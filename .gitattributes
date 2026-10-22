@@ -1,0 +1,8 @@
+# Keep ROS/Linux scripts runnable after Windows checkout or transfer.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.pgm binary
+*.stl binary
+*.sldprt binary
+*.sldasm binary

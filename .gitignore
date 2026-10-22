@@ -1,0 +1,27 @@
+# ROS / Python 构建产物与运行日志
+build/
+install/
+log/
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+runtime_logs/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# 运行数据
+*.bag
+*.db3
+tests/logs/*
+!tests/logs/.gitkeep
+
+# 本地参考与临时文件
+.ref/
+.tmp/
+*:Zone.Identifier
+
+# 大文件（CAD 导出/临时）
+cad/exports/*.zip
+!cad/exports/.gitkeep
