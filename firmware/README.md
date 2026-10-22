@@ -7,6 +7,7 @@
 | 订阅 | `/cmd_vel` (`Twist`) | 麦轮逆运动学 → 4 轮目标转速 → 编码器 PID |
 | 发布 | `/odom` (`Odometry`) | 编码器推算位置 + yaw |
 | 订阅 | `/lifter` (`UInt8`) | `1` 升起 / `0` 放下，带限位与堵转保护 |
+| 发布 | `/imu/data` (`Imu`) | 板载 **ICM42670P**，EKF 只需 `angular_velocity.z` |
 
 ## ⚠️ 先读：别自己推逆运动学
 

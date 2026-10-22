@@ -21,7 +21,7 @@ robot_bringup/
 │  ├─ sensors.launch.py      只起相机+雷达
 │  └─ navigation.launch.py   只起定位+导航
 └─ config/
-   ├─ interfaces.yaml        5 个话题名集中定义
+   ├─ interfaces.yaml        6 个话题名集中定义
    ├─ nav2_params.yaml       导航参数
    ├─ mission.yaml           状态机参数（货架坐标、超时）
    └─ camera_qr.yaml         相机与 QR 参数

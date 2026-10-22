@@ -84,7 +84,7 @@ ros2 launch robot_bringup bringup.launch.py
 
 ## 提交与协作
 
-- **接口冻结**：只保留 5 个话题（见《模块接口说明》），加话题要先在站会说一声。
+- **接口冻结**：只保留 6 个话题（见《模块接口说明》），加话题要先在站会说一声。
 - **分支**：`main` 稳定，`feat/<模块名>` 开发；合并前至少一人看过。
 - **不要提交**：`build/`、`install/`、`log/`、`__pycache__`、运行日志（已在 `.gitignore`）。
 - **贡献日志**：每周更新 `docs/CONTRIBUTION_LOG.md`（用于 5% 同伴互评）。
