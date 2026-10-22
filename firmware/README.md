@@ -10,10 +10,11 @@
 
 ## ⚠️ 先读：别自己推逆运动学
 
-麦轮逆/正运动学**已有现成实现**，直接移植：
+运动学**有现成实现**，别自己推。但先分清两件事：
 
 1. **首选**：Yahboom 官方例程 `twist_subscriber` + `odom_publisher`（ESP-IDF，同板同电机，源码在官方资料包/虚拟机 `~/esp/Samples/microros_samples/`）。
-2. **备选**：`linorobot2_hardware` 的 `lib/kinematics/`（Arduino，`MECANUM` 枚举现成，含 PID/编码器/odom）。
+   ⚠️ **官方参考车是"普通轮四轮差速"，不是麦轮**：`Motion_Ctrl(vx, 0, wz)` 把 `linear.y` 写死为 0，模型是左右两组差速。**照搬它 = 麦轮当四驱用（无横移），正好是保底路线。**
+2. **要麦轮横移才用**：`linorobot2_hardware` 的 `lib/kinematics/`（Arduino，`MECANUM` 枚举现成，含 PID/编码器/odom）。
 
 完整对比与代码引用见 **《[底盘参考实现](../docs/给队友看/底盘参考实现.md)》**。
 
