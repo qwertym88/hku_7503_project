@@ -4,6 +4,14 @@
 > `3. Group Projects Materials.pdf`、`4. …Samples of QR codes.pdf`
 > 编制日期：2026-10-22　｜　提交截止：2026-11-26（周四）　｜　团队规模：约 8 人
 
+> ⚠️ **本文是初始策划（背景备查）。后续决策以下列文档为准**：
+> - 感知改用 **`picamera2`**，弃 `camera_ros` →《[QR 感知方案](给队友看/QR感知方案.md)》
+> - 导航**复用 linorobot2** 的 Nav2/SLAM/EKF/Gazebo 栈 →《[导航栈方案对比](给队友看/导航栈方案对比.md)》
+> - 契约话题为 **6 个**（新增 `/imu/data`）→《[模块接口说明](给队友看/模块接口说明.md)》
+> - 团队规模按 **5 人**执行 →《[PROJECT_PLAN_SLIM](PROJECT_PLAN_SLIM.md)》
+>
+> **下文凡提到 `camera_ros`、8 人分工、5 个话题处，一律以上述文档为准。**
+
 ---
 
 ## 0. 一页结论（TL;DR）

@@ -5,10 +5,10 @@
 
 ```text
 bringup.launch.py
-  1. 相机驱动（camera_ros）           → /camera/image_raw
+  1. QR 感知（picamera2 内核）        → /qr
   2. 雷达驱动（MS200）                → /scan
-  3. micro-ROS agent（连接 ESP32）    ↔ /cmd_vel /odom /lifter
-  4. 定位（AMCL）                     → map→odom
+  3. micro-ROS agent（连接 ESP32）    ↔ /cmd_vel /odom /imu/data /lifter
+  4. 定位（EKF + AMCL）               → map→odom
   5. 导航（Nav2）                     → /cmd_vel
   6. mission_control                  → /lifter
 ```
