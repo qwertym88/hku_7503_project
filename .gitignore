@@ -27,3 +27,5 @@ tests/logs/*
 # 大文件（CAD 导出/临时）
 cad/exports/*.zip
 !cad/exports/.gitkeep
+
+.vscode

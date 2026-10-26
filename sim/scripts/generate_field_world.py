@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """生成 DASE7503 比赛场地 的 Gazebo (SDF) 世界文件。
 
-单一事实来源：本文件里的 FIELD / ZONES / RACKS 三张表。
-world 文件由它生成，所以改尺寸只要改这里，不会出现"手改 SDF 改漏一处"。
+坐标【全部硬编码为图纸给定的中心坐标】——不再做约束推导，避免推偏。
 
 坐标系（与图纸一致）：
   - 单位：米 (m)
   - 原点 (0,0) = 场地左下角
   - +X 向右，+Y 向上，+Z 向上（Gazebo 天向）
-  - 场地范围：x ∈ [0, 3.02]，y ∈ [0, 2.0]
-  - 围墙贴在场地【外侧】，内表面正好压在 x=0/3.02、y=0/2.0 上，所以不占用场地面积
+  - 场地范围：x ∈ [0, 3.02]，y ∈ [0, 2.00]
+  - 围墙贴在场地【外侧】，内表面正好压在 x=0/3.02、y=0/2.0 上，不占用场地面积
 
 用法：
-  python3 sim/scripts/generate_field_world.py           # 写入 sim/worlds/dase7503_field.sdf
-  python3 sim/scripts/generate_field_world.py --stdout  # 只打印到屏幕
-  python3 sim/scripts/generate_field_world.py --check   # 只做几何自检 + 俯视图
+  python3 sim/scripts/generate_field_world.py                    # Harmonic 版（Jazzy/24.04）
+  python3 sim/scripts/generate_field_world.py --target fortress  # Fortress 版（Humble/22.04）
+  python3 sim/scripts/generate_field_world.py --check            # 只做几何自检 + 俯视图
+  python3 sim/scripts/generate_field_world.py --stdout           # 只打印不写文件
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ import argparse
 import os
 
 # --------------------------------------------------------------------------
-# 1. 场地与围墙
+# 1. 场地 / 围墙 / 货架基础尺寸
 # --------------------------------------------------------------------------
 FIELD_X = 3.02          # 长（X）
 FIELD_Y = 2.00          # 宽（Y）
@@ -39,86 +39,34 @@ RACK_H = 0.2325         # 货架高
 POST = 0.012            # 货架立柱截面
 POST_H = RACK_H
 SHELF_T = 0.008         # 层板厚度
-SHELF_Z = (0.020, 0.2325 / 2, RACK_H - 0.012)   # 三层板的中心高度
+SHELF_Z = (0.020, RACK_H / 2, RACK_H - 0.012)   # 三层板的中心高度
 
 # --------------------------------------------------------------------------
-# 2. 区域（图纸给定"位置"，尺寸冲突时按 §4 规则解析）
+# 2. 区域（图纸给定【中心坐标】+ 尺寸，硬编码）
 # --------------------------------------------------------------------------
-# 图纸原值：Destination 0.8x1.4，距左墙 0.8，距顶墙 0.8
-#           Start       0.6x0.8，贴右墙 0.0，距底墙 0.6
-ZONES_RAW = {
-    "destination": dict(w=0.80, h=1.40, from_west=0.80, from_north=0.80),
-    "start":       dict(w=0.60, h=0.80, from_east=0.00, from_south=0.60),
+#  destination：宽 0.8、高 1.4，靠左上角。高 1.4 与"距顶墙 0.8"在 2.0 宽的场地里
+#               不可能同时满足（0.8+1.4+? > 2.0），按图纸要求【顶部贴紧 Y=2.0】
+#               → x 0.80~1.60，y 0.60~2.00，中心 (1.20, 1.30)
+#  start      ：宽 0.6、高 0.8，【底部居中】且紧贴底边
+#               → x 1.21~1.81，y 0.00~0.80，中心 (1.51, 0.40)
+ZONES = {
+    "destination": dict(cx=1.20, cy=1.30, w=0.80, h=1.40),
+    "start":       dict(cx=1.51, cy=0.40, w=0.60, h=0.80),
 }
 
-
-def resolve_destination() -> dict:
-    """Destination 区：保留两个锚定偏移(0.8/0.8)，只压缩冲突的高度 1.4→1.2。
-
-    理由：图纸明确给了"距左墙 0.8、距顶墙 0.8"这两个【位置】约束，
-    而 0.8 + 1.4 = 2.2 > 2.0 冲突的是【尺寸】。按"位置优先"处理。
-
-    备选方案（若你更想保住 1.4 的高度）：把下面改成
-        y1 = FIELD_Y            # 顶边贴顶墙
-        y0 = FIELD_Y - h        # 则距顶墙变成 0.6
-    生成器会自动重算 Rack A 的位置（它依赖 Destination 的右边缘，不受影响）。
-    """
-    w = ZONES_RAW["destination"]["w"]
-    h = ZONES_RAW["destination"]["h"]
-    x0 = ZONES_RAW["destination"]["from_west"]
-    y1 = FIELD_Y - ZONES_RAW["destination"]["from_north"]
-    h_max = y1  # 下边界不能低于 y=0
-    h_fit = min(h, h_max)
-    return dict(x0=x0, x1=x0 + w, y0=y1 - h_fit, y1=y1,
-                w=w, h=h_fit, h_raw=h, clipped=(h_fit < h - 1e-9))
-
-
-def resolve_start() -> dict:
-    w = ZONES_RAW["start"]["w"]
-    h = ZONES_RAW["start"]["h"]
-    x1 = FIELD_X - ZONES_RAW["start"]["from_east"]
-    y0 = ZONES_RAW["start"]["from_south"]
-    return dict(x0=x1 - w, x1=x1, y0=y0, y1=y0 + h, w=w, h=h,
-                h_raw=h, clipped=False)
-
-
 # --------------------------------------------------------------------------
-# 3. 货架（按图纸的相对位置关系解算中心坐标）
+# 3. 货架（图纸给定【中心坐标】，硬编码）
 # --------------------------------------------------------------------------
-def rack_center(*, from_west=None, from_east=None, from_south=None, from_north=None,
-                right_of_x=None, right_gap=None) -> tuple[float, float]:
-    """由"距墙距离"或"某处右侧留白"推出货架中心 (cx, cy)。"""
-    if from_west is not None:
-        cx = from_west + RACK_S / 2
-    elif from_east is not None:
-        cx = FIELD_X - from_east - RACK_S / 2
-    elif right_of_x is not None:
-        cx = right_of_x + right_gap + RACK_S / 2
-    else:
-        raise ValueError("需要给出 X 方向约束")
-
-    if from_south is not None:
-        cy = from_south + RACK_S / 2
-    elif from_north is not None:
-        cy = FIELD_Y - from_north - RACK_S / 2
-    else:
-        raise ValueError("需要给出 Y 方向约束")
-    return cx, cy
-
-
-def build_racks(dest: dict) -> dict:
-    racks = {}
-    # A：距顶墙 0.35，位于 Destination 右边缘再往右 0.4
-    racks["a"] = rack_center(from_north=0.35, right_of_x=dest["x1"], right_gap=0.40)
-    # C：距顶墙 0.21，距右墙 0.6
-    racks["c"] = rack_center(from_north=0.21, from_east=0.60)
-    # B：在 C 正下方（同 X），距右墙 0.6，距底墙 0.44
-    racks["b"] = rack_center(from_south=0.44, from_east=0.60)
-    # D：距左墙 0.45，距底墙 0.30
-    racks["d"] = rack_center(from_west=0.45, from_south=0.30)
-    assert abs(racks["b"][0] - racks["c"][0]) < 1e-9, "B 必须在 C 正下方（同 X）"
-    return racks
-
+#  A：Destination 右缘 +0.4，靠上           → (2.07, 1.58)
+#  C：距右墙 0.6，距顶墙 0.21                → (2.35, 1.72)
+#  B：在 C 正下方（同 X），距右墙 0.6，距底墙 0.44 → (2.35, 0.51)
+#  D：距左墙 0.45，距底墙 0.30               → (0.52, 0.37)
+RACKS = {
+    "a": dict(cx=2.07, cy=1.58),
+    "b": dict(cx=2.35, cy=0.51),
+    "c": dict(cx=2.35, cy=1.72),
+    "d": dict(cx=0.52, cy=0.37),
+}
 
 # --------------------------------------------------------------------------
 # 4. 颜色
@@ -129,15 +77,42 @@ COL_GREEN = ("0.02 0.45 0.10 1", "0.10 0.75 0.20 1")     # Destination
 COL_BLUE = ("0.02 0.15 0.50 1", "0.15 0.40 0.90 1")      # Start
 COL_WOOD = ("0.42 0.26 0.10 1", "0.85 0.62 0.32 1")      # 货架（木色/黄）
 
+ZONE_COLORS = {"destination": COL_GREEN, "start": COL_BLUE}
+ZONE_LABELS = {"destination": "Destination 绿", "start": "Start 蓝"}
+
 SDF_VERSION = {"harmonic": "1.10", "fortress": "1.9"}
 
 # Gazebo 新版（Harmonic, gz-sim8）与 Fortress（ign-gazebo6）的系统插件命名不同：
-#   Harmonic: filename="gz-sim-physics-system"      name="gz::sim::systems::Physics"
+#   Harmonic: filename="gz-sim-physics-system"          name="gz::sim::systems::Physics"
 #   Fortress: filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics"
 PLUGIN_NS = {"harmonic": ("gz-sim", "gz::sim::systems"),
              "fortress": ("ignition-gazebo", "ignition::gazebo::systems")}
 
 
+# --------------------------------------------------------------------------
+# 5. 由"中心 + 尺寸"得到矩形，便于自检与画图
+# --------------------------------------------------------------------------
+def rect_of(cx: float, cy: float, w: float, h: float) -> dict:
+    return dict(cx=cx, cy=cy, w=w, h=h,
+                x0=cx - w / 2, x1=cx + w / 2,
+                y0=cy - h / 2, y1=cy + h / 2)
+
+
+def collect_rects() -> list[tuple[str, float, float, float, float, bool]]:
+    """(名称, x0, x1, y0, y1, 是否有碰撞)"""
+    items = []
+    for key, z in ZONES.items():
+        r = rect_of(z["cx"], z["cy"], z["w"], z["h"])
+        items.append((f"{key}_zone", r["x0"], r["x1"], r["y0"], r["y1"], False))
+    for key, k in RACKS.items():
+        r = rect_of(k["cx"], k["cy"], RACK_S, RACK_S)
+        items.append((f"rack_{key}", r["x0"], r["x1"], r["y0"], r["y1"], True))
+    return items
+
+
+# --------------------------------------------------------------------------
+# 6. SDF 片段生成
+# --------------------------------------------------------------------------
 def sdf_header(target: str) -> str:
     pretty = {"harmonic": "Gazebo Harmonic (gz-sim8), SDF 1.10",
               "fortress": "Gazebo Fortress (ign-gazebo6), SDF 1.9"}[target]
@@ -145,13 +120,18 @@ def sdf_header(target: str) -> str:
 <!--
   DASE7503 比赛场地 —— Gazebo 世界文件
   *** 本文件由 sim/scripts/generate_field_world.py 自动生成，请勿手改 ***
-  改尺寸/位置请改脚本里的 FIELD / ZONES_RAW / build_racks()，然后重新生成。
+  改坐标请改脚本里的 ZONES / RACKS 两张表，然后重新生成。
 
-  坐标系：原点在场地的左下角，+X 向右(长 3.02)，+Y 向上(宽 2.0)，+Z 天向。
+  坐标系：原点在场地左下角，+X 向右(长 3.02)，+Y 向上(宽 2.00)，+Z 天向。
   目标格式：{pretty}
 -->
 <sdf version="{SDF_VERSION[target]}">
   <world name="dase7503_field">
+"""
+
+
+SDF_TAIL = """  </world>
+</sdf>
 """
 
 
@@ -165,10 +145,6 @@ def plugin_block(target: str) -> str:
     <plugin filename='{f}-sensors-system' name='{n}::Sensors'>
       <render_engine>ogre2</render_engine>
     </plugin>
-"""
-
-SDF_TAIL = """  </world>
-</sdf>
 """
 
 
@@ -206,16 +182,10 @@ def box_model(name: str, size, pose, ambient, diffuse, *, static=True, collision
     return "\n".join(out) + "\n"
 
 
-def rect_pose(r: dict):
-    """由矩形 (x0,x1,y0,y1) 得到中心与尺寸。"""
-    return ((r["x0"] + r["x1"]) / 2, (r["y0"] + r["y1"]) / 2,
-            r["x1"] - r["x0"], r["y1"] - r["y0"])
-
-
+# --------------------------------------------------------------------------
+# 7. 组装世界
+# --------------------------------------------------------------------------
 def build_world(target: str = "harmonic") -> str:
-    dest = resolve_destination()
-    start = resolve_start()
-    racks = build_racks(dest)
     p = [sdf_header(target)]
 
     # ---- 物理 / 插件 ----
@@ -296,20 +266,19 @@ def build_world(target: str = "harmonic") -> str:
 
     # ---- 区域（仅视觉：机器人要能开过去）----
     p.append("    <!-- ===== 区域标记：无碰撞，仅视觉 ===== -->\n")
-    name_cn = {"destination": "Destination 绿", "start": "Start 蓝"}
-    for key, r in (("destination", dest), ("start", start)):
-        cx, cy, w, h = rect_pose(r)
-        col = COL_GREEN if key == "destination" else COL_BLUE
-        p.append("    <!-- {}: x {:.3f}~{:.3f}, y {:.3f}~{:.3f} -->\n".format(
-            name_cn[key], r["x0"], r["x1"], r["y0"], r["y1"]))
-        p.append(box_model(f"{key}_zone", (w, h, ZONE_T),
-                           (cx, cy, ZONE_Z, 0, 0, 0), *col, collision=False))
+    for key, z in ZONES.items():
+        r = rect_of(z["cx"], z["cy"], z["w"], z["h"])
+        p.append("    <!-- {}: 中心 ({:.3f}, {:.3f})  x {:.3f}~{:.3f}  y {:.3f}~{:.3f} -->\n".format(
+            ZONE_LABELS[key], z["cx"], z["cy"], r["x0"], r["x1"], r["y0"], r["y1"]))
+        p.append(box_model(f"{key}_zone", (z["w"], z["h"], ZONE_T),
+                           (z["cx"], z["cy"], ZONE_Z, 0, 0, 0),
+                           *ZONE_COLORS[key], collision=False))
 
     # ---- 货架 ----
     p.append("    <!-- ===== 货架：{} x {} x {} m，多层结构 ===== -->\n".format(
         RACK_S, RACK_S, RACK_H))
-    for key in ("a", "b", "c", "d"):
-        cx, cy = racks[key]
+    for key, k in RACKS.items():
+        cx, cy = k["cx"], k["cy"]
         p.append("    <!-- RACK {}: 中心 ({:.3f}, {:.3f}) -->\n".format(key.upper(), cx, cy))
         p.append(f"    <model name='rack_{key}'>\n      <static>true</static>\n"
                  f"      <pose>{cx:.6f} {cy:.6f} 0 0 0 0</pose>\n")
@@ -345,64 +314,80 @@ def build_world(target: str = "harmonic") -> str:
 
 
 # --------------------------------------------------------------------------
-# 5. 几何自检与俯视图
+# 8. 自检（含"区域互相重叠"的显式告警）+ 俯视图
 # --------------------------------------------------------------------------
-def collect_rects():
-    dest = resolve_destination()
-    start = resolve_start()
-    racks = build_racks(dest)
-    items = [("destination", dest["x0"], dest["x1"], dest["y0"], dest["y1"], False),
-             ("start", start["x0"], start["x1"], start["y0"], start["y1"], False)]
-    for k in ("a", "b", "c", "d"):
-        cx, cy = racks[k]
-        items.append((f"rack_{k}", cx - RACK_S / 2, cx + RACK_S / 2,
-                      cy - RACK_S / 2, cy + RACK_S / 2, True))
-    return items
-
-
-def check() -> int:
+def audit() -> int:
     items = collect_rects()
-    bad = 0
-    print("=" * 74)
-    print("几何自检")
-    print("=" * 74)
-    for name, x0, x1, y0, y1, _ in items:
+    hard = 0
+    print("=" * 96)
+    print("几何自检 —— 所有坐标均为图纸给定值（硬编码，无推导）")
+    print("=" * 96)
+    print(f"  {'对象':<16}{'x 范围':<20}{'y 范围':<20}{'尺寸':<16}"
+          f"{'距左':>7}{'距右':>7}{'距底':>7}{'距顶':>7}")
+    for name, x0, x1, y0, y1, solid in items:
         ok = (x0 >= -1e-9 and y0 >= -1e-9 and x1 <= FIELD_X + 1e-9 and y1 <= FIELD_Y + 1e-9)
-        flag = "OK " if ok else "出界"
         if not ok:
-            bad += 1
-        print(f"  [{flag}] {name:<12} x {x0:6.3f}~{x1:6.3f}   y {y0:6.3f}~{y1:6.3f}"
-              f"   ({x1-x0:.3f} x {y1-y0:.3f} m)")
+            hard += 1
+        tag = "" if ok else "  ← 出界!"
+        print(f"  {name:<16}[{x0:6.3f},{x1:6.3f}]      [{y0:6.3f},{y1:6.3f}]      "
+              f"{x1-x0:.2f}x{y1-y0:.2f}     {x0:6.3f} {FIELD_X-x1:6.3f} "
+              f"{y0:6.3f} {FIELD_Y-y1:6.3f}{tag}")
 
-    print("-" * 74)
-    solids = [it for it in items if it[5]]
-    for i in range(len(solids)):
-        for j in range(i + 1, len(solids)):
-            a, b = solids[i], solids[j]
+    print("-" * 96)
+    racks = [it for it in items if it[5]]
+    zones = [it for it in items if not it[5]]
+
+    # 货架之间：不允许重叠
+    for i in range(len(racks)):
+        for j in range(i + 1, len(racks)):
+            a, b = racks[i], racks[j]
             if a[1] < b[2] and b[1] < a[2] and a[3] < b[4] and b[3] < a[4]:
-                print(f"  [重叠] {a[0]} <-> {b[0]}")
-                bad += 1
-    print(f"  [{'OK ' if bad == 0 else '问题'}] 货架之间无重叠；全部实体在边界内")
-    return bad
+                print(f"  [✗ 货架重叠] {a[0]} <-> {b[0]}")
+                hard += 1
+    print(f"  [{'OK' if hard == 0 else '✗'}] 货架之间无重叠；全部实体在 3.02 x 2.00 边界内")
+
+    # 区域之间：图纸给定值，若重叠只告警（区域无碰撞，不影响物理）
+    warn = 0
+    for i in range(len(zones)):
+        for j in range(i + 1, len(zones)):
+            a, b = zones[i], zones[j]
+            ox = min(a[2], b[2]) - max(a[1], b[1])
+            oy = min(a[4], b[4]) - max(a[3], b[3])
+            if ox > 1e-9 and oy > 1e-9:
+                warn += 1
+                print(f"  [⚠ 区域重叠] {a[0]} <-> {b[0]}："
+                      f"x 重叠 {ox:.3f} m, y 重叠 {oy:.3f} m"
+                      f"（重叠区 x[{max(a[1],b[1]):.3f},{min(a[2],b[2]):.3f}] "
+                      f"y[{max(a[3],b[3]):.3f},{min(a[4],b[4]):.3f}]）")
+    for z in zones:
+        for r in racks:
+            if z[1] < r[2] and r[1] < z[2] and z[3] < r[4] and r[3] < z[4]:
+                warn += 1
+                print(f"  [⚠ 区域压到货架] {z[0]} <-> {r[0]}")
+    if warn == 0:
+        print("  [OK] 区域之间、区域与货架之间无重叠")
+    else:
+        print(f"  [⚠] 共有 {warn} 处区域重叠 —— 这是【图纸给定坐标的必然结果】，"
+              f"区域无碰撞故不影响仿真；如需消除，见 sim/README.md §2")
+    return hard
 
 
 def ascii_map(width: int = 74) -> str:
-    """按实际比例画俯视图，方便肉眼核对布局。"""
     items = collect_rects()
     rows = int(width * FIELD_Y / FIELD_X / 2) + 1
     grid = [[" "] * width for _ in range(rows)]
 
     def put(x0, x1, y0, y1, ch):
-        c0 = int(x0 / FIELD_X * (width - 1))
-        c1 = int(x1 / FIELD_X * (width - 1))
-        r0 = int((1 - y1 / FIELD_Y) * (rows - 1))
-        r1 = int((1 - y0 / FIELD_Y) * (rows - 1))
+        c0 = int(round(x0 / FIELD_X * (width - 1)))
+        c1 = int(round(x1 / FIELD_X * (width - 1)))
+        r0 = int(round((1 - y1 / FIELD_Y) * (rows - 1)))
+        r1 = int(round((1 - y0 / FIELD_Y) * (rows - 1)))
         for r in range(r0, r1 + 1):
             for c in range(c0, c1 + 1):
                 grid[r][c] = ch
 
     for name, x0, x1, y0, y1, solid in items:
-        ch = {"destination": "G", "start": "S"}.get(name, name[-1].upper())
+        ch = {"destination_zone": "G", "start_zone": "S"}.get(name, name[-1].upper())
         put(x0, x1, y0, y1, ch)
 
     top = "+" + "-" * (width - 2) + "+"
@@ -413,21 +398,14 @@ def ascii_map(width: int = 74) -> str:
 
 
 def summary() -> str:
-    dest = resolve_destination()
-    start = resolve_start()
-    racks = build_racks(dest)
     L = []
     L.append("场地: {:.2f} (X) x {:.2f} (Y) m, 围墙高 {:.2f} m".format(FIELD_X, FIELD_Y, WALL_H))
-    L.append("Destination: x {:.3f}~{:.3f}, y {:.3f}~{:.3f}".format(
-        dest["x0"], dest["x1"], dest["y0"], dest["y1"]))
-    if dest["clipped"]:
-        L.append("   ! 高度由 {:.2f} 压缩为 {:.2f}（0.8+1.4=2.2 > 2.0 冲突，保位置约束）"
-                 .format(dest["h_raw"], dest["h"]))
-    L.append("Start:       x {:.3f}~{:.3f}, y {:.3f}~{:.3f}".format(
-        start["x0"], start["x1"], start["y0"], start["y1"]))
-    for k in ("a", "b", "c", "d"):
-        cx, cy = racks[k]
-        L.append("RACK {}:      center ({:.3f}, {:.3f})".format(k.upper(), cx, cy))
+    for key, z in ZONES.items():
+        r = rect_of(z["cx"], z["cy"], z["w"], z["h"])
+        L.append("{:<12} 中心 ({:.2f}, {:.2f})  {}x{} m  x {:.3f}~{:.3f}  y {:.3f}~{:.3f}".format(
+            key, z["cx"], z["cy"], z["w"], z["h"], r["x0"], r["x1"], r["y0"], r["y1"]))
+    for key, k in RACKS.items():
+        L.append("RACK {:<8} 中心 ({:.2f}, {:.2f})".format(key.upper(), k["cx"], k["cy"]))
     return "\n".join(L)
 
 
@@ -443,11 +421,11 @@ def main() -> None:
 
     print(summary())
     print()
-    bad = check()
+    hard = audit()
     print()
     print(ascii_map())
     if args.check:
-        raise SystemExit(1 if bad else 0)
+        raise SystemExit(1 if hard else 0)
 
     text = build_world(args.target)
     if args.stdout:

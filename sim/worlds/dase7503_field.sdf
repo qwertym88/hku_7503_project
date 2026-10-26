@@ -2,9 +2,9 @@
 <!--
   DASE7503 比赛场地 —— Gazebo 世界文件
   *** 本文件由 sim/scripts/generate_field_world.py 自动生成，请勿手改 ***
-  改尺寸/位置请改脚本里的 FIELD / ZONES_RAW / build_racks()，然后重新生成。
+  改坐标请改脚本里的 ZONES / RACKS 两张表，然后重新生成。
 
-  坐标系：原点在场地的左下角，+X 向右(长 3.02)，+Y 向上(宽 2.0)，+Z 天向。
+  坐标系：原点在场地左下角，+X 向右(长 3.02)，+Y 向上(宽 2.00)，+Z 天向。
   目标格式：Gazebo Harmonic (gz-sim8), SDF 1.10
 -->
 <sdf version="1.10">
@@ -167,14 +167,14 @@
       </link>
     </model>
     <!-- ===== 区域标记：无碰撞，仅视觉 ===== -->
-    <!-- Destination 绿: x 0.800~1.600, y 0.000~1.200 -->
+    <!-- Destination 绿: 中心 (1.200, 1.300)  x 0.800~1.600  y 0.600~2.000 -->
     <model name='destination_zone'>
       <static>true</static>
-      <pose>1.200000 0.600000 0.003000 0.000000 0.000000 0.000000</pose>
+      <pose>1.200000 1.300000 0.003000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <visual name='visual'>
           <geometry>
-            <box><size>0.800000 1.200000 0.002000</size></box>
+            <box><size>0.800000 1.400000 0.002000</size></box>
           </geometry>
           <material>
             <ambient>0.02 0.45 0.10 1</ambient>
@@ -184,10 +184,10 @@
         </visual>
       </link>
     </model>
-    <!-- Start 蓝: x 2.420~3.020, y 0.600~1.400 -->
+    <!-- Start 蓝: 中心 (1.510, 0.400)  x 1.210~1.810  y 0.000~0.800 -->
     <model name='start_zone'>
       <static>true</static>
-      <pose>2.720000 1.000000 0.003000 0.000000 0.000000 0.000000</pose>
+      <pose>1.510000 0.400000 0.003000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <visual name='visual'>
           <geometry>
