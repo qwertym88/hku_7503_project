@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """生成 DASE7503 比赛场地 的 Gazebo (SDF) 世界文件。
 
-坐标【全部硬编码为图纸给定的中心坐标】——不做约束推导，避免推偏。
+坐标以 ``1.png`` 的俯视图为准。区域尺寸、边界位置和货架中心均以
+图纸的毫米标注换算为米；不从旧的仿真布局推导。
 
 坐标系（与图纸一致）：
   - 单位：米 (m)
   - 原点 (0,0) = 场地左下角
   - +X 向右，+Y 向上，+Z 向上（Gazebo 天向）
-  - 场地是【竖向/纵向】矩形：X（宽/横向）= 2.00 m，Y（长/纵向）= 3.02 m
-        即 x ∈ [0, 2.00]，y ∈ [0, 3.02]
-  - 围墙贴在场地【外侧】，内表面正好压在 x=0/2.00、y=0/3.02 上，不占用场地面积
-  - 布局走向：Destination（绿）在上 → 四个货架在中间 2x2 排布 → Start（蓝）在下
+  - 场地是【横向】矩形：X（长/横向）= 3.02 m，Y（宽/纵向）= 2.00 m
+        即 x ∈ [0, 3.02]，y ∈ [0, 2.00]
+  - 围墙贴在场地【外侧】，内表面正好压在 x=0/3.02、y=0/2.00 上，不占用场地面积
+  - 布局（俯视，与图纸一致）：
+        Destination：左侧，x=0.00~0.80，y=0.30~1.70
+        Start：右侧，x=2.42~3.02，y=0.60~1.40
+        货架 A/D 在中部偏左，C/B 在中部偏右。
 
 用法：
   python3 sim/scripts/generate_field_world.py                    # Harmonic 版（Jazzy/24.04）
@@ -27,8 +31,8 @@ import os
 # --------------------------------------------------------------------------
 # 1. 场地 / 围墙 / 货架基础尺寸
 # --------------------------------------------------------------------------
-FIELD_X = 2.00          # 横向宽度（X）
-FIELD_Y = 3.02          # 纵向长度（Y）
+FIELD_X = 3.02          # 横向跨度（X，长）
+FIELD_Y = 2.00          # 纵向跨度（Y，宽）
 WALL_T = 0.05           # 围墙厚度
 WALL_H = 0.50           # 围墙高度
 
@@ -36,7 +40,7 @@ FLOOR_T = 0.002         # 场地地板厚度（仅视觉，略高于地面避免
 ZONE_T = 0.002          # 区域标记厚度（仅视觉，无碰撞）
 ZONE_Z = FLOOR_T + 0.001
 
-RACK_S = 0.14           # 货架长/宽
+RACK_S = 0.14           # 货架平面边长（图纸标注 140 mm）
 RACK_H = 0.2325         # 货架高
 POST = 0.012            # 货架立柱截面
 POST_H = RACK_H
@@ -46,27 +50,28 @@ SHELF_Z = (0.020, RACK_H / 2, RACK_H - 0.012)   # 三层板的中心高度
 # --------------------------------------------------------------------------
 # 2. 区域（图纸给定【中心坐标】+ 尺寸，硬编码）
 # --------------------------------------------------------------------------
-#  destination（绿）：0.8(X) x 1.4(Y)，【顶部居中】
-#                     → x 0.60~1.40，y 1.62~3.02（顶部贴 Y=3.02），中心 (1.00, 2.32)
-#  start      （蓝）：0.6(X) x 0.8(Y)，【底部居中且贴底边】
-#                     → x 0.70~1.30，y 0.00~0.80，中心 (1.00, 0.40)
-#  两者之间留出 0.82 m 纵向通道（Destination 底 1.62，Start 顶 0.80），不重叠。
+# destination（绿）：左贴边，宽 0.80、高 1.40
+#                     → x 0.00~0.80，y 0.30~1.70
+# start（蓝）：右贴边，宽 0.60、高 0.80
+#                     → x 2.42~3.02，y 0.60~1.40
+# 二者之间的主通道净宽 1.62 m。
 ZONES = {
-    "destination": dict(cx=1.00, cy=2.32, w=0.80, h=1.40),
-    "start":       dict(cx=1.00, cy=0.40, w=0.60, h=0.80),
+    "destination": dict(cx=0.40, cy=1.00, w=0.80, h=1.40),
+    "start":       dict(cx=2.72, cy=1.00, w=0.60, h=0.80),
 }
 
 # --------------------------------------------------------------------------
 # 3. 货架（图纸给定【中心坐标】，硬编码）
 # --------------------------------------------------------------------------
-#  四个货架在场地【中间】排成 2x2（矩形分布）：
-#            A(0.5, 2.0)   C(1.5, 2.0)      ← 上排（左上 / 右上）
-#            D(0.5, 1.0)   B(1.5, 1.0)      ← 下排（左下 / 右下）
+# 图纸俯视图的货架中心（单位 m）。
+# A 与 C 的水平中心距 650 mm；B 与 C 同列。货架到场地边缘的标注
+# （A 顶部 350 mm、C 顶部 210 mm、B 底部 440 mm、D 底部 300 mm）
+# 均量到 140 mm 货架的边缘，故下列为其中心坐标。
 RACKS = {
-    "a": dict(cx=0.50, cy=2.00),   # 左上
-    "b": dict(cx=1.50, cy=1.00),   # 右下
-    "c": dict(cx=1.50, cy=2.00),   # 右上
-    "d": dict(cx=0.50, cy=1.00),   # 左下
+    "a": dict(cx=1.20, cy=1.58),   # 左上
+    "b": dict(cx=1.85, cy=0.51),   # 右下
+    "c": dict(cx=1.85, cy=1.72),   # 右上
+    "d": dict(cx=1.35, cy=0.37),   # 左下
 }
 
 # --------------------------------------------------------------------------
@@ -104,7 +109,8 @@ def collect_rects() -> list[tuple[str, float, float, float, float, bool]]:
     items = []
     for key, z in ZONES.items():
         r = rect_of(z["cx"], z["cy"], z["w"], z["h"])
-        items.append((f"{key}_zone", r["x0"], r["x1"], r["y0"], r["y1"], False))
+        items.append(
+            (f"{key}_zone", r["x0"], r["x1"], r["y0"], r["y1"], False))
     for key, k in RACKS.items():
         r = rect_of(k["cx"], k["cy"], RACK_S, RACK_S)
         items.append((f"rack_{key}", r["x0"], r["x1"], r["y0"], r["y1"], True))
@@ -119,12 +125,12 @@ def sdf_header(target: str) -> str:
               "fortress": "Gazebo Fortress (ign-gazebo6), SDF 1.9"}[target]
     return f"""<?xml version="1.0" ?>
 <!--
-  DASE7503 比赛场地 —— Gazebo 世界文件（竖向布局）
+  DASE7503 比赛场地 —— Gazebo 世界文件（图纸横向布局）
   *** 本文件由 sim/scripts/generate_field_world.py 自动生成，请勿手改 ***
   改坐标请改脚本里的 ZONES / RACKS 两张表，然后重新生成。
 
-  坐标系：原点在场地左下角，+X 向右(宽 {FIELD_X:.2f})，+Y 向上(长 {FIELD_Y:.2f})，+Z 天向。
-  布局：Destination(绿) 在上 → 4 个货架在中间 2x2 → Start(蓝) 在下。
+  坐标系：原点在场地左下角，+X 向右(长 {FIELD_X:.2f})，+Y 向上(宽 {FIELD_Y:.2f})，+Z 天向。
+  布局：左侧 Destination(绿) → 中部 A/D/C/B 货架 → 右侧 Start(蓝)。
   目标格式：{pretty}
 -->
 <sdf version="{SDF_VERSION[target]}">
@@ -170,12 +176,14 @@ def box_model(name: str, size, pose, ambient, diffuse, *, static=True, collision
     if collision:
         out.append("        <collision name='collision'>")
         out.append("          <geometry>")
-        out.append("            <box><size>{:.6f} {:.6f} {:.6f}</size></box>".format(sx, sy, sz))
+        out.append(
+            "            <box><size>{:.6f} {:.6f} {:.6f}</size></box>".format(sx, sy, sz))
         out.append("          </geometry>")
         out.append("        </collision>")
     out.append("        <visual name='visual'>")
     out.append("          <geometry>")
-    out.append("            <box><size>{:.6f} {:.6f} {:.6f}</size></box>".format(sx, sy, sz))
+    out.append(
+        "            <box><size>{:.6f} {:.6f} {:.6f}</size></box>".format(sx, sy, sz))
     out.append("          </geometry>")
     out.append(material(ambient, diffuse, "          ").rstrip("\n"))
     out.append("        </visual>")
@@ -251,15 +259,16 @@ def build_world(target: str = "harmonic") -> str:
         *COL_GREY_FLOOR, collision=False))
 
     # ---- 四面围墙（贴在场地外侧，内表面正好在场界线）----
-    p.append("    <!-- ===== 围墙：高度 {:.2f} m，内表面即场界线 ===== -->\n".format(WALL_H))
+    p.append(
+        "    <!-- ===== 围墙：高度 {:.2f} m，内表面即场界线 ===== -->\n".format(WALL_H))
     half = WALL_T / 2
     walls = {
-        # 南/北墙沿 X（横向），长度 = 场地宽 + 两侧墙厚
+        # 南/北墙沿 X（横向），长度 = 场地长 + 两侧墙厚
         "wall_south": ((FIELD_X + 2 * WALL_T, WALL_T, WALL_H),
                        (FIELD_X / 2, -half, WALL_H / 2, 0, 0, 0)),
         "wall_north": ((FIELD_X + 2 * WALL_T, WALL_T, WALL_H),
                        (FIELD_X / 2, FIELD_Y + half, WALL_H / 2, 0, 0, 0)),
-        # 西/东墙沿 Y（纵向），长度 = 场地长
+        # 西/东墙沿 Y（纵向），长度 = 场地宽
         "wall_west": ((WALL_T, FIELD_Y, WALL_H),
                       (-half, FIELD_Y / 2, WALL_H / 2, 0, 0, 0)),
         "wall_east": ((WALL_T, FIELD_Y, WALL_H),
@@ -283,7 +292,8 @@ def build_world(target: str = "harmonic") -> str:
         RACK_S, RACK_S, RACK_H))
     for key, k in RACKS.items():
         cx, cy = k["cx"], k["cy"]
-        p.append("    <!-- RACK {}: 中心 ({:.3f}, {:.3f}) -->\n".format(key.upper(), cx, cy))
+        p.append(
+            "    <!-- RACK {}: 中心 ({:.3f}, {:.3f}) -->\n".format(key.upper(), cx, cy))
         p.append(f"    <model name='rack_{key}'>\n      <static>true</static>\n"
                  f"      <pose>{cx:.6f} {cy:.6f} 0 0 0 0</pose>\n")
         # 四根立柱
@@ -318,19 +328,20 @@ def build_world(target: str = "harmonic") -> str:
 
 
 # --------------------------------------------------------------------------
-# 8. 自检（含"区域互相重叠"的显式告警）+ 俯视图
+# 8. 自检（含重叠告警与净空提示）+ 俯视图
 # --------------------------------------------------------------------------
 def audit() -> int:
     items = collect_rects()
     hard = 0
-    print("=" * 96)
-    print("几何自检 —— 所有坐标均为图纸给定值（硬编码，无推导）")
-    print(f"场地 {FIELD_X:.2f} (X/宽) x {FIELD_Y:.2f} (Y/长)  [竖向]")
-    print("=" * 96)
+    print("=" * 100)
+    print("几何自检 —— 以 1.png 图纸的毫米标注换算（不沿用旧仿真布局）")
+    print(f"场地 {FIELD_X:.2f} (X/横向) x {FIELD_Y:.2f} (Y/纵向)  [横向布局]")
+    print("=" * 100)
     print(f"  {'对象':<17}{'x 范围':<21}{'y 范围':<21}{'尺寸':<12}"
           f"{'距左':>7}{'距右':>7}{'距底':>7}{'距顶':>7}")
     for name, x0, x1, y0, y1, solid in items:
-        ok = (x0 >= -1e-9 and y0 >= -1e-9 and x1 <= FIELD_X + 1e-9 and y1 <= FIELD_Y + 1e-9)
+        ok = (x0 >= -1e-9 and y0 >= -1e-9 and x1 <=
+              FIELD_X + 1e-9 and y1 <= FIELD_Y + 1e-9)
         if not ok:
             hard += 1
         tag = "" if ok else "  ← 出界!"
@@ -338,7 +349,7 @@ def audit() -> int:
               f"{x1-x0:.2f}x{y1-y0:.2f}   {x0:6.3f} {FIELD_X-x1:6.3f} "
               f"{y0:6.3f} {FIELD_Y-y1:6.3f}{tag}")
 
-    print("-" * 96)
+    print("-" * 100)
     racks = [it for it in items if it[5]]
     zones = [it for it in items if not it[5]]
 
@@ -352,7 +363,7 @@ def audit() -> int:
     print(f"  [{'OK' if hard == 0 else '✗'}] 货架之间无重叠；"
           f"全部实体在 {FIELD_X:.2f} x {FIELD_Y:.2f} 边界内")
 
-    # 区域之间：图纸给定值，若重叠只告警（区域无碰撞，不影响物理）
+    # 区域之间 / 区域与货架
     warn = 0
     for i in range(len(zones)):
         for j in range(i + 1, len(zones)):
@@ -361,10 +372,12 @@ def audit() -> int:
             oy = min(a[4], b[4]) - max(a[3], b[3])
             if ox > 1e-9 and oy > 1e-9:
                 warn += 1
-                print(f"  [⚠ 区域重叠] {a[0]} <-> {b[0]}："
-                      f"x 重叠 {ox:.3f} m, y 重叠 {oy:.3f} m"
-                      f"（重叠区 x[{max(a[1],b[1]):.3f},{min(a[2],b[2]):.3f}] "
-                      f"y[{max(a[3],b[3]):.3f},{min(a[4],b[4]):.3f}]）")
+                print(
+                    f"  [⚠ 区域重叠] {a[0]} <-> {b[0]}：x 重叠 {ox:.3f} m, y 重叠 {oy:.3f} m")
+            else:
+                print(f"  [OK] {a[0]} <-> {b[0]} 不重叠"
+                      f"（X 分离 {max(b[1] - a[2], a[1] - b[2]):.3f} m，"
+                      f"Y 分离 {max(b[3] - a[4], a[3] - b[4]):.3f} m）")
     for z in zones:
         for r in racks:
             if z[1] < r[2] and r[1] < z[2] and z[3] < r[4] and r[3] < z[4]:
@@ -373,21 +386,22 @@ def audit() -> int:
     if warn == 0:
         print("  [OK] 区域之间、区域与货架之间【均无重叠】")
     else:
-        print(f"  [⚠] 共有 {warn} 处区域重叠 —— 区域无碰撞故不影响仿真；"
-              f"如需消除，见 sim/README.md §2")
+        print(f"  [⚠] 共有 {warn} 处区域相关重叠 —— 区域无碰撞故不影响仿真")
 
-    # 纵向通道净空
-    dest = [it for it in items if it[0] == "destination_zone"][0]
-    start = [it for it in items if it[0] == "start_zone"][0]
-    gap = dest[3] - start[4]
-    print(f"  [i] Destination 底边 y={dest[3]:.3f}，Start 顶边 y={start[4]:.3f}，"
-          f"中间纵向通道净空 {gap:.3f} m")
+    # 货架到最近两面墙的净空（提示"贴得近但没重叠"的位置）
+    print("  [i] 货架到最近的两面墙的净空：")
+    for name, x0, x1, y0, y1, _ in racks:
+        gaps = {"左墙": x0, "右墙": FIELD_X - x1, "底墙": y0, "顶墙": FIELD_Y - y1}
+        near = sorted(gaps.items(), key=lambda kv: kv[1])[:2]
+        print(f"        {name:<10} " +
+              "，".join(f"距{k} {v:.3f} m" for k, v in near))
     return hard
 
 
-def ascii_map(target_rows: int = 34, max_width: int = 74) -> str:
-    """按场地长宽比自适应画俯视图（竖向场地会画得高一些）。"""
-    width = max(24, min(max_width, int(round(target_rows * 2 * FIELD_X / FIELD_Y))))
+def ascii_map(target_rows: int = 30, max_width: int = 78) -> str:
+    """按场地长宽比自适应画俯视图。"""
+    width = max(24, min(max_width, int(
+        round(target_rows * 2 * FIELD_X / FIELD_Y))))
     rows = max(6, int(round(width * FIELD_Y / FIELD_X / 2)))
     grid = [[" "] * width for _ in range(rows)]
 
@@ -401,27 +415,29 @@ def ascii_map(target_rows: int = 34, max_width: int = 74) -> str:
                 grid[r][c] = ch
 
     for name, x0, x1, y0, y1, solid in collect_rects():
-        ch = {"destination_zone": "G", "start_zone": "S"}.get(name, name[-1].upper())
+        ch = {"destination_zone": "G", "start_zone": "S"}.get(
+            name, name[-1].upper())
         put(x0, x1, y0, y1, ch)
 
     top = "+" + "-" * width + "+"
     body = "\n".join("|" + "".join(r) + "|" for r in grid)
     return (f"{top}\n{body}\n{top}\n"
-            f"  上方 = 场地顶部(y={FIELD_Y:.2f})  下方 = 场地底部(y=0)  左 = x=0\n"
-            f"  G=Destination绿(上)  S=Start蓝(下)  A左上 C右上 D左下 B右下\n"
-            f"  场地 {FIELD_X:.2f}(X/宽) x {FIELD_Y:.2f}(Y/长) m，竖向")
+            f"  上方 = 场地顶部(y={FIELD_Y:.2f})，下方 = 场地底部(y=0)，左 = x=0，右 = x={FIELD_X:.2f}\n"
+            f"  G=Destination绿(左)  S=Start蓝(右)  A左上 D左下  C右上 B右下\n"
+            f"  场地 {FIELD_X:.2f}(X/横向) x {FIELD_Y:.2f}(Y/纵向) m，横向")
 
 
 def summary() -> str:
     L = []
-    L.append("场地: {:.2f} (X/宽) x {:.2f} (Y/长) m  —— 竖向矩形，围墙高 {:.2f} m".format(
+    L.append("场地: {:.2f} (X/横向) x {:.2f} (Y/纵向) m  —— 横向矩形，围墙高 {:.2f} m".format(
         FIELD_X, FIELD_Y, WALL_H))
     for key, z in ZONES.items():
         r = rect_of(z["cx"], z["cy"], z["w"], z["h"])
         L.append("{:<12} 中心 ({:.2f}, {:.2f})  {}x{} m  x {:.3f}~{:.3f}  y {:.3f}~{:.3f}".format(
             key, z["cx"], z["cy"], z["w"], z["h"], r["x0"], r["x1"], r["y0"], r["y1"]))
     for key, k in RACKS.items():
-        L.append("RACK {:<8} 中心 ({:.2f}, {:.2f})".format(key.upper(), k["cx"], k["cy"]))
+        L.append("RACK {:<8} 中心 ({:.2f}, {:.2f})".format(
+            key.upper(), k["cx"], k["cy"]))
     return "\n".join(L)
 
 

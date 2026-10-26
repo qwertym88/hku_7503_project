@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <!--
-  DASE7503 比赛场地 —— Gazebo 世界文件（竖向布局）
+  DASE7503 比赛场地 —— Gazebo 世界文件（图纸横向布局）
   *** 本文件由 sim/scripts/generate_field_world.py 自动生成，请勿手改 ***
   改坐标请改脚本里的 ZONES / RACKS 两张表，然后重新生成。
 
-  坐标系：原点在场地左下角，+X 向右(宽 2.00)，+Y 向上(长 3.02)，+Z 天向。
-  布局：Destination(绿) 在上 → 4 个货架在中间 2x2 → Start(蓝) 在下。
+  坐标系：原点在场地左下角，+X 向右(长 3.02)，+Y 向上(宽 2.00)，+Z 天向。
+  布局：左侧 Destination(绿) → 中部 A/D/C/B 货架 → 右侧 Start(蓝)。
   目标格式：Gazebo Fortress (ign-gazebo6), SDF 1.9
 -->
 <sdf version="1.9">
@@ -36,7 +36,7 @@
     </light>
 
     <light type='point' name='fill_light'>
-      <pose>1.000000 1.510000 2.20 0 0 0</pose>
+      <pose>1.510000 1.000000 2.20 0 0 0</pose>
       <diffuse>0.55 0.55 0.55 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
       <attenuation>
@@ -68,11 +68,11 @@
     </model>
     <model name='field_floor'>
       <static>true</static>
-      <pose>1.000000 1.510000 0.001000 0.000000 0.000000 0.000000</pose>
+      <pose>1.510000 1.000000 0.001000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <visual name='visual'>
           <geometry>
-            <box><size>2.000000 3.020000 0.002000</size></box>
+            <box><size>3.020000 2.000000 0.002000</size></box>
           </geometry>
           <material>
             <ambient>0.62 0.62 0.64 1</ambient>
@@ -85,16 +85,16 @@
     <!-- ===== 围墙：高度 0.50 m，内表面即场界线 ===== -->
     <model name='wall_south'>
       <static>true</static>
-      <pose>1.000000 -0.025000 0.250000 0.000000 0.000000 0.000000</pose>
+      <pose>1.510000 -0.025000 0.250000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
-            <box><size>2.100000 0.050000 0.500000</size></box>
+            <box><size>3.120000 0.050000 0.500000</size></box>
           </geometry>
         </collision>
         <visual name='visual'>
           <geometry>
-            <box><size>2.100000 0.050000 0.500000</size></box>
+            <box><size>3.120000 0.050000 0.500000</size></box>
           </geometry>
           <material>
             <ambient>0.45 0.45 0.48 1</ambient>
@@ -106,16 +106,16 @@
     </model>
     <model name='wall_north'>
       <static>true</static>
-      <pose>1.000000 3.045000 0.250000 0.000000 0.000000 0.000000</pose>
+      <pose>1.510000 2.025000 0.250000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
-            <box><size>2.100000 0.050000 0.500000</size></box>
+            <box><size>3.120000 0.050000 0.500000</size></box>
           </geometry>
         </collision>
         <visual name='visual'>
           <geometry>
-            <box><size>2.100000 0.050000 0.500000</size></box>
+            <box><size>3.120000 0.050000 0.500000</size></box>
           </geometry>
           <material>
             <ambient>0.45 0.45 0.48 1</ambient>
@@ -127,16 +127,16 @@
     </model>
     <model name='wall_west'>
       <static>true</static>
-      <pose>-0.025000 1.510000 0.250000 0.000000 0.000000 0.000000</pose>
+      <pose>-0.025000 1.000000 0.250000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
-            <box><size>0.050000 3.020000 0.500000</size></box>
+            <box><size>0.050000 2.000000 0.500000</size></box>
           </geometry>
         </collision>
         <visual name='visual'>
           <geometry>
-            <box><size>0.050000 3.020000 0.500000</size></box>
+            <box><size>0.050000 2.000000 0.500000</size></box>
           </geometry>
           <material>
             <ambient>0.45 0.45 0.48 1</ambient>
@@ -148,16 +148,16 @@
     </model>
     <model name='wall_east'>
       <static>true</static>
-      <pose>2.025000 1.510000 0.250000 0.000000 0.000000 0.000000</pose>
+      <pose>3.045000 1.000000 0.250000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
-            <box><size>0.050000 3.020000 0.500000</size></box>
+            <box><size>0.050000 2.000000 0.500000</size></box>
           </geometry>
         </collision>
         <visual name='visual'>
           <geometry>
-            <box><size>0.050000 3.020000 0.500000</size></box>
+            <box><size>0.050000 2.000000 0.500000</size></box>
           </geometry>
           <material>
             <ambient>0.45 0.45 0.48 1</ambient>
@@ -168,10 +168,10 @@
       </link>
     </model>
     <!-- ===== 区域标记：无碰撞，仅视觉 ===== -->
-    <!-- Destination 绿: 中心 (1.000, 2.320)  x 0.600~1.400  y 1.620~3.020 -->
+    <!-- Destination 绿: 中心 (0.400, 1.000)  x 0.000~0.800  y 0.300~1.700 -->
     <model name='destination_zone'>
       <static>true</static>
-      <pose>1.000000 2.320000 0.003000 0.000000 0.000000 0.000000</pose>
+      <pose>0.400000 1.000000 0.003000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <visual name='visual'>
           <geometry>
@@ -185,10 +185,10 @@
         </visual>
       </link>
     </model>
-    <!-- Start 蓝: 中心 (1.000, 0.400)  x 0.700~1.300  y 0.000~0.800 -->
+    <!-- Start 蓝: 中心 (2.720, 1.000)  x 2.420~3.020  y 0.600~1.400 -->
     <model name='start_zone'>
       <static>true</static>
-      <pose>1.000000 0.400000 0.003000 0.000000 0.000000 0.000000</pose>
+      <pose>2.720000 1.000000 0.003000 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <visual name='visual'>
           <geometry>
@@ -203,10 +203,10 @@
       </link>
     </model>
     <!-- ===== 货架：0.14 x 0.14 x 0.2325 m，多层结构 ===== -->
-    <!-- RACK A: 中心 (0.500, 2.000) -->
+    <!-- RACK A: 中心 (1.200, 1.580) -->
     <model name='rack_a'>
       <static>true</static>
-      <pose>0.500000 2.000000 0 0 0 0</pose>
+      <pose>1.200000 1.580000 0 0 0 0</pose>
       <link name='post_0'>
         <pose>-0.064000 -0.064000 0.116250 0 0 0</pose>
         <collision name='collision'>
@@ -334,10 +334,10 @@
         </visual>
       </link>
     </model>
-    <!-- RACK B: 中心 (1.500, 1.000) -->
+    <!-- RACK B: 中心 (1.850, 0.510) -->
     <model name='rack_b'>
       <static>true</static>
-      <pose>1.500000 1.000000 0 0 0 0</pose>
+      <pose>1.850000 0.510000 0 0 0 0</pose>
       <link name='post_0'>
         <pose>-0.064000 -0.064000 0.116250 0 0 0</pose>
         <collision name='collision'>
@@ -465,10 +465,10 @@
         </visual>
       </link>
     </model>
-    <!-- RACK C: 中心 (1.500, 2.000) -->
+    <!-- RACK C: 中心 (1.850, 1.720) -->
     <model name='rack_c'>
       <static>true</static>
-      <pose>1.500000 2.000000 0 0 0 0</pose>
+      <pose>1.850000 1.720000 0 0 0 0</pose>
       <link name='post_0'>
         <pose>-0.064000 -0.064000 0.116250 0 0 0</pose>
         <collision name='collision'>
@@ -596,10 +596,10 @@
         </visual>
       </link>
     </model>
-    <!-- RACK D: 中心 (0.500, 1.000) -->
+    <!-- RACK D: 中心 (1.350, 0.370) -->
     <model name='rack_d'>
       <static>true</static>
-      <pose>0.500000 1.000000 0 0 0 0</pose>
+      <pose>1.350000 0.370000 0 0 0 0</pose>
       <link name='post_0'>
         <pose>-0.064000 -0.064000 0.116250 0 0 0</pose>
         <collision name='collision'>
