@@ -20,6 +20,8 @@ tests/logs/*
 # 本地参考与临时文件
 .ref/
 .tmp/
+.tmpimg/          # 从 PDF 抽出的临时图片（调试图纸用）
+.pylibs/          # pip --target 装的临时依赖（如 pillow/numpy/OCR）
 *:Zone.Identifier
 
 # 大文件（CAD 导出/临时）
