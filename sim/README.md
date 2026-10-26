@@ -1,12 +1,12 @@
 # sim —— Gazebo 仿真场地
 
-场地已按 [1.png](../1.png) 的横向俯视图重建。**原点在左下角**，`+X` 向右、`+Y` 向上、`+Z` 向上；单位均为米。围墙高 0.50 m，位于场地外侧，内表面就是边界线。
+场地已按[场地工程图](../docs/图纸/)的横向俯视图重建（图纸文件需手动放入 [`docs/图纸/`](../docs/图纸/README.md)，见该目录说明）。**原点在左下角**，`+X` 向右、`+Y` 向上、`+Z` 向上；单位均为米。围墙高 0.50 m，位于场地外侧，内表面就是边界线。
 
 ```text
 sim/
 ├─ scripts/generate_field_world.py    # 唯一事实来源：坐标和尺寸改这里
-├─ worlds/dase7503_field.sdf          # Gazebo Harmonic（自动生成）
-├─ worlds/dase7503_field_fortress.sdf # Gazebo Fortress（自动生成）
+├─ worlds/dase7503_field.sdf          # Gazebo Harmonic（自动生成）★ 唯一维护目标
+├─ worlds/dase7503_field_fortress.sdf # Gazebo Fortress（自动生成）— 遗留，不再维护
 └─ launch/field_with_robot.launch.py  # 场地 + linorobot2 麦轮机器人
 ```
 
@@ -54,3 +54,5 @@ ros2 launch sim/launch/field_with_robot.launch.py
 ```
 
 两个世界的几何完全一致，仅 SDF 版本和 Gazebo 系统插件命名不同。
+
+> **本项目只走 Jazzy + Harmonic。** 上面那条 `ign gazebo` / `--target fortress` 仅作遗留保留，不再维护、不再投入（见《[HANDOFF](../HANDOFF.md)》§3 不变量）。

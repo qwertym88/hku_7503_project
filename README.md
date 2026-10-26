@@ -11,7 +11,10 @@ Pi5（ROS 2 Jazzy）                         ESP32（micro-ROS）
  定位 + Nav2  ┘
 ```
 
-当前状态：**框架与文档已就绪，硬件与算法待 5 位队友按《分工与任务拆解》接入。**
+当前状态：**仿真场地已完成并验证；框架与文档已就绪；硬件与算法待 5 位队友按《分工与任务拆解》接入。**
+
+> 🚚 **换开发设备？先看《[开发交接与环境衔接](HANDOFF.md)》** —— 一页纸讲清「环境怎么重建、现在做到哪、哪些不能动、还欠什么」。
+> 全新机器一行命令装环境：`bash tools/bootstrap_jazzy.sh`
 
 ---
 
@@ -46,7 +49,10 @@ Pi5（ROS 2 Jazzy）                         ESP32（micro-ROS）
 ```text
 .
 ├─ README.md                  ← 你正在看的入口
+├─ HANDOFF.md                 ← 换开发设备必读（环境重建 / 状态 / 不变量）
+├─ tools/bootstrap_jazzy.sh   ← 新机器一键环境重建
 ├─ docs/
+│  ├─ 图纸/                   场地工程图（坐标依据，需补 1.png）
 │  ├─ PROJECT_FRAMEWORK.md    需求解读与完整框架（背景备查）
 │  ├─ PROJECT_PLAN_SLIM.md    精简执行计划（保底 A 档）
 │  ├─ 给队友看/               上手文档（分工拆解 + 各模块方案）
@@ -71,6 +77,9 @@ Pi5（ROS 2 Jazzy）                         ESP32（micro-ROS）
 ## 快速开始（ROS 2 Jazzy）
 
 ```bash
+# 全新机器先一键装依赖（Ubuntu 24.04 + ROS 2 Jazzy）
+bash tools/bootstrap_jazzy.sh
+
 # 在安装了 ROS 2 Jazzy 的 Ubuntu 24.04 或树莓派上
 cd ros2_ws
 source /opt/ros/jazzy/setup.bash
@@ -82,8 +91,8 @@ ros2 launch robot_bringup bringup.launch.py
 详细操作、通信域、实机步骤见《[运行说明](docs/给队友看/运行说明.md)》。
 
 > ⚠️ **ROS 版本必须是 Jazzy（Ubuntu 24.04）**——需求 PDF 明确指定，本仓库的路径/依赖都按 Jazzy 写。
-> 若开发机是 **Ubuntu 22.04 + Humble**（例如某台已装 Humble 的机器）：ROS 侧要用 linorobot2 的 **`humble`** 分支，仿真改用 **Gazebo Fortress**：
-> `ros2 launch sim/launch/field_world.launch.py backend:=fortress`。**Jazzy 与 Humble 不要混用**（Gazebo 插件命名、SDF 版本、Nav2 参数都可能不同）。详见《[sim/README](sim/README.md)》§0。
+> **本项目只做 Jazzy 一条路。** Humble / Fortress 相关的遗留文件（`--target fortress`、`backend:=fortress`）**保留但不再维护、不再投入**。
+> 完整的不变量清单见《[HANDOFF](HANDOFF.md)》§3。
 
 ---
 
