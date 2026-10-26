@@ -34,7 +34,7 @@ Pi5（ROS 2 Jazzy）                         ESP32（micro-ROS）
 | **机械 M1** | `cad/`、《[分工与任务拆解](docs/给队友看/分工与任务拆解.md)》第 2 节 | 底盘 + 举升机构 + 装配；SolidWorks pack-and-go |
 | **硬件/嵌入式 M2** | `firmware/`、《[底盘参考实现](docs/给队友看/底盘参考实现.md)》、《[里程计标定](docs/给队友看/里程计标定.md)》、《[模块接口说明](docs/给队友看/模块接口说明.md)》 | 线束供电；ESP32 固件：`/cmd_vel`→电机、编码器→`/odom`、`/imu/data`、`/lifter`→舵机 |
 | **感知 M3** | `ros2_ws/src/qr_perception/`、《[QR 感知方案](docs/给队友看/QR感知方案.md)》、《[模块接口说明](docs/给队友看/模块接口说明.md)》 | picamera2 取流 + 纯 Python 解码 + 薄封装 → `/qr`（**不用 camera_ros**） |
-| **导航 M4** | `ros2_ws/src/robot_navigation/`、`maps/`、《[导航栈方案对比](docs/给队友看/导航栈方案对比.md)》 | 雷达 → `/scan`；建图定位；点到点导航 → `/cmd_vel`（建议复用 linorobot2 的 Nav2/SLAM/EKF 栈） |
+| **导航 M4** | `ros2_ws/src/robot_navigation/`、`maps/`、《[导航栈方案对比](docs/给队友看/导航栈方案对比.md)》、《[仿真与离线测试方案](docs/给队友看/仿真与离线测试方案.md)》 | 雷达 → `/scan`；建图定位；点到点导航 → `/cmd_vel`（复用 linorobot2 的 Nav2/SLAM/EKF/Gazebo 栈） |
 | **集成/PM M5** | `ros2_ws/src/mission_control/`、`tests/` | mission 状态机、联调、测试、文档、PPT |
 
 > `ros2_ws/src/mission_control` 是**状态机**；`robot_bringup` 是**统一启动**；`robot_description` 是 **URDF/模型**；`robot_firmware_bridge` 是 **micro-ROS 桥接**。**不要把电机、导航、解码算法塞进状态机。**
