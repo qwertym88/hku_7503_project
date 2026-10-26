@@ -129,17 +129,42 @@ COL_GREEN = ("0.02 0.45 0.10 1", "0.10 0.75 0.20 1")     # Destination
 COL_BLUE = ("0.02 0.15 0.50 1", "0.15 0.40 0.90 1")      # Start
 COL_WOOD = ("0.42 0.26 0.10 1", "0.85 0.62 0.32 1")      # 货架（木色/黄）
 
-SDF_HEADER = """<?xml version="1.0" ?>
+SDF_VERSION = {"harmonic": "1.10", "fortress": "1.9"}
+
+# Gazebo 新版（Harmonic, gz-sim8）与 Fortress（ign-gazebo6）的系统插件命名不同：
+#   Harmonic: filename="gz-sim-physics-system"      name="gz::sim::systems::Physics"
+#   Fortress: filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics"
+PLUGIN_NS = {"harmonic": ("gz-sim", "gz::sim::systems"),
+             "fortress": ("ignition-gazebo", "ignition::gazebo::systems")}
+
+
+def sdf_header(target: str) -> str:
+    pretty = {"harmonic": "Gazebo Harmonic (gz-sim8), SDF 1.10",
+              "fortress": "Gazebo Fortress (ign-gazebo6), SDF 1.9"}[target]
+    return f"""<?xml version="1.0" ?>
 <!--
   DASE7503 比赛场地 —— Gazebo 世界文件
   *** 本文件由 sim/scripts/generate_field_world.py 自动生成，请勿手改 ***
   改尺寸/位置请改脚本里的 FIELD / ZONES_RAW / build_racks()，然后重新生成。
 
   坐标系：原点在场地的左下角，+X 向右(长 3.02)，+Y 向上(宽 2.0)，+Z 天向。
-  Gazebo Harmonic (gz-sim) 格式，SDF 1.10。
+  目标格式：{pretty}
 -->
-<sdf version="1.10">
+<sdf version="{SDF_VERSION[target]}">
   <world name="dase7503_field">
+"""
+
+
+def plugin_block(target: str) -> str:
+    f, n = PLUGIN_NS[target]
+    return f"""    <!-- 必需的系统插件：缺任何一个都会表现为
+         「没有物理 / 生成不了模型 / 看不到画面 / 雷达无数据」 -->
+    <plugin filename='{f}-physics-system' name='{n}::Physics'/>
+    <plugin filename='{f}-user-commands-system' name='{n}::UserCommands'/>
+    <plugin filename='{f}-scene-broadcaster-system' name='{n}::SceneBroadcaster'/>
+    <plugin filename='{f}-sensors-system' name='{n}::Sensors'>
+      <render_engine>ogre2</render_engine>
+    </plugin>
 """
 
 SDF_TAIL = """  </world>
@@ -187,13 +212,13 @@ def rect_pose(r: dict):
             r["x1"] - r["x0"], r["y1"] - r["y0"])
 
 
-def build_world() -> str:
+def build_world(target: str = "harmonic") -> str:
     dest = resolve_destination()
     start = resolve_start()
     racks = build_racks(dest)
-    p = [SDF_HEADER]
+    p = [sdf_header(target)]
 
-    # ---- 物理 / 光照 / 场景 ----
+    # ---- 物理 / 插件 ----
     p.append("""    <gravity>0 0 -9.8</gravity>
 
     <physics default='0' name='default_physics' type='ode'>
@@ -202,15 +227,11 @@ def build_world() -> str:
       <real_time_update_rate>100</real_time_update_rate>
     </physics>
 
-    <!-- 必需的系统插件：缺任何一个都会表现为
-         「没有物理 / 生成不了模型 / 看不到画面 / 雷达无数据」 -->
-    <plugin filename='gz-sim-physics-system' name='gz::sim::systems::Physics'/>
-    <plugin filename='gz-sim-user-commands-system' name='gz::sim::systems::UserCommands'/>
-    <plugin filename='gz-sim-scene-broadcaster-system' name='gz::sim::systems::SceneBroadcaster'/>
-    <plugin filename='gz-sim-sensors-system' name='gz::sim::systems::Sensors'>
-      <render_engine>ogre2</render_engine>
-    </plugin>
+""")
+    p.append(plugin_block(target))
 
+    # ---- 光照 ----
+    p.append("""
     <light type='directional' name='sun'>
       <cast_shadows>true</cast_shadows>
       <pose>0 0 6 0 0 0</pose>
@@ -412,6 +433,9 @@ def summary() -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--target", choices=["harmonic", "fortress"], default="harmonic",
+                    help="harmonic = Gazebo Harmonic/gz-sim8（Jazzy，默认）；"
+                         "fortress = Gazebo Fortress/ign-gazebo6（Humble）")
     ap.add_argument("--stdout", action="store_true", help="只打印，不写文件")
     ap.add_argument("--check", action="store_true", help="只做自检")
     ap.add_argument("--out", default=None, help="输出路径")
@@ -425,17 +449,20 @@ def main() -> None:
     if args.check:
         raise SystemExit(1 if bad else 0)
 
-    text = build_world()
+    text = build_world(args.target)
     if args.stdout:
         print(text)
         return
+    default_name = ("dase7503_field.sdf" if args.target == "harmonic"
+                    else "dase7503_field_fortress.sdf")
     out = args.out or os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   "..", "worlds", "dase7503_field.sdf")
+                                   "..", "worlds", default_name)
     out = os.path.abspath(out)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         f.write(text)
-    print(f"\n已写入: {out}  ({len(text)} bytes)")
+    print(f"\n已写入: {out}  ({len(text)} bytes)  [target={args.target}, "
+          f"SDF {SDF_VERSION[args.target]}]")
 
 
 if __name__ == "__main__":

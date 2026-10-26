@@ -16,7 +16,10 @@ MS200 → /scan → 建图(slam_toolbox) → 地图 → 定位(AMCL) → Nav2 �
 - [ ] EKF 融合 `odom/unfiltered` + `/imu/data`，再 AMCL 定位（定位跳变 < 3cm）
 - [ ] Nav2 配置（复用其 `navigation.yaml`，膨胀半径调保守防撞墙）
 - [ ] 停靠点标定（货架前 / 目的区）
+- [ ] **用 `sim/` 里的场地世界练**（没场地时）→ `ros2 launch sim/launch/field_with_robot.launch.py`
 - [ ] 兜底方案：里程计 + 雷达避障的简易航点驱动（~100 行）
 
 当前为空壳。**参数以实测为准**，不要照抄示例。
 注意：linorobot2 的 Nav2 用**差速**控制器（RPP + 差分 AMCL），不输出横向速度——与我们的保底路线一致。
+
+> ⚠️ linorobot2 要按 ROS 版本选分支：**Jazzy → `-b jazzy`**、Humble → `-b humble`。仿真世界也分 Harmonic/Fortress 两版，见《[sim/README](../../../sim/README.md)》§0。

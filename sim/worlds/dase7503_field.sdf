@@ -5,7 +5,7 @@
   改尺寸/位置请改脚本里的 FIELD / ZONES_RAW / build_racks()，然后重新生成。
 
   坐标系：原点在场地的左下角，+X 向右(长 3.02)，+Y 向上(宽 2.0)，+Z 天向。
-  Gazebo Harmonic (gz-sim) 格式，SDF 1.10。
+  目标格式：Gazebo Harmonic (gz-sim8), SDF 1.10
 -->
 <sdf version="1.10">
   <world name="dase7503_field">

@@ -4,14 +4,44 @@
 
 ```text
 sim/
-├─ worlds/dase7503_field.sdf        ← 生成物（别手改）
-├─ scripts/generate_field_world.py  ← 唯一事实来源：改尺寸改这里
+├─ worlds/dase7503_field.sdf          ← Harmonic 版（生成物，别手改）
+├─ worlds/dase7503_field_fortress.sdf ← Fortress 版（同上）
+├─ scripts/generate_field_world.py    ← 唯一事实来源：改尺寸改这里
 └─ launch/
-   ├─ field_world.launch.py         ← 只启动场地
-   └─ field_with_robot.launch.py    ← 场地 + linorobot2 麦轮机器人（推荐）
+   ├─ field_world.launch.py           ← 只启动场地
+   └─ field_with_robot.launch.py      ← 场地 + linorobot2 麦轮机器人（推荐）
 ```
 
 **坐标约定**（与图纸一致）：原点在**场地左下角**，+X 向右（长 3.02），+Y 向上（宽 2.0），+Z 天向。围墙高 **0.5 m**，贴在场地**外侧**，内表面正好压在 0/3.02、0/2.0 上（不占场地面积）。
+
+---
+
+## 0. 两个变体，别搞混（附本机环境诊断）
+
+两个世界文件**几何、尺寸、颜色完全一样**，只有 **SDF 版本号 + 插件命名**不同：
+
+| 文件 | 目标环境 | SDF | 插件命名 | 启动命令 |
+|---|---|---|---|---|
+| `dase7503_field.sdf` | **Gazebo Harmonic**（Ubuntu 24.04 / ROS 2 Jazzy） | 1.10 | `gz-sim-*`、`gz::sim::systems::*` | `gz sim -r <file>` |
+| `dase7503_field_fortress.sdf` | **Gazebo Fortress**（Ubuntu 22.04 / ROS 2 Humble） | 1.9 | `ignition-gazebo-*`、`ignition::gazebo::systems::*` | `ign gazebo <file>` |
+
+重新生成：`python3 sim/scripts/generate_field_world.py --target harmonic`（或 `--target fortress`）
+
+### 本机（开发机）诊断结论 —— 为什么 `gz sim` 用不了
+
+| 项 | 实际情况 |
+|---|---|
+| 系统 | **Ubuntu 22.04.5 LTS (Jammy)** |
+| `/usr/bin/gz` | **Gazebo Classic 11.10.2** 的 gz-tools v1。它的子命令只有 `help / camera / joint / log / marker / model / physics / sdf / stats / topic / world` —— **压根没有 `sim`**，这就是 `gz sim` 报 `Invalid arguments` 的原因 |
+| Gazebo Classic | 11.10.2（`gazebo` / `gzserver` / `gzclient`，sdformat9）——**不是我们的目标，别用** |
+| **Gazebo Fortress** | ✅ 装了：**Ignition Gazebo 6.18.0**，命令是 **`ign gazebo`**（不是 `gz sim`） |
+| **Gazebo Harmonic** | ❌ **没装**。没有任何 `libgz-sim8` / `libgz-transport13` / `sdformat14`；anaconda 里那个 `sdformat14` 只是包缓存，conda base 里也没有 gz-sim |
+| ROS 2 | **Humble**（`/opt/ros/humble`，含 `ros_gz_sim` / `ros_gz_bridge` → 对应 Fortress） |
+| Harmonic 能装吗 | ❌ **apt 装不了**：Harmonic 配的是 Ubuntu 24.04 / ROS 2 Jazzy |
+
+> ⚠️ **与项目要求不一致**：需求 PDF 明确写 **ROS 2 Jazzy**（Ubuntu 24.04），而这台机器是 **Humble**。
+> 所以：**仿真最终要在 24.04 + Jazzy + Harmonic 的机器上跑**；这台机器适合做 ① Fortress 版布局核对 ② 与 ROS 版本无关的活（M3 纯 Python 图像算法、M2 的 ESP-IDF 固件）。
+> linorobot2 同时有 **`humble` 和 `jazzy`** 两个分支（hardware 仓库也是），两条路都走得通——**但不要混用**。
 
 ---
 
@@ -81,10 +111,16 @@ sim/
 ### 3.1 只看场地（核对布局 / PPT 截图）
 
 ```bash
+# 目标环境（Harmonic / Jazzy）
 gz sim -r sim/worlds/dase7503_field.sdf
-# 或
 ros2 launch sim/launch/field_world.launch.py
-ros2 launch sim/launch/field_world.launch.py headless:=true   # 无界面
+
+# 本机（Ubuntu 22.04 + Fortress）
+ign gazebo sim/worlds/dase7503_field_fortress.sdf
+ros2 launch sim/launch/field_world.launch.py backend:=fortress
+
+# 无界面（跑回归时用）
+ros2 launch sim/launch/field_world.launch.py headless:=true
 ```
 
 ### 3.2 场地 + 麦轮机器人（推荐，M4 日常用）
@@ -134,19 +170,16 @@ python3 sim/scripts/generate_field_world.py --check     # 只做几何自检 + �
 | 项 | 结果 |
 |---|---|
 | XML 合法性 | ✅ 通过 |
-| **sdformat 结构校验** | ✅ 通过（`gz sdf -k`，无错误）｜本机装的是 **Gazebo Classic，只支持到 SDF 1.7**，故降级 1.7 校验结构；已确认元素层级全部合法 |
+| **sdformat 结构校验（Harmonic 版）** | ✅ 通过（降级 SDF 1.7 校验：本机的 `gz sdf` 来自 Classic，最高只认 1.7；元素层级全部合法） |
+| **sdformat 结构校验（Fortress 版）** | ✅ `ign sdf -k` → **Valid.**（1.9 是 Fortress 的原生版本） |
+| **Fortress 实跑** | ✅ **已验证**：`ign gazebo -r -s` 无界面跑了 35 秒，**0 error / 0 warning**，SceneBroadcaster 正常发布 → 世界加载、物理步进、4 个系统插件全部 OK |
 | 几何自检 | ✅ 6 个实体全在 3.02×2.0 内；货架之间**无重叠**；Rack B 与 C 同 X（"正下方"成立） |
 | 12 个 `<model>` / 36 个 `<link>` | ✅ 计数与预期一致 |
-| **在 Gazebo Harmonic 里真正加载运行** | ⚠️ **未验证**——本机没有 Harmonic |
+| **Harmonic 实跑** | ⚠️ **仍未验证**——本机装不了 Harmonic（见 §0）。请在 24.04 + Jazzy 的机器上跑 `gz sim -r sim/worlds/dase7503_field.sdf` |
 
-**请在有 Harmonic 的机器上跑一次确认**（第一条命令）：
+**Fortress 版已证明"几何 + 插件 + 物理"这套东西是对的**（两个变体除了版本号和插件名，内容逐字相同），所以 Harmonic 版的风险已经很小——只剩下"插件名/版本号对不对"这一点，而那正是两个变体唯一的差别。
 
-```bash
-gz sim -r sim/worlds/dase7503_field.sdf
-```
-
-要确认三点：① 四面墙 + 2 个色块 + 4 个货架都出现；② 颜色对（绿/蓝/木色/灰）；③ 终端无红色报错。
-World 里已显式声明 4 个必需的系统插件（`Physics`/`UserCommands`/`SceneBroadcaster`/`Sensors`）——缺任何一个都会表现为"没物理 / 生成不了模型 / 看不到画面 / 雷达无数据"。
+World 里已显式声明 4 个必需的系统插件（`Physics` / `UserCommands` / `SceneBroadcaster` / `Sensors`）——缺任何一个都会表现为"没物理 / 生成不了模型 / 看不到画面 / 雷达无数据"。
 
 ---
 

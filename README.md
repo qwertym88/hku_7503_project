@@ -81,6 +81,10 @@ ros2 launch robot_bringup bringup.launch.py
 
 详细操作、通信域、实机步骤见《[运行说明](docs/给队友看/运行说明.md)》。
 
+> ⚠️ **ROS 版本必须是 Jazzy（Ubuntu 24.04）**——需求 PDF 明确指定，本仓库的路径/依赖都按 Jazzy 写。
+> 若开发机是 **Ubuntu 22.04 + Humble**（例如某台已装 Humble 的机器）：ROS 侧要用 linorobot2 的 **`humble`** 分支，仿真改用 **Gazebo Fortress**：
+> `ros2 launch sim/launch/field_world.launch.py backend:=fortress`。**Jazzy 与 Humble 不要混用**（Gazebo 插件命名、SDF 版本、Nav2 参数都可能不同）。详见《[sim/README](sim/README.md)》§0。
+
 ---
 
 ## 提交与协作
