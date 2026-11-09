@@ -1,0 +1,38 @@
+# EKF 局部定位（M4-3）：融合轮式里程计 + IMU，输出 odom → base_footprint TF
+# 复用 linorobot2_base/config/ekf.yaml 的结构（决策 D1/D7），frame 统一为 odom / base_footprint。
+# 输入话题（均由 M2 固件发布，见《模块接口说明》）：
+#   odom/unfiltered : nav_msgs/Odometry —— 固件的 /odom 用 remap 映射过来，不改固件（决策 D3）
+#   imu/data        : sensor_msgs/Imu    —— 板载 ICM42670P，EKF 只取角速度 z（弥补麦轮打滑的 yaw 漂移）
+# 输出：
+#   /odom（odometry/filtered 被 launch remap 成 /odom）+ TF odom → base_footprint
+# 注：IMU 暂时拿不到时不用改本文件——没有发布者时 EKF 只告警，仍可用里程计单独跑（会退化）。
+
+ekf_filter_node:
+  ros__parameters:
+    frequency: 50.0
+    two_d_mode: true
+    publish_tf: true
+
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_footprint
+    world_frame: odom
+
+    # x     , y     , z
+    # roll  , pitch , yaw
+    # vx    , vy    , vz
+    # vroll , vpitch, vyaw
+    # ax    , ay    , az
+    odom0: odom/unfiltered
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, true,
+                   false, false, false]
+
+    imu0: imu/data
+    imu0_config: [false, false, false,
+                  false, false, false,
+                  false, false, false,
+                  false, false, true,
+                  false, false, false]

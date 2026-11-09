@@ -11,10 +11,10 @@
 
 | 模块 | 责任人 | 状态 | 位置 | 备注 |
 |---|---|---|---|---|
-| 机械 CAD | M1 | ⬜ 未开始 | `cad/` | 只有 README + `exports/.gitkeep` |
+| 机械 CAD | M1 | 🟡 初版 URDF 已入库 | `cad/`、`robot_description/` | SolidWorks 导出（TF 外参待实测） |
 | 固件 / 底盘 | M2 | ⬜ 未开始 | `firmware/` | 只有 README；`COUNTS_PER_REV = 1040` 已记录 |
 | 感知 QR | M3 | ⬜ 未开始 | `ros2_ws/src/qr_perception/` | 只有 README（方案已定：picamera2 + 纯 Python，不用 `camera_ros`） |
-| 导航 | M4 | 🟡 **仿真场地 ✅，导航栈未开始** | `sim/` ✅、`ros2_ws/src/robot_navigation/` ⬜ | 场地已验证；Nav2/SLAM/EKF 待接 |
+| 导航 | M4 | 🟢 **真机链路全通（2026-11-09）**：雷达 10Hz ✅、建图/存图 ✅、Nav2 发目标→/cmd_vel ✅、兜底驱动 ✅ | `ros2_ws/src/robot_navigation/`、`ros2_ws/src/oradar_lidar/` | 场地正式地图与真车 ±5cm 验收待 M2 底盘 |
 | 集成 / 状态机 | M5 | ⬜ 未开始 | `ros2_ws/src/mission_control/` | 只有 README |
 | 联调测试 | M5 | ⬜ 未开始 | `tests/` | 只有 README + 两个空目录 |
 
@@ -156,7 +156,7 @@ git clone 7139.bundle 7139
 | 1 | 货架精确几何 / 重量；A、B 档的时间阈值；赛前是否允许预先建图；场地精确尺寸 | 问老师 |
 | 2 | `microros_samples` 的来源 | 问老师 / 查资料 |
 | 3 | 固件里 `MOTOR_ENCODER_CIRCLE` 宏未在 Yahboom 虚拟机里核实 | M2 |
-| 4 | **Harmonic 版世界未实测** | 换到 Jazzy 机器后立刻跑（§1 第 3 步） |
+| 4 | **Harmonic 版世界** | ✅ 已实测（2026-11-09：500 迭代 0 error / 0 warning）。**但 11-09 起仿真路线暂停，转真机优先**（本机 Gazebo 渲染与沙箱冲突，真机链路已全通） |
 | 5 | 图纸 `1.png` 未入库 → 放到 `docs/图纸/`（见该目录说明） | 你 |
 | 6 | 本机未装 `robot_localization`（linorobot2 的 EKF 依赖） | bootstrap 脚本已包含 |
 

@@ -24,6 +24,9 @@ tests/logs/*
 .pylibs/          # pip --target 装的临时依赖（如 pillow/numpy/OCR）
 *:Zone.Identifier
 
+# 第三方克隆（不入库；需要时按 sim/launch/field_with_robot.launch.py 头部说明克隆）
+ros2_ws/src/linorobot2/
+
 # 大文件（CAD 导出/临时）
 cad/exports/*.zip
 !cad/exports/.gitkeep
