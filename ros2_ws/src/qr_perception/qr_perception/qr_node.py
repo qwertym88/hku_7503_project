@@ -140,18 +140,31 @@ class QrPerceptionNode(Node):
         self.get_logger().info(f"帧源: {self._src}")
         self._src.open()
         period = 1.0 / self.target_fps if self.target_fps > 0 else 0.0
+        reopen_left = 3  # 断流自动重连次数（瞬时故障不杀节点）
         try:
             while rclpy.ok():
-                frame, stamp = self._src.capture()
+                try:
+                    frame, stamp = self._src.capture()
+                except sources.FrameSourceError as e:
+                    if "回放结束" in str(e):
+                        self.get_logger().info("回放结束，节点退出")
+                        break
+                    if reopen_left <= 0:
+                        raise
+                    reopen_left -= 1
+                    self.get_logger().warn(f"取流中断，尝试重连({3 - reopen_left}/3): {e}")
+                    import time
+                    time.sleep(2.0)
+                    self._src.open()  # 各帧源的 open() 幂等
+                    self.get_logger().info("重连成功")
+                    continue
+                reopen_left = 3  # 成功跑一帧后恢复重连配额
                 self.on_frame(frame, stamp)
                 if period:
                     import time
                     time.sleep(period)
         except sources.FrameSourceError as e:
-            if "回放结束" in str(e):
-                self.get_logger().info("回放结束，节点退出")
-            else:
-                self.get_logger().error(f"取流失败: {e}")
+            self.get_logger().error(f"取流失败（重连后仍不行）: {e}")
         finally:
             self._src.close()
 

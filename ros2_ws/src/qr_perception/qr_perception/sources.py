@@ -53,6 +53,7 @@ class PicameraSource:
             raise FrameSourceError(
                 "picamera2 未安装（树莓派上: sudo apt install python3-picamera2）") from e
 
+        self.close()  # 幂等：重复 open 先停旧实例，避免 "Camera is in use"
         picam2 = Picamera2()
         # XBGR8888 = BGRA 字节序，转 BGR 一次 cvtColor 即可
         config = picam2.create_video_configuration(
@@ -123,9 +124,10 @@ class RpicamVidSource:
         if self.exposure_time_us is not None:
             cmd += ["--shutter", str(self.exposure_time_us)]
         cmd += self.extra_args
+        self.close()  # 幂等：重复 open 先清旧进程
         try:
             self._proc = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except FileNotFoundError as e:
             raise FrameSourceError("rpicam-vid 不存在（rpicam-apps 未安装？）") from e
         # 起流等待：最多 5s 出第一帧；进程死 / 超时都报错，不永久阻塞
@@ -135,8 +137,17 @@ class RpicamVidSource:
             if ready and self._read_raw() is not None:
                 return
             if self._proc.poll() is not None:
-                raise FrameSourceError("rpicam-vid 启动即退出（检查相机线/是否被占用）")
+                raise FrameSourceError(
+                    f"rpicam-vid 启动即退出: {self._stderr_text()}")
         raise FrameSourceError("rpicam-vid 5s 内没出帧")
+
+    def _stderr_text(self) -> str:
+        """读子进程 stderr 尾部（报错时给用户看真实原因，不再吞掉）。"""
+        try:
+            err = self._proc.stderr.read() if self._proc and self._proc.stderr else b""
+            return err.decode(errors="replace").strip()[-300:] or "(无输出)"
+        except Exception:
+            return "(读不到 stderr)"
 
     def _read_raw(self):
         """读一帧完整 YUV420 裸数据；管道断了返回 None。"""
@@ -149,7 +160,10 @@ class RpicamVidSource:
     def capture(self):
         raw = self._read_raw()
         if raw is None:
-            raise FrameSourceError("rpicam-vid 管道断流（进程退出？）")
+            detail = f": {self._stderr_text()}" \
+                if self._proc and self._proc.poll() is not None else \
+                "（进程还活着但不出帧，可能是相机管线卡死）"
+            raise FrameSourceError(f"rpicam-vid 管道断流{detail}")
         # I420 平面布局：[Y: h*w][U: h*w/4][V: h*w/4] 连续存放，总 h*w*3/2 字节
         yuv = np.frombuffer(raw, dtype=np.uint8)
         plane_y = self.width * self.height
@@ -272,6 +286,7 @@ class CvSource:
         self._cap = None
 
     def open(self):
+        self.close()  # 幂等
         self._cap = cv2.VideoCapture(self.index)
         if not self._cap.isOpened():
             raise FrameSourceError(f"打不开摄像头 index={self.index}")
