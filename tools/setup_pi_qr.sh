@@ -32,24 +32,38 @@ fi
 echo "✅ SSH OK"
 
 # ---------- 2) Pi 侧依赖 ----------
-say "2/5 安装 Pi 侧依赖（需要免密 sudo）"
+say "2/5 安装 Pi 侧依赖"
+# Ubuntu 24.04 没有 python3-picamera2 包（那是 Pi OS 的）。取流两条路：
+#   A) pip 装 picamera2==0.3.10（匹配 noble 的 libcamera 0.2.0）+ apt python3-libcamera —— 需要 sudo
+#   B) rpicam-vid 子进程帧源 —— rpicam-apps 已预装，零依赖（setup 脚本自动探测）
 if ssh $SSH_OPTS "$PI_HOST" 'sudo -n true' 2>/dev/null; then
   ssh $SSH_OPTS "$PI_HOST" '
     sudo apt-get update -qq || true
-    sudo apt-get install -y -qq python3-picamera2 python3-opencv libzbar0 >/dev/null
+    sudo apt-get install -y -qq python3-libcamera libzbar0 python3-opencv >/dev/null
     echo "apt 依赖 OK"
   '
 else
-  echo "⚠️  Pi 上 sudo 需要密码，请手动在 Pi 上执行后重跑本脚本："
-  echo "    sudo apt install python3-picamera2 python3-opencv libzbar0"
+  echo "⚠️  Pi 上 sudo 需要密码。请手动在 Pi 上执行（装完重跑本脚本即可继续）："
+  echo "    sudo apt install python3-libcamera libzbar0"
 fi
 ssh $SSH_OPTS "$PI_HOST" '
+  if python3 -c "import cv2" 2>/dev/null; then echo "cv2 OK"; else echo "⚠️  缺 python3-opencv（apt 装）"; fi
+  if python3 -c "import libcamera" 2>/dev/null; then echo "libcamera OK"; else echo "⚠️  缺 python3-libcamera（apt 装）"; fi
+  if python3 -c "import picamera2" 2>/dev/null; then
+    echo "picamera2 OK"
+  elif python3 -c "import libcamera" 2>/dev/null && \
+       pip install --user --break-system-packages --quiet "picamera2==0.3.10" >/dev/null 2>&1 && \
+       python3 -c "import picamera2" 2>/dev/null; then
+    echo "picamera2 已装（pip 0.3.10）"
+  else
+    echo "ℹ️  picamera2 不可用 —— 没关系，将使用 rpicam-vid 帧源（零依赖）"
+  fi
   if python3 -c "import pyzbar" 2>/dev/null; then
     echo "pyzbar 已装"
-  elif pip install --break-system-packages --quiet pyzbar >/dev/null 2>&1; then
+  elif pip install --user --break-system-packages --quiet pyzbar >/dev/null 2>&1; then
     echo "pyzbar 已装（pip）"
   else
-    echo "⚠️  pyzbar 装不上（可选兜底，跳过不影响主流程）"
+    echo "ℹ️  pyzbar 装不上（可选兜底，跳过不影响主流程）"
   fi
 '
 
@@ -73,11 +87,17 @@ ssh $SSH_OPTS "$PI_HOST" "
 "
 
 # ---------- 5) 实拍冒烟 ----------
-say "5/5 picamera2 实拍冒烟（60 帧 ≈ 最多 1 分钟，可 Ctrl+C 跳过）"
+say "5/5 实拍冒烟（60 帧，自动选可用的帧源；可 Ctrl+C 跳过）"
 ssh $SSH_OPTS "$PI_HOST" "
   cd $PI_DIR
-  timeout 90 python3 tools/qr_preview.py --no-window --max-frames 60 || \
-    echo '⚠️  实拍冒烟失败：看上面的报错（常见：相机被占用 / picamera2 未装 / CSI 线没插好）'
+  if python3 -c 'import picamera2' >/dev/null 2>&1; then
+    SRC_FLAG=''
+  else
+    SRC_FLAG='--rpicam'
+  fi
+  if ! timeout 90 python3 tools/qr_preview.py \$SRC_FLAG --no-window --max-frames 60; then
+    echo '⚠️  实拍冒烟失败：看上面的报错（常见：相机被占用 / CSI 线没插好）'
+  fi
 "
 
 say "部署完成。下一步（M3-4 截图归档，在 Pi 上跑）："

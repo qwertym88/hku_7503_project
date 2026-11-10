@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import glob
 import os
+import select
+import subprocess
 import time
 
 import cv2
@@ -91,6 +93,86 @@ class PicameraSource:
 
     def __str__(self):
         return f"picamera2({self.width}x{self.height})"
+
+
+class RpicamVidSource:
+    """rpicam-vid 子进程取流（树莓派官方 rpicam-apps，Ubuntu 24.04 上免装 picamera2）。
+
+    原理：`rpicam-vid --codec yuv420 -o -` 向 stdout 写裸 YUV420 帧，
+    每帧固定 w*h*3/2 字节，按长度精确读取后 cv2 转 BGR。
+    锁焦/锁曝光直接用官方 CLI 参数（--lens-position 屈光度 / --shutter µs）。
+    """
+
+    def __init__(self, width: int = 640, height: int = 480, framerate: int = 30,
+                 focus_diopters: float | None = None, exposure_time_us: int | None = None,
+                 extra_args: list | None = None):
+        self.width, self.height, self.framerate = int(width), int(height), int(framerate)
+        self.focus_diopters = focus_diopters
+        self.exposure_time_us = exposure_time_us
+        self.extra_args = extra_args or []
+        self._proc = None
+        self._frame_bytes = self.width * self.height * 3 // 2
+
+    def open(self):
+        cmd = ["rpicam-vid", "--codec", "yuv420",
+               "--width", str(self.width), "--height", str(self.height),
+               "--framerate", str(self.framerate),
+               "--nopreview", "-o", "-"]
+        if self.focus_diopters is not None:
+            cmd += ["--lens-position", str(self.focus_diopters)]
+        if self.exposure_time_us is not None:
+            cmd += ["--shutter", str(self.exposure_time_us)]
+        cmd += self.extra_args
+        try:
+            self._proc = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        except FileNotFoundError as e:
+            raise FrameSourceError("rpicam-vid 不存在（rpicam-apps 未安装？）") from e
+        # 起流等待：最多 5s 出第一帧；进程死 / 超时都报错，不永久阻塞
+        deadline = time.time() + 5.0
+        while time.time() < deadline:
+            ready, _, _ = select.select([self._proc.stdout], [], [], 0.2)
+            if ready and self._read_raw() is not None:
+                return
+            if self._proc.poll() is not None:
+                raise FrameSourceError("rpicam-vid 启动即退出（检查相机线/是否被占用）")
+        raise FrameSourceError("rpicam-vid 5s 内没出帧")
+
+    def _read_raw(self):
+        """读一帧完整 YUV420 裸数据；管道断了返回 None。"""
+        assert self._proc and self._proc.stdout
+        buf = self._proc.stdout.read(self._frame_bytes)
+        if len(buf) < self._frame_bytes:
+            return None
+        return buf
+
+    def capture(self):
+        raw = self._read_raw()
+        if raw is None:
+            raise FrameSourceError("rpicam-vid 管道断流（进程退出？）")
+        # I420 平面布局：[Y: h*w][U: h*w/4][V: h*w/4] 连续存放，总 h*w*3/2 字节
+        yuv = np.frombuffer(raw, dtype=np.uint8)
+        plane_y = self.width * self.height
+        plane_u = plane_y * 5 // 4
+        y = yuv[:plane_y].reshape(self.height, self.width)
+        u = yuv[plane_y:plane_u].reshape(self.height // 2, self.width // 2)
+        v = yuv[plane_u:].reshape(self.height // 2, self.width // 2)
+        i420 = np.concatenate([y.ravel(), u.ravel(), v.ravel()]) \
+            .reshape(self.height * 3 // 2, self.width)
+        frame = cv2.cvtColor(i420, cv2.COLOR_YUV2BGR_I420)
+        return frame, time.time()
+
+    def close(self):
+        if self._proc is not None:
+            self._proc.terminate()
+            try:
+                self._proc.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                self._proc.kill()
+            self._proc = None
+
+    def __str__(self):
+        return f"rpicam-vid({self.width}x{self.height}@{self.framerate})"
 
 
 class FileSource:
@@ -212,12 +294,14 @@ class CvSource:
 
 
 def make_source(kind: str, **kwargs):
-    """按名字建帧源。kind: picamera2 | file | cv"""
+    """按名字建帧源。kind: picamera2 | rpicam | file | cv"""
     kind = kind.lower()
     if kind in ("picamera2", "picam", "pi"):
         return PicameraSource(**kwargs)
+    if kind in ("rpicam", "rpicam-vid", "rpicamvid"):
+        return RpicamVidSource(**kwargs)
     if kind in ("file", "replay"):
         return FileSource(**kwargs)
     if kind in ("cv", "webcam", "usb"):
         return CvSource(**kwargs)
-    raise FrameSourceError(f"未知帧源类型: {kind}（可选 picamera2 / file / cv）")
+    raise FrameSourceError(f"未知帧源类型: {kind}（可选 picamera2 / rpicam / file / cv）")

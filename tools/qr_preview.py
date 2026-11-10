@@ -34,7 +34,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
 
 from qr_perception.core import QrDecoder          # noqa: E402
 from qr_perception.sources import (CvSource, FileSource,     # noqa: E402
-                                   FrameSourceError, PicameraSource)
+                                   FrameSourceError, PicameraSource,
+                                   RpicamVidSource)
 from qr_perception.voting import MultiFrameVoter  # noqa: E402
 
 GREEN = (0, 255, 0)
@@ -63,8 +64,11 @@ def main():
     src = ap.add_mutually_exclusive_group()
     src.add_argument("--path", help="离线回放：图片目录 / 视频文件 / 单张图片")
     src.add_argument("--cv", type=int, metavar="IDX", help="用 V4L2 摄像头 IDX（默认自动：有 picamera2 用 Pi，否则试 cv:0）")
+    src.add_argument("--rpicam", action="store_true",
+                     help="用 rpicam-vid 子进程取流（Ubuntu 24.04 上免装 picamera2）")
     ap.add_argument("--width", type=int, default=640)
     ap.add_argument("--height", type=int, default=480)
+    ap.add_argument("--framerate", type=int, default=30, help="rpicam-vid 取流帧率")
     ap.add_argument("--focus", type=float, default=None, metavar="DIOPTERS",
                     help="固定对焦屈光度(1/米)，如 0.4m → 2.5；缺省=自动对焦")
     ap.add_argument("--exposure-us", type=int, default=None, help="锁曝光时间(µs)")
@@ -80,6 +84,10 @@ def main():
     try:
         if args.path:
             source = FileSource(args.path, fps=args.fps)
+        elif args.rpicam:
+            source = RpicamVidSource(args.width, args.height, framerate=args.framerate,
+                                     focus_diopters=args.focus,
+                                     exposure_time_us=args.exposure_us)
         elif args.cv is not None:
             source = CvSource(args.cv, args.width, args.height)
         else:

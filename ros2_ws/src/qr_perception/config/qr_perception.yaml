@@ -2,11 +2,14 @@
 /**:
   ros__parameters:
     # ---- 帧源 ----
-    source: picamera2          # picamera2 | file | cv
+    source: picamera2          # picamera2 | rpicam | file | cv
+                               # Ubuntu 24.04 没有 python3-picamera2 包：装了 pip 版 picamera2 用 picamera2，
+                               # 没装就用 rpicam（官方 rpicam-vid 子进程，零额外依赖）
     file_path: ""              # source:=file 时必填
     replay_fps: 10.0           # 回放节奏（帧/秒）
     replay_loop: true          # 回放是否循环
     cv_index: 0                # source:=cv 时的设备号
+    camera_framerate: 30       # source:=rpicam 时的取流帧率
 
     # ---- 取流（M3-1）----
     width: 640

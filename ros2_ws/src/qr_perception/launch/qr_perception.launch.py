@@ -39,7 +39,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'source', default_value='picamera2',
-            description='帧源: picamera2 | file | cv'),
+            description='帧源: picamera2 | rpicam | file | cv（Ubuntu 24.04 无 python3-picamera2 时用 rpicam）'),
         DeclareLaunchArgument(
             'file_path', default_value='',
             description='source:=file 时的图片目录/视频/单图路径'),

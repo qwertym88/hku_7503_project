@@ -9,7 +9,8 @@
   发 /camera/image_raw sensor_msgs/Image  仅供感知自用与 RViz（非契约接口，可关）
 
 常用参数（ros2 run qr_perception qr_perception --ros-args -p ...）：
-  source: picamera2 | file | cv     帧源（默认 picamera2；本机无相机用 file 回放）
+  source: picamera2 | rpicam | file | cv  帧源（默认 picamera2；rpicam 用官方 rpicam-vid，
+                                          Ubuntu 24.04 无需装 picamera2；本机无相机用 file 回放）
   file_path: str                    source=file 时的图片目录/视频/单图
   width/height: 640/480             取流分辨率
   focus_diopters: double            固定对焦屈光度（1/米）；null=自动对焦
@@ -53,6 +54,7 @@ class QrPerceptionNode(Node):
         self.declare_parameter("replay_fps", 10.0)
         self.declare_parameter("replay_loop", True)
         self.declare_parameter("cv_index", 0)
+        self.declare_parameter("camera_framerate", 30)    # rpicam-vid 取流帧率
         self.declare_parameter("width", 640)
         self.declare_parameter("height", 480)
         self.declare_parameter("focus_diopters", 0.0)      # <=0 视为不锁焦
@@ -73,6 +75,14 @@ class QrPerceptionNode(Node):
                                      loop=bool(p("replay_loop")))
         elif kind in ("cv", "webcam", "usb"):
             src = sources.CvSource(index=int(p("cv_index")), **common)
+        elif kind in ("rpicam", "rpicam-vid", "rpicamvid"):
+            focus = float(p("focus_diopters"))
+            exposure = int(p("exposure_time_us"))
+            src = sources.RpicamVidSource(
+                framerate=int(p("camera_framerate")),
+                **common,
+                focus_diopters=focus if focus > 0 else None,
+                exposure_time_us=exposure if exposure > 0 else None)
         else:
             focus = float(p("focus_diopters"))
             exposure = int(p("exposure_time_us"))
