@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>qr_perception</name>
+  <version>0.1.0</version>
+  <description>DASE7503 M3: picamera2 capture, pure-Python QR decode core (OpenCV first, pyzbar fallback), multi-frame voting, thin ROS wrapper publishing /qr (std_msgs/String).</description>
+  <maintainer email="team@dase7503.invalid">DASE7503 project team</maintainer>
+  <license>Proprietary</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+
+  <!-- 解码核心依赖系统 OpenCV（apt: python3-opencv）；pyzbar 为可选兜底（apt: libzbar0 + pip: pyzbar）。
+       picamera2 只在树莓派上需要（apt: python3-picamera2），import 失败时 FileSource/CvSource 仍可用。 -->
+  <exec_depend>python3-opencv</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

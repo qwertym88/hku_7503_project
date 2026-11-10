@@ -1,0 +1,28 @@
+# M3 感知节点默认参数（launch 文件里的命令行参数会覆盖这里的同名项）
+/**:
+  ros__parameters:
+    # ---- 帧源 ----
+    source: picamera2          # picamera2 | file | cv
+    file_path: ""              # source:=file 时必填
+    replay_fps: 10.0           # 回放节奏（帧/秒）
+    replay_loop: true          # 回放是否循环
+    cv_index: 0                # source:=cv 时的设备号
+
+    # ---- 取流（M3-1）----
+    width: 640
+    height: 480
+    focus_diopters: 0.0        # >0 锁焦（屈光度=1/米）。装车后按停靠距离定，见《QR感知方案》§5
+    exposure_time_us: 0        # >0 锁曝光（µs）。车动时建议 ≤10000 防拖影
+
+    # ---- 解码（M3-2）----
+    deep_every_n: 2            # 每 N 帧做一次深度尝试（放大+pyzbar）；1=每帧全开
+    use_pyzbar: true           # pyzbar 兜底（没装则自动失效）
+
+    # ---- 投票去抖（M3-5）----
+    confirm_frames: 2          # 累计 N 票才上报
+    absent_frames: 15          # 消失 N 帧后允许重报同一码
+
+    # ---- ROS ----
+    publish_image: true        # 发 /camera/image_raw（仅供 RViz/调试，非契约接口）
+    frame_id: camera
+    target_fps: 0.0            # >0 时限制处理帧率；0=尽力跑
