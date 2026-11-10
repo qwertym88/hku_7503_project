@@ -94,12 +94,45 @@ def variants(official: np.ndarray) -> dict:
     return out
 
 
+def make_print_sheet(root: str, out_path: str) -> int:
+    """把 6 个官方码拼成一张 A4 比例的打印样张（测试时举到相机前用）。"""
+    classes = sorted(d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)))
+    codes = []
+    for cls in classes:
+        p = os.path.join(root, cls, "official.png")
+        img = cv2.imread(p)
+        if img is not None:
+            codes.append((cls, img))
+    if not codes:
+        return 1
+    cell, pad, label_h = 420, 40, 60
+    cols = 3
+    rows = (len(codes) + cols - 1) // cols
+    sheet = np.full((rows * (cell + label_h + pad) + pad,
+                     cols * (cell + pad) + pad, 3), 255, dtype=np.uint8)
+    for i, (cls, img) in enumerate(codes):
+        r, c = divmod(i, cols)
+        x0 = pad + c * (cell + pad)
+        y0 = pad + r * (cell + label_h + pad)
+        resized = cv2.resize(img, (cell, cell), interpolation=cv2.INTER_NEAREST)
+        if len(resized.shape) == 2:
+            resized = cv2.cvtColor(resized, cv2.COLOR_GRAY2BGR)
+        sheet[y0:y0 + cell, x0:x0 + cell] = resized
+        cv2.putText(sheet, cls, (x0 + cell // 2 - len(cls) * 9, y0 + cell + 40),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, 0, 2)
+    cv2.imwrite(out_path, sheet)
+    print(f"打印样张已生成: {out_path}（{len(codes)} 个码）")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", default=os.path.join("tests", "qr_dataset"),
                     help="数据集根目录（默认 tests/qr_dataset/）")
     ap.add_argument("--overwrite", action="store_true", help="覆盖已存在的变体")
+    ap.add_argument("--sheet", action="store_true",
+                    help="额外生成打印样张 tests/qr_print_sheet.png（测试时举到相机前）")
     args = ap.parse_args()
 
     root = args.out
@@ -129,6 +162,8 @@ def main():
             cv2.imwrite(dst, img)
             n_written += 1
         print(f"[OK] {cls}: 变体已生成")
+    if args.sheet:
+        make_print_sheet(root, os.path.join(os.path.dirname(root) or ".", "qr_print_sheet.png"))
     print(f"\n共写入 {n_written} 张变体。评测：python3 tools/qr_eval.py {root}")
     return 0
 
