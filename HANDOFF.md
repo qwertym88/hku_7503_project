@@ -7,16 +7,16 @@
 
 ## 0. 当前真实状态（诚实版）
 
-**仿真场地已完成并验证；6 个 ROS 包仍是只有 README 的空壳，底盘/感知/导航算法尚未落地。**
+**仿真场地已完成并验证；M3 感知与 M4 导航代码已落地；底盘/状态机尚未落地。**
 
 | 模块 | 责任人 | 状态 | 位置 | 备注 |
 |---|---|---|---|---|
 | 机械 CAD | M1 | 🟡 初版 URDF 已入库 | `cad/`、`robot_description/` | SolidWorks 导出（TF 外参待实测） |
 | 固件 / 底盘 | M2 | ⬜ 未开始 | `firmware/` | 只有 README；`COUNTS_PER_REV = 1040` 已记录 |
-| 感知 QR | M3 | ⬜ 未开始 | `ros2_ws/src/qr_perception/` | 只有 README（方案已定：picamera2 + 纯 Python，不用 `camera_ros`） |
+| 感知 QR | M3 | 🟢 **代码全通（2026-11-10）**：解码核心离线 100%（本机+Pi 双验证）、/qr 薄封装回放实测、投票单测 8/8；🟡 实拍验收进行中（Pi 供电疑似不稳，见下） | `ros2_ws/src/qr_perception/`、`tools/qr_*.py`、`tests/qr_dataset/` | Ubuntu 24.04 **无** `python3-picamera2`：用 rpicam-vid 帧源（零依赖）或 pip `picamera2==0.3.10`+apt `python3-libcamera` |
 | 导航 | M4 | 🟢 **真机链路全通（2026-11-09）**：雷达 10Hz ✅、建图/存图 ✅、Nav2 发目标→/cmd_vel ✅、兜底驱动 ✅ | `ros2_ws/src/robot_navigation/`、`ros2_ws/src/oradar_lidar/` | 场地正式地图与真车 ±5cm 验收待 M2 底盘 |
 | 集成 / 状态机 | M5 | ⬜ 未开始 | `ros2_ws/src/mission_control/` | 只有 README |
-| 联调测试 | M5 | ⬜ 未开始 | `tests/` | 只有 README + 两个空目录 |
+| 联调测试 | M5 | 🟡 M3 离线测试集已建 | `tests/` | `TEST_LOG.md` 已有首批记录 |
 
 > ⚠️ **因为包都还是空壳，`colcon build` 现在不会构建任何东西**（不报错，但也什么都没编出来）。这是正常的，不是环境装错了。
 
