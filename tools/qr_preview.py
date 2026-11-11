@@ -52,9 +52,9 @@ def draw_results(frame, results):
         cv2.circle(frame, (u, v), 4, RED, -1)
         label = f"{r.text} [{r.source}]"
         (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-        top = min(p[1] for p in r.corners)
+        top = min(int(p[1]) for p in r.corners)
         lx = max(0, min(u - tw // 2, frame.shape[1] - tw - 4))
-        ly = max(th + 6, top - 6)
+        ly = int(max(th + 6, top - 6))
         cv2.rectangle(frame, (lx - 4, ly - th - 4), (lx + tw + 4, ly + 2), (0, 0, 0), -1)
         cv2.putText(frame, label, (lx, ly), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
     return frame
