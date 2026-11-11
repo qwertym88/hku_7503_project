@@ -1,3 +1,5 @@
+> **2026-11-11执行基线v2.1**：真实雷达建图、地图保存/重载、AMCL实时定位是必做；M4复用下述组件，并新增固定路段执行器。在线规划/路径跟随为可选，暂停高精度调优。新接线需保留原始/odom、EKF输出/odometry/filtered，见[架构](../../../docs/给队友看/建图定位与固定路线方案.md)、[分工](../../../docs/给队友看/分工与任务拆解.md)与[验收](../../../tests/保守方案验收.md)。下文旧mock链路记录与launch仍可参考，但未改接线前不能直接当作新整车启动方案。
+
 # robot_navigation —— 雷达 / 定位 / 导航（M4）
 
 ## 职责
@@ -76,7 +78,7 @@ rviz/nav.rviz          RViz 配置（TF/雷达/地图/路径/AMCL 粒子）
 - ⚠️ **不变量**：`enable_stamped_cmd_vel: false`（否则 Jazzy Nav2 发 TwistStamped，车不动不报错）；
   `velocity_smoother` 的 y 速度钳 0（保底无横移）。
 
-## 待办（按优先级）
+## 旧方案待办（建图/定位项仍必做，其余按当前分工取舍）
 
 - [ ] **进场地建正式地图** → `maps/dase7503_field.yaml`（现在只有桌面测试图 `test_desk`）
 - [ ] M2 固件就绪后：去掉 `mock_base`，实测 EKF 融合真 odom+IMU（定位跳变 < 3cm）

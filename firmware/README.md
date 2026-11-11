@@ -1,3 +1,5 @@
+> **2026-11-11当前任务v2.1**：按[新分工M2](../docs/给队友看/分工与任务拆解.md)交付原始/odom、IMU、低速闭环、舵机和看门狗。/odom只由固件发布，EKF输入它并输出/odometry/filtered；固件关闭重复odom→base_footprint TF，不接relay。真实雷达建图与实时定位必做，详见[接口](../docs/给队友看/模块接口说明.md)。沿用ESP-IDF，烧录与实测命令待补。
+
 # ESP32 micro-ROS 固件（M2）
 
 实现 3 件事：
@@ -7,7 +9,7 @@
 | 订阅 | `/cmd_vel` (`Twist`) | 麦轮逆运动学 → 4 轮目标转速 → 编码器 PID |
 | 发布 | `/odom` (`Odometry`) | 编码器推算位置 + yaw |
 | 订阅 | `/lifter` (`UInt8`) | `1` 升起 / `0` 放下，带限位与堵转保护 |
-| 发布 | `/imu/data` (`Imu`) | 板载 **ICM42670P**，EKF 只需 `angular_velocity.z` |
+| 发布 | `/imu/data` (`Imu`) | 板载 **ICM42670P**，提供航向辅助所需 `angular_velocity.z`，M4决定经验证的使用方式 |
 
 ## ⚠️ 先读：别自己推逆运动学
 
@@ -34,9 +36,9 @@
 - 引脚表、串口波特率：**待 M2 填写后替换本段。**
 
 ## 构建与烧录
-- 框架：**ESP-IDF**（官方例程同款）或 Arduino/PlatformIO（linorobot2 路线）——**二选一，别混用**。
+- 框架：沿用官方 **ESP-IDF** 例程；本轮不切换 Arduino/PlatformIO。
 - 官方参考：https://github.com/YahboomTechnology/MicroROS-Board
 - agent 用 `micro-ROS/micro-ROS-Agent` 的 **`jazzy` 分支**，走**串口**（满足需求文档）。
 - 烧录步骤：**待 M2 补充。**
 
-> 当前目录为空壳，未烧录任何程序。
+> 当前目录仅有README，未入库固件源码；实际烧录状态由M2补充，不能从仓库目录推断实物状态。

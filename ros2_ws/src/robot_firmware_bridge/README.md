@@ -1,3 +1,5 @@
+> **2026-11-11当前任务v2.1**：M2交付agent安装、确切串口/波特率、断连看门狗证据；M5集成建图/定位执行两模式。原始/odom不改名，EKF输出/odometry/filtered与唯一局部TF，不relay、不映射回/odom。详见[接口](../../../docs/给队友看/模块接口说明.md)与[运行说明](../../../docs/给队友看/运行说明.md)。
+
 # robot_firmware_bridge —— micro-ROS 桥接（M2 + M5）
 
 ## 职责

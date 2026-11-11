@@ -1,3 +1,5 @@
+> **历史框架**：2026-11-11起当前执行基线v2.1保留真实雷达建图与实时定位，采用[固定路线计划v2](PROJECT_PLAN_SLIM.md)和[五人任务安排](给队友看/分工与任务拆解.md)。下文的8人分工、视觉门控与旧里程碑为历史方案；SLAM/EKF/AMCL功能仍复用，在线规划/导航调优可选，仅供需求背景参考，不作为当前工作指令。原始评分要求仍以requirements内任务书为准。
+
 # DASE7503 智能轮式物流机器人 — 项目框架策划书
 
 > 依据：`requirements/1. DASE7503 Group Project_2026-27_1B.pdf`、`2. …QR Code and Gamefield.pdf`、
