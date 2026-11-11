@@ -139,7 +139,8 @@ class QrDecoder:
         if stamp is None:
             stamp = time.time()
         self._frame_count += 1
-        deep = (self._frame_count % self.deep_every_n) == 1  # 第 1 帧就是深度帧
+        # 第 1 帧即深度帧；之后每 N 帧一次（N=1 时每帧都深度）
+        deep = ((self._frame_count - 1) % self.deep_every_n) == 0
 
         try:
             gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)

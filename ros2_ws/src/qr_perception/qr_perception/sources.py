@@ -17,10 +17,13 @@
 
 from __future__ import annotations
 
+import collections
+import fcntl
 import glob
 import os
-import select
 import subprocess
+import tempfile
+import threading
 import time
 
 import cv2
@@ -113,6 +116,10 @@ class RpicamVidSource:
         self.extra_args = extra_args or []
         self._proc = None
         self._frame_bytes = self.width * self.height * 3 // 2
+        self._frames = None       # 最新帧队列（读线程 → 消费者）
+        self._thread = None
+        self._stderr_file = None
+        self._dead = None         # 读线程退出原因（None = 还活着）
 
     def open(self):
         cmd = ["rpicam-vid", "--codec", "yuv420",
@@ -126,44 +133,74 @@ class RpicamVidSource:
         cmd += self.extra_args
         self.close()  # 幂等：重复 open 先清旧进程
         try:
+            self._stderr_file = tempfile.TemporaryFile()
             self._proc = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                cmd, stdout=subprocess.PIPE, stderr=self._stderr_file)
         except FileNotFoundError as e:
             raise FrameSourceError("rpicam-vid 不存在（rpicam-apps 未安装？）") from e
+
+        # 教训（Pi5 实测）：消费者比 30fps 慢时，rpicam-vid 会阻塞在写管道上，
+        # 事件循环卡死 → "进程活着但永不出帧"。修法：独立读线程全速排水，
+        # 队列只留最新 2 帧（自动丢旧帧），消费者永远拿到新鲜帧。
+        try:  # 管道缓冲尽力加大（默认 64KB 装不下半帧）
+            fcntl.fcntl(self._proc.stdout.fileno(), fcntl.F_SETPIPE_SZ, 1 << 20)
+        except (OSError, AttributeError):
+            pass
+        self._frames = collections.deque(maxlen=2)
+        self._dead = None
+        self._thread = threading.Thread(target=self._drain, daemon=True)
+        self._thread.start()
+
         # 起流等待：最多 5s 出第一帧；进程死 / 超时都报错，不永久阻塞
         deadline = time.time() + 5.0
         while time.time() < deadline:
-            ready, _, _ = select.select([self._proc.stdout], [], [], 0.2)
-            if ready and self._read_raw() is not None:
+            if self._frames:
                 return
             if self._proc.poll() is not None:
                 raise FrameSourceError(
                     f"rpicam-vid 启动即退出: {self._stderr_text()}")
+            time.sleep(0.05)
         raise FrameSourceError("rpicam-vid 5s 内没出帧")
+
+    def _drain(self):
+        """读线程：全速从管道读字节，拼成整帧放进队列（满则自动丢最旧）。"""
+        fd = self._proc.stdout.fileno()
+        buf = bytearray()
+        try:
+            while True:
+                chunk = os.read(fd, 1 << 16)
+                if not chunk:
+                    self._dead = "rpicam-vid 关闭了输出"
+                    break
+                buf += chunk
+                while len(buf) >= self._frame_bytes:
+                    self._frames.append(bytes(buf[:self._frame_bytes]))
+                    del buf[:self._frame_bytes]
+        except OSError as e:
+            self._dead = f"读管道失败({e})"
 
     def _stderr_text(self) -> str:
         """读子进程 stderr 尾部（报错时给用户看真实原因，不再吞掉）。"""
         try:
-            err = self._proc.stderr.read() if self._proc and self._proc.stderr else b""
-            return err.decode(errors="replace").strip()[-300:] or "(无输出)"
+            if self._stderr_file is None:
+                return "(无 stderr)"
+            self._stderr_file.seek(0)
+            return self._stderr_file.read().decode(errors="replace").strip()[-300:] or "(无输出)"
         except Exception:
             return "(读不到 stderr)"
 
-    def _read_raw(self):
-        """读一帧完整 YUV420 裸数据；管道断了返回 None。"""
-        assert self._proc and self._proc.stdout
-        buf = self._proc.stdout.read(self._frame_bytes)
-        if len(buf) < self._frame_bytes:
-            return None
-        return buf
-
     def capture(self):
-        raw = self._read_raw()
-        if raw is None:
-            detail = f": {self._stderr_text()}" \
-                if self._proc and self._proc.poll() is not None else \
-                "（进程还活着但不出帧，可能是相机管线卡死）"
-            raise FrameSourceError(f"rpicam-vid 管道断流{detail}")
+        if self._dead is not None and not self._frames:
+            raise FrameSourceError(
+                f"rpicam-vid 管道断流: {self._dead}: {self._stderr_text()}")
+        if not self._frames:
+            time.sleep(0.033)  # 等一帧的工夫再试一次
+        try:
+            raw = self._frames.popleft()
+        except IndexError:
+            detail = self._dead or "进程活着但 33ms 内没出新帧"
+            raise FrameSourceError(
+                f"rpicam-vid 管道断流: {detail}: {self._stderr_text()}")
         # I420 平面布局：[Y: h*w][U: h*w/4][V: h*w/4] 连续存放，总 h*w*3/2 字节
         yuv = np.frombuffer(raw, dtype=np.uint8)
         plane_y = self.width * self.height
@@ -184,6 +221,14 @@ class RpicamVidSource:
             except subprocess.TimeoutExpired:
                 self._proc.kill()
             self._proc = None
+        if self._stderr_file is not None:
+            try:
+                self._stderr_file.close()
+            except Exception:
+                pass
+            self._stderr_file = None
+        self._frames = None
+        self._thread = None
 
     def __str__(self):
         return f"rpicam-vid({self.width}x{self.height}@{self.framerate})"
