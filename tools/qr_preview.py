@@ -44,19 +44,35 @@ RED = (0, 0, 255)
 
 
 def draw_results(frame, results):
-    """在帧上画角点框 + 文本。标签画在码上方，不遮挡码本身（截图可复验）。"""
+    """在帧上画角点框 + 文本。
+
+    框画在码外 6px（静区）上：实测画在角点上的线会压到模块、
+    让截图无法复验解码；外扩到静区则完全不影响。
+    标签优先放码上方、放不下放下方，同样不遮挡码。
+    """
     for r in results:
-        pts = np.array(r.corners, dtype=np.int32).reshape(-1, 1, 2)
-        cv2.polylines(frame, [pts], True, GREEN, 2)
+        pts = np.array(r.corners, dtype=np.float64)
+        centroid = pts.mean(axis=0)
+        d = pts - centroid
+        norm = np.linalg.norm(d, axis=1, keepdims=True)
+        unit = np.divide(d, norm, out=np.zeros_like(d), where=norm > 0)
+        outer = np.int32(pts + unit * 6.0)  # 沿质心方向外扩 6px → 落在静区
+        cv2.polylines(frame, [outer.reshape(-1, 1, 2)], True, GREEN, 2)
         u, v = int(r.center[0]), int(r.center[1])
-        cv2.circle(frame, (u, v), 4, RED, -1)
         label = f"{r.text} [{r.source}]"
         (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-        top = min(int(p[1]) for p in r.corners)
-        lx = max(0, min(u - tw // 2, frame.shape[1] - tw - 4))
-        ly = int(max(th + 6, top - 6))
-        cv2.rectangle(frame, (lx - 4, ly - th - 4), (lx + tw + 4, ly + 2), (0, 0, 0), -1)
-        cv2.putText(frame, label, (lx, ly), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
+        top = int(pts[:, 1].min()) - 8
+        bottom = int(pts[:, 1].max()) + 8
+        h, w = frame.shape[:2]
+        lw, lh = tw + 8, th + 8
+        if top >= lh + 4:                      # 码上方有空间
+            by1, by2 = top - lh - 2, top - 2
+        else:                                   # 放码下方
+            by1, by2 = bottom + 2, min(h - 1, bottom + lh + 2)
+        bx1 = max(0, min(u - lw // 2, w - lw - 1))
+        by1, by2 = max(0, by1), min(h - 1, by2)
+        cv2.rectangle(frame, (bx1, by1), (bx1 + lw, by2), (0, 0, 0), -1)
+        cv2.putText(frame, label, (bx1 + 4, by2 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
     return frame
 
 
