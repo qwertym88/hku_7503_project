@@ -46,14 +46,19 @@ colcon test --packages-select qr_perception       # 单元测试
 ```
 
 ## 待办
-- [x] M3-1 取流（picamera2，FileSource/CvSource 备选）
-- [x] M3-2 纯 Python 解码核心（OpenCV 首选，pyzbar 兜底）
-- [x] M3-3 ROS 薄封装 → `/qr`（本机图片回放实测 6 类码各发一次）
+- [x] M3-1 取流（Pi 实测 rpicam-vid 640x480，400 帧零断流 16.9fps ≥15 达标；picamera2/file/cv 备选）
+- [x] M3-2 纯 Python 解码核心（OpenCV 首选，pyzbar 兜底；离线 72/72=100%）
+- [x] M3-3 ROS 薄封装 → `/qr`（跨机验证：Pi 发布本机订阅，6 类码各恰好一条）
+- [x] M3-4/9 六类码实拍识别 + 截图归档 `tests/qr_shots/`（2026-11-11，62 次确认，提交件可复验）
 - [x] M3-5 多帧投票去抖（8 场景单测通过）
 - [x] M3-11 离线图像测试集 + `qr_eval.py`（官方 6 码 + 合成难例 72 张）
-- [ ] M3-4/9 树莓派实拍 6 类码截图归档 `tests/qr_shots/`（等整机/打印码）
-- [ ] M3-6 近距离/角度识别率实测表（等装车后按停靠位姿拍）
-- [ ] M3-7 按实际扫码距离锁焦（`focus_diopters` 参数已留好，装车后标定）
+- [ ] M3-6 近距离/角度识别率实测表（模板 `tests/qr_distance_test.md` 已备好，装车后按停靠位姿填）
+- [ ] M3-7 按实际扫码距离锁焦（`focus_diopters`/`--focus` 参数已留好，装车后标定）
+
+## 实测教训（2026-11-11，详见 `tests/TEST_LOG.md`）
+- Ubuntu 24.04 无 `python3-picamera2` → rpicam-vid 帧源（零依赖）为主路
+- rpicam-vid 默认 `-t 5000` 只跑 5 秒 → 必须 `-t 0`
+- `deep_every_n=4`（Pi5 实测 15fps；=2 只有 13fps）
 
 ## 参考实现（已核实）
 - [ros-drivers/zbar_ros](https://github.com/ros-drivers/zbar_ros)：**薄封装范本**，整包节点仅 162 行，CI 覆盖 jazzy。

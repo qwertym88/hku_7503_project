@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | 机械 CAD | M1 | 🟡 初版 URDF 已入库 | `cad/`、`robot_description/` | SolidWorks 导出（TF 外参待实测） |
 | 固件 / 底盘 | M2 | ⬜ 未开始 | `firmware/` | 只有 README；`COUNTS_PER_REV = 1040` 已记录 |
-| 感知 QR | M3 | 🟢 **代码全通（2026-11-10）**：解码核心离线 100%（本机+Pi 双验证）、/qr 薄封装回放实测、投票单测 8/8；🟡 实拍验收进行中（Pi 供电疑似不稳，见下） | `ros2_ws/src/qr_perception/`、`tools/qr_*.py`、`tests/qr_dataset/` | Ubuntu 24.04 **无** `python3-picamera2`：用 rpicam-vid 帧源（零依赖）或 pip `picamera2==0.3.10`+apt `python3-libcamera` |
+| 感知 QR | M3 | 🟢 **真机全通（2026-11-11）**：离线回归 100%（本机+Pi）、投票单测 8/8、Pi 实拍 6/6 类码识别 + 截图归档、取流 16.9fps（≥15 达标）、跨机 /qr 全栈验证 | `ros2_ws/src/qr_perception/`、`tools/qr_*.py`、`tests/qr_shots/` | Ubuntu 24.04 **无** `python3-picamera2`：用 rpicam 帧源（零依赖）；待办仅剩 M3-6 距离/角度实测表、M3-7 装车锁焦 |
 | 导航 | M4 | 🟢 **真机链路全通（2026-11-09）**：雷达 10Hz ✅、建图/存图 ✅、Nav2 发目标→/cmd_vel ✅、兜底驱动 ✅ | `ros2_ws/src/robot_navigation/`、`ros2_ws/src/oradar_lidar/` | 场地正式地图与真车 ±5cm 验收待 M2 底盘 |
 | 集成 / 状态机 | M5 | ⬜ 未开始 | `ros2_ws/src/mission_control/` | 只有 README |
 | 联调测试 | M5 | 🟡 M3 离线测试集已建 | `tests/` | `TEST_LOG.md` 已有首批记录 |
