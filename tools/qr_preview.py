@@ -44,7 +44,7 @@ RED = (0, 0, 255)
 
 
 def draw_results(frame, results):
-    """在帧上画角点框 + 文本。"""
+    """在帧上画角点框 + 文本。标签画在码上方，不遮挡码本身（截图可复验）。"""
     for r in results:
         pts = np.array(r.corners, dtype=np.int32).reshape(-1, 1, 2)
         cv2.polylines(frame, [pts], True, GREEN, 2)
@@ -52,9 +52,11 @@ def draw_results(frame, results):
         cv2.circle(frame, (u, v), 4, RED, -1)
         label = f"{r.text} [{r.source}]"
         (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-        ty = max(0, v - 10)
-        cv2.rectangle(frame, (u - tw // 2 - 4, ty - th - 4), (u + tw // 2 + 4, ty), (0, 0, 0), -1)
-        cv2.putText(frame, label, (u - tw // 2, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
+        top = min(p[1] for p in r.corners)
+        lx = max(0, min(u - tw // 2, frame.shape[1] - tw - 4))
+        ly = max(th + 6, top - 6)
+        cv2.rectangle(frame, (lx - 4, ly - th - 4), (lx + tw + 4, ly + 2), (0, 0, 0), -1)
+        cv2.putText(frame, label, (lx, ly), cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2)
     return frame
 
 
@@ -115,6 +117,7 @@ def main():
 
     n, t0, fps_disp = 0, time.time(), 0.0
     exit_code = 0
+    saved_at = {}  # text -> 上次存图的帧号（同一码短时间内不重复存）
     try:
         while True:
             frame, stamp = source.capture()
@@ -123,12 +126,20 @@ def main():
 
             for text in confirmed:
                 print(f"[确认] {text}")
-                if args.save:
-                    out = draw_results(frame.copy(), results)
-                    safe = "".join(c if c.isalnum() else "_" for c in text)
+
+            # 截图在「原始解码命中」时刻存，而不是投票确认时刻：
+            # 确认天然滞后（攒票），确认瞬间的画面可能已是拖影或下一个码。
+            # 命中时刻的帧必然含有该码，标注也只画这一个码。
+            if args.save:
+                for r in results:
+                    if decoder._frame_count - saved_at.get(r.text, -10_000) < 30:
+                        continue  # 同一码 30 帧(≈2s)内不重复存
+                    saved_at[r.text] = decoder._frame_count
+                    out = draw_results(frame.copy(), [r])
+                    safe = "".join(c if c.isalnum() else "_" for c in r.text)
                     path = os.path.join(args.save, f"{safe}_{int(stamp * 1000)}.png")
                     cv2.imwrite(path, out)
-                    print(f"        已存 {path}")
+                    print(f"[截图] {r.text} -> {path}")
 
             n += 1
             now = time.time()

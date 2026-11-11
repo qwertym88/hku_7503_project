@@ -125,6 +125,7 @@ class RpicamVidSource:
         cmd = ["rpicam-vid", "--codec", "yuv420",
                "--width", str(self.width), "--height", str(self.height),
                "--framerate", str(self.framerate),
+               "-t", "0",  # ⚠️ rpicam-vid 默认 -t 5000ms 只跑 5 秒就自己停！
                "--nopreview", "-o", "-"]
         if self.focus_diopters is not None:
             cmd += ["--lens-position", str(self.focus_diopters)]
@@ -190,15 +191,16 @@ class RpicamVidSource:
             return "(读不到 stderr)"
 
     def capture(self):
-        if self._dead is not None and not self._frames:
-            raise FrameSourceError(
-                f"rpicam-vid 管道断流: {self._dead}: {self._stderr_text()}")
-        if not self._frames:
-            time.sleep(0.033)  # 等一帧的工夫再试一次
+        # 等帧：5ms 粒度轮询，0.5s 上限（30fps 一帧 33ms，起流初期有抖动）
+        deadline = time.time() + 0.5
+        while not self._frames:
+            if self._dead is not None or time.time() > deadline:
+                break
+            time.sleep(0.005)
         try:
             raw = self._frames.popleft()
         except IndexError:
-            detail = self._dead or "进程活着但 33ms 内没出新帧"
+            detail = self._dead or "进程活着但 0.5s 内没出新帧"
             raise FrameSourceError(
                 f"rpicam-vid 管道断流: {detail}: {self._stderr_text()}")
         # I420 平面布局：[Y: h*w][U: h*w/4][V: h*w/4] 连续存放，总 h*w*3/2 字节
