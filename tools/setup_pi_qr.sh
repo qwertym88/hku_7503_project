@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-PI_HOST="${1:-ubuntu-pi@10.42.0.1}"
+PI_HOST="${1:-ubuntu-pi@10.67.111.59}"
 PI_DIR="${2:-~/hku_7503_project}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SSH_OPTS="-o ConnectTimeout=8"
