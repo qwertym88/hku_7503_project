@@ -6,7 +6,7 @@
 在 Pi5 上运行 `micro_ros_agent`，把 ESP32 的 micro-ROS 话题接到 ROS 2 网络：
 
 ```text
-ESP32 ──USB 串口── micro_ros_agent ── /cmd_vel /odom /lifter ── ROS 2
+ESP32 ──USB 串口── micro_ros_agent ── /cmd_vel /odom /imu/data ── ROS 2
 ```
 
 ## 待办
@@ -14,4 +14,4 @@ ESP32 ──USB 串口── micro_ros_agent ── /cmd_vel /odom /lifter ─�
 - [ ] 断线重连 + 心跳检测
 - [ ] 启动脚本与 bringup 集成
 
-当前为空壳。固件本体在仓库根目录 `firmware/`。
+当前仍无 ROS 包/启动脚本实现；本机已用 Docker agent 连通正常固件，`/lifter` 尚未在固件实现。串口 UART0、921600、domain42，同串口只运行一个 agent；操作和容器停止/重建步骤见[固件说明](../../../firmware/chassis/README.md)。USB 重连可能需重建容器与板上 RESET，尚未实现自动恢复。Pi 上部署/udev/统一启动仍待完成，见[M2交付清单](../../../docs/给队友看/M2底盘进度与交付清单.md)。

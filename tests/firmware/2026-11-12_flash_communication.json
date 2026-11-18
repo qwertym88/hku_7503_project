@@ -1,0 +1,39 @@
+{
+  "sample_count": 100,
+  "frequency_hz": 19.99813967608657,
+  "max_interval_s": 0.05105050400015898,
+  "latest_timestamp_age_s": 0.011319398880004883,
+  "first_pose": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+  ],
+  "last_pose": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+  ],
+  "max_abs_vx": 0.0,
+  "max_abs_wz": 0.0,
+  "nodes": [
+    "chassis",
+    "chassis_flash_check"
+  ],
+  "odom_publishers": [
+    {
+      "node": "chassis",
+      "type": "nav_msgs/msg/Odometry"
+    }
+  ],
+  "cmd_vel_publisher_count": 0,
+  "cmd_vel_subscriber_count": 1,
+  "date": "2026-11-12",
+  "board": "ESP32-S3 rev0.2, 4MB flash, 2MB PSRAM",
+  "serial_port": "/dev/ttyUSB0",
+  "firmware_sha256": "09a9748d4a544ef8a82389f55e9b2478d156b0f64f41b4fb90d28b8061280388",
+  "flash_result": "bootloader, application and partition table hashes verified by esptool; automatic reset completed",
+  "commands_sent": false,
+  "scope": "Stationary communication only. Wheel direction, encoder signs, physical stopping delay, IMU and lift have not been tested."
+}

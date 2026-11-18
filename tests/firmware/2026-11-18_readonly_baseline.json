@@ -1,0 +1,386 @@
+{
+  "recorded_at": "2026-11-18T13:07:13.719766+08:00",
+  "scope": "read_only_no_published_commands_no_flash",
+  "domain_id": 42,
+  "nodes": [
+    "chassis",
+    "m2_readonly_baseline",
+    "_ros2cli_daemon_42_287e7f4278c74543ad9e85a62ce9d315"
+  ],
+  "cmd_vel_publishers": [],
+  "cmd_vel_subscribers": [
+    "chassis"
+  ],
+  "odom": {
+    "samples": 100,
+    "receive_hz": 19.992,
+    "last": {
+      "frame": "odom",
+      "child": "base_footprint",
+      "x": 0.006878826188935528,
+      "vx": 0.0
+    }
+  },
+  "diagnostics": [
+    {
+      "received_after_s": 0.3476,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1758540,
+        "cycles": 228798,
+        "battery_v": 7.564,
+        "adc_raw": 2328,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 0.8478,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1759040,
+        "cycles": 228848,
+        "battery_v": 7.552,
+        "adc_raw": 2325,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 1.3491,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1759542,
+        "cycles": 228898,
+        "battery_v": 7.556,
+        "adc_raw": 2327,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 1.8473,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1760040,
+        "cycles": 228948,
+        "battery_v": 7.556,
+        "adc_raw": 2327,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 2.3496,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1760542,
+        "cycles": 228998,
+        "battery_v": 7.532,
+        "adc_raw": 2319,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 2.8498,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1761042,
+        "cycles": 229048,
+        "battery_v": 7.556,
+        "adc_raw": 2327,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 3.3499,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1761542,
+        "cycles": 229098,
+        "battery_v": 7.556,
+        "adc_raw": 2327,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 3.8482,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1762040,
+        "cycles": 229148,
+        "battery_v": 7.548,
+        "adc_raw": 2323,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 4.3494,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1762540,
+        "cycles": 229198,
+        "battery_v": 7.552,
+        "adc_raw": 2325,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "received_after_s": 4.8506,
+      "data": {
+        "rx": 160,
+        "rejected": 0,
+        "enabled": 0,
+        "age_ms": 1763042,
+        "cycles": 229248,
+        "battery_v": 7.556,
+        "adc_raw": 2327,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "target": [
+          5.09,
+          5.09,
+          5.09,
+          5.09
+        ],
+        "speed": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pid_output": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ]
+}

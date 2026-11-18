@@ -16,6 +16,19 @@
 | 2026-11-11 | M3 | **Pi 实拍**：6 类 QR 实机识别（手机/打印样张举码，多轮） | 6/6 全部识别，每码多轮确认；投票去抖正常（同码不刷屏、重现重报） | `tests/qr_shots/*.png`（6 张提交件，标注后仍可复验解码）；会话日志 62 次截图/确认 | M3 |
 | 2026-11-11 | M3 | **跨机全栈**：Pi 跑节点（回放源）→ 本机 `ros2 topic echo /qr`（ROS_DOMAIN_ID=42，局域网 DDS） | 6 类码各恰好 1 条消息，跨机去抖正确 | 本机终端输出（data: START … data: END） | M3 |
 | 2026-11-11 | M3 | Pi 离线回归（Pi 的 cv2 4.6 环境） | 72/72 = 100% PASS | `tools/setup_pi_qr.sh` 第 4 步输出 | M3 |
+| 2026-11-12 | M2 | 首次底盘固件交叉编译（无开发板） | ESP-IDF5.1.2/esp32s3编译通过；不计为烧录、运动或看门狗实测通过 | `bash firmware/chassis/idf.sh build`：`Project build complete`；`chassis.bin` 321856B，SHA256 `09a9748d4a544ef8a82389f55e9b2478d156b0f64f41b4fb90d28b8061280388`；依赖提交见`firmware/chassis/micro_ros_sources.lock.json` | Codex辅助 |
+
+| 2026-11-12 | M2 | ESP32-S3首次烧录与静止串口ROS通信 | 写入校验通过；100条odom平均19.998Hz、最大间隔51.1ms；未发送运动指令，运动及看门狗物理测试未做 | `tests/firmware/2026-11-12_flash.md`、同目录JSON；原Flash已完整本地备份 | Codex辅助 |
+
+| 2026-11-12 | M2 | 架空前进指令：0.03m/s、20Hz、约2s | 未通过：odom持续发布但编码器速度全程为0；物理观察待用户补充；已发零速，后退/转向暂缓，不能据此计算停车延时 | `tests/firmware/2026-11-12_motion_forward.json` | Codex执行／用户外部观察 |
+
+| 2026-11-12 | M2 | 用户要求继续后的架空前进复测及诊断 | 未通过：用户观察四轮无动作；板端确认收到指令/目标与PID更新，编码器几乎无变化；已停车，后退/转向未执行，待供电接线检查 | `tests/firmware/2026-11-12_motion_investigation.md`及其JSON记录 | Codex执行／用户外部观察 |
+
+| 2026-11-18 | M2 | domain42只读复核及官方单轮PWM测试准备 | 当前odom约19.992Hz、停车时counts全0；新增独立测试固件交叉编译、控制逻辑主机检查及正常固件构建回归通过；未烧录测试版、未发送运动指令，不计运动验收通过 | `tests/firmware/2026-11-18_readonly_baseline.json`、`2026-11-18_motor_test_preparation.md`；`firmware/motor_test/README.md` | Codex辅助 |
+
+| 2026-11-18 | M2 | 用户确认架空供电后的M1单轮开环PWM测试及手转检查 | 运动未通过：测试版烧录校验通过，M1输入40、20Hz共10条，0.504467秒后发零；板端确认PWM软件输出，用户确认完全无动作，counts全0；用户随后报告可正反手转，17秒监听170条仍未采到计数变化；末尾输出全零，待检查线束／接口供电 | `tests/firmware/2026-11-18_m1_pwm_test.md`、`2026-11-18_m1_pwm_pulse.json`、`2026-11-18_manual_encoder_observation.json`、`2026-11-18_motor_test_flash.log` | Codex执行／用户外部观察 |
+
+| 2026-11-18 | M2（电机M3） | 用户重新检查线路后的M3单向开环复测 | 单向开环与反馈基本检查通过：M3输入40、20Hz共10条，0.505537秒后发零；M3计数0→574，其他三路保持0，无拒绝／故障；末尾输出全零、计数稳定，用户确认右前轮转动并已停下。反向、整车、PID闭环和停车时延未验收 | `tests/firmware/2026-11-18_m3_pwm_test.md`、`2026-11-18_m3_pwm_pulse.json` | Codex执行／用户外部观察 |
 
 ## 已知问题与注意事项（M3 实测教训）
 
@@ -26,3 +39,11 @@
   节点已带断流自动重连（3 次）。比赛单轮 3 分钟，风险低。
 - pyzbar 兜底在 Pi 上暂不可用（pip 装了但缺 `libzbar0` 系统库，需 sudo）；OpenCV 主路 100% 覆盖测试集，不阻塞。
 - `deep_every_n` 实测（Pi5，640x480 空画面）：2→13fps，4→15fps，已设默认 4。识别到码时总是走轻量路径（19ms），确认延迟 ~2 帧。
+
+| 2026-11-18 | M2 | 200×170mm正常底盘固件重编译、烧录、静态通信 | 编译及三个写入段哈希校验通过；8秒160条odom、16条诊断；无速度发布者，未做运动验收 | [烧录及通信记录](firmware/2026-11-18_geometry_flash.md) | Codex辅助 |
+
+| 2026-11-18 | M2 | 板载ICM42670P及/imu/data接入的软件检查 | ESP-IDF编译、SI/新鲜度主机测试、实际发布回调桩测试通过；未烧录、未做硬件IMU验收，50Hz为目标 | [IMU实现与验证](firmware/2026-11-18_imu_integration.md) | Codex辅助 |
+
+| 2026-11-18 | M2 | 含IMU固件烧录、平放静态读取与零偏测量 | 三段写入校验通过；1500样本IMU约49.992Hz、odom约19.989Hz，WHOAMI=0x67且无I2C错误；零偏未补偿，完整安装外参/三轴旋转待验证 | [IMU板端验证](firmware/2026-11-18_imu_flash_verification.md) | Codex采集／用户确认姿态与手动方向 |
+
+| 2026-11-18 | M2 | 交付进度重评与提交前软件复核 | 正常固件重建通过，应用 SHA256 与已烧录版本一致；SI/新鲜度原生测试、实际 IMU 回调测试及构建脚本语法检查通过。补齐分项缺口、IMU 使用限制与后续验收；未重新烧录、未发运动命令，不新增硬件验收结论 | [M2进度与交付清单](../docs/给队友看/M2底盘进度与交付清单.md)、[提交前复核](firmware/2026-11-18_m2_progress_review.md) | Codex辅助 |

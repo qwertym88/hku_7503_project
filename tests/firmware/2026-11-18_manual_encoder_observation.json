@@ -1,0 +1,5479 @@
+{
+  "recorded_at": "2026-11-18T13:14:54.050839+08:00",
+  "domain_id": 42,
+  "scope": "read_only_manual_encoder_observation_no_published_commands",
+  "prior_user_motor_observation": "M1_completely_no_motion",
+  "samples": [
+    {
+      "t": 0.1111,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25495,
+        "age_ms": 155673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 0.2113,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25505,
+        "age_ms": 155773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 0.3113,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25515,
+        "age_ms": 155873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 0.4113,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25525,
+        "age_ms": 155973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 0.5114,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25535,
+        "age_ms": 156073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 0.6111,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25545,
+        "age_ms": 156173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 0.7112,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25555,
+        "age_ms": 156273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 0.8112,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25565,
+        "age_ms": 156373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 0.9112,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25575,
+        "age_ms": 156473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.0114,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25585,
+        "age_ms": 156573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.1114,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25595,
+        "age_ms": 156673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.2115,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25605,
+        "age_ms": 156773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.3114,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25615,
+        "age_ms": 156873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.4117,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25625,
+        "age_ms": 156973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.5115,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25635,
+        "age_ms": 157073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.6116,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25645,
+        "age_ms": 157173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.7115,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25655,
+        "age_ms": 157273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.8116,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25665,
+        "age_ms": 157373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 1.9116,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25675,
+        "age_ms": 157473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.0116,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25685,
+        "age_ms": 157573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.1118,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25695,
+        "age_ms": 157673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.212,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25705,
+        "age_ms": 157773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.3117,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25715,
+        "age_ms": 157873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.4117,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25725,
+        "age_ms": 157973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.5118,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25735,
+        "age_ms": 158073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.612,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25745,
+        "age_ms": 158173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.7119,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25755,
+        "age_ms": 158273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.8119,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25765,
+        "age_ms": 158373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 2.9119,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25775,
+        "age_ms": 158473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.012,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25785,
+        "age_ms": 158573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.1119,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25795,
+        "age_ms": 158673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.212,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25805,
+        "age_ms": 158773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.312,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25815,
+        "age_ms": 158873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.412,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25825,
+        "age_ms": 158973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.5121,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25835,
+        "age_ms": 159073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.6124,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25845,
+        "age_ms": 159173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.7121,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25855,
+        "age_ms": 159273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.8112,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25864,
+        "age_ms": 159372,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 3.9121,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25875,
+        "age_ms": 159473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.0123,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25885,
+        "age_ms": 159573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.1126,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25895,
+        "age_ms": 159673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.2126,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25905,
+        "age_ms": 159773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.3127,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25915,
+        "age_ms": 159873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.4126,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25925,
+        "age_ms": 159973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.5127,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25935,
+        "age_ms": 160073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.6127,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25945,
+        "age_ms": 160173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.7125,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25955,
+        "age_ms": 160273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.8134,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25965,
+        "age_ms": 160374,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 4.9116,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25974,
+        "age_ms": 160472,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.0125,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25985,
+        "age_ms": 160573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.1127,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 25995,
+        "age_ms": 160673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.2129,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26005,
+        "age_ms": 160773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.313,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26015,
+        "age_ms": 160873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.4129,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26025,
+        "age_ms": 160973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.513,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26035,
+        "age_ms": 161073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.6131,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26045,
+        "age_ms": 161173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.7128,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26055,
+        "age_ms": 161273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.8131,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26065,
+        "age_ms": 161373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 5.9132,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26075,
+        "age_ms": 161473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.013,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26085,
+        "age_ms": 161573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.1129,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26095,
+        "age_ms": 161673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.2132,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26105,
+        "age_ms": 161773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.313,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26115,
+        "age_ms": 161873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.4131,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26125,
+        "age_ms": 161973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.5131,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26135,
+        "age_ms": 162073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.6134,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26145,
+        "age_ms": 162173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.7137,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26155,
+        "age_ms": 162273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.8133,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26165,
+        "age_ms": 162373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 6.9135,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26175,
+        "age_ms": 162473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.0133,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26185,
+        "age_ms": 162573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.1133,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26195,
+        "age_ms": 162673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.2133,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26205,
+        "age_ms": 162773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.3134,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26215,
+        "age_ms": 162873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.4134,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26225,
+        "age_ms": 162973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.5135,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26235,
+        "age_ms": 163073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.6135,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26245,
+        "age_ms": 163173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.7134,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26255,
+        "age_ms": 163273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.8135,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26265,
+        "age_ms": 163373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 7.9136,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26275,
+        "age_ms": 163473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.0136,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26285,
+        "age_ms": 163573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.1136,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26295,
+        "age_ms": 163673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.2136,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26305,
+        "age_ms": 163773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.3136,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26315,
+        "age_ms": 163873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.4137,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26325,
+        "age_ms": 163973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.5138,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26335,
+        "age_ms": 164073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.614,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26345,
+        "age_ms": 164173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.7138,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26355,
+        "age_ms": 164273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.8139,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26365,
+        "age_ms": 164373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 8.9138,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26375,
+        "age_ms": 164473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.0139,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26385,
+        "age_ms": 164573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.1142,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26395,
+        "age_ms": 164673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.214,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26405,
+        "age_ms": 164773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.3141,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26415,
+        "age_ms": 164873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.4141,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26425,
+        "age_ms": 164973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.5141,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26435,
+        "age_ms": 165073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.6141,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26445,
+        "age_ms": 165173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.7141,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26455,
+        "age_ms": 165273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.8141,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26465,
+        "age_ms": 165373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 9.9141,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26475,
+        "age_ms": 165473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.0142,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26485,
+        "age_ms": 165573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.1146,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26495,
+        "age_ms": 165673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.2146,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26505,
+        "age_ms": 165773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.3143,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26515,
+        "age_ms": 165873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.4144,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26525,
+        "age_ms": 165973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.5146,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26535,
+        "age_ms": 166073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.6144,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26545,
+        "age_ms": 166173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.7145,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26555,
+        "age_ms": 166273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.8145,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26565,
+        "age_ms": 166373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 10.9146,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26575,
+        "age_ms": 166473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.0149,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26585,
+        "age_ms": 166573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.1147,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26595,
+        "age_ms": 166673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.2147,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26605,
+        "age_ms": 166773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.3147,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26615,
+        "age_ms": 166873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.4147,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26625,
+        "age_ms": 166973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.5148,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26635,
+        "age_ms": 167073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.6148,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26645,
+        "age_ms": 167173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.7148,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26655,
+        "age_ms": 167273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.8148,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26665,
+        "age_ms": 167373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 11.9148,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26675,
+        "age_ms": 167473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.0152,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26685,
+        "age_ms": 167573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.115,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26695,
+        "age_ms": 167673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.2151,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26705,
+        "age_ms": 167773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.315,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26715,
+        "age_ms": 167873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.415,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26725,
+        "age_ms": 167973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.5151,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26735,
+        "age_ms": 168073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.6151,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26745,
+        "age_ms": 168173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.7151,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26755,
+        "age_ms": 168273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.8154,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26765,
+        "age_ms": 168373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 12.9152,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26775,
+        "age_ms": 168473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.0153,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26785,
+        "age_ms": 168573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.1153,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26795,
+        "age_ms": 168673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.2153,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26805,
+        "age_ms": 168773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.3153,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26815,
+        "age_ms": 168873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.4154,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26825,
+        "age_ms": 168973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.5155,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26835,
+        "age_ms": 169073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.6154,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26845,
+        "age_ms": 169173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.7154,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26855,
+        "age_ms": 169273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.8155,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26865,
+        "age_ms": 169373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 13.9158,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26875,
+        "age_ms": 169473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.0158,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26885,
+        "age_ms": 169573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.1156,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26895,
+        "age_ms": 169673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.2157,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26905,
+        "age_ms": 169773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.3158,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26915,
+        "age_ms": 169873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.4157,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26925,
+        "age_ms": 169973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.5158,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26935,
+        "age_ms": 170073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.6158,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26945,
+        "age_ms": 170173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.7158,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26955,
+        "age_ms": 170273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.8159,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26965,
+        "age_ms": 170373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 14.9158,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26975,
+        "age_ms": 170473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.0158,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26985,
+        "age_ms": 170573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.1159,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 26995,
+        "age_ms": 170673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.2159,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27005,
+        "age_ms": 170773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.316,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27015,
+        "age_ms": 170873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.4161,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27025,
+        "age_ms": 170973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.516,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27035,
+        "age_ms": 171073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.616,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27045,
+        "age_ms": 171173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.7161,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27055,
+        "age_ms": 171273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.8161,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27065,
+        "age_ms": 171373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 15.9161,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27075,
+        "age_ms": 171473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.0162,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27085,
+        "age_ms": 171573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.1163,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27095,
+        "age_ms": 171673,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.2162,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27105,
+        "age_ms": 171773,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.3162,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27115,
+        "age_ms": 171873,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.4163,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27125,
+        "age_ms": 171973,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.5164,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27135,
+        "age_ms": 172073,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.6164,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27145,
+        "age_ms": 172173,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.7164,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27155,
+        "age_ms": 172273,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.8165,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27165,
+        "age_ms": 172373,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 16.9165,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27175,
+        "age_ms": 172473,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    },
+    {
+      "t": 17.0166,
+      "data": {
+        "mode": "open_loop_test",
+        "rx": 34,
+        "rejected": 0,
+        "enabled": 0,
+        "latched": 0,
+        "fault": 0,
+        "cycles": 27185,
+        "age_ms": 172573,
+        "counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_input": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_ticks": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pwm_period_ticks": 400
+      }
+    }
+  ],
+  "finish_requested": true,
+  "finished_at": "2026-11-18T13:15:11.067355+08:00",
+  "status": "observation_window_completed",
+  "first_counts": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "last_counts": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "min_counts": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "max_counts": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "all_samples_driver_disabled": true,
+  "user_reported_manual_rotation": "Wheel hub can be turned; completed forward and reverse manual rotation.",
+  "user_report_original": "轮毂可以转动，已正反手转",
+  "interpretation_limit": "No count change was captured in the 17-second read-only window; exact timing of each manual turn was not instrumented."
+}

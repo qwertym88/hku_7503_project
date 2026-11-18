@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-18",
+  "measurement_only": true,
+  "runtime_bias_compensation_applied": false,
+  "sensor": "ICM42670P",
+  "frame": "imu_link",
+  "firmware_sha256": "035bb902db397cdcfb27ee69410e4820d3e117eb0574a841ad629905f6d0b65d",
+  "samples": 1500,
+  "gyro_bias_mean_rad_s": [
+    -0.01375085328402929,
+    -0.005065842145122588,
+    0.02455367410151909
+  ],
+  "gyro_bias_median_rad_s": [
+    -0.013848860748112202,
+    -0.0053264847956597805,
+    0.024501828476786613
+  ],
+  "gyro_bias_mean_deg_s": [
+    -0.7878658578784861,
+    -0.29025137459502376,
+    1.4068218975567175
+  ],
+  "gyro_covariance_rad2_s2": [
+    [
+      1.6944357568843006e-05,
+      6.181707439027444e-06,
+      -4.823876002857222e-06
+    ],
+    [
+      6.181707439027444e-06,
+      2.736619830713763e-05,
+      -3.5475545958899155e-06
+    ],
+    [
+      -4.823876002857222e-06,
+      -3.5475545958899155e-06,
+      6.0804191298447355e-06
+    ]
+  ],
+  "gyro_percentile_05_rad_s": [
+    -0.017044750973582268,
+    -0.010652969591319561,
+    0.021305939182639122
+  ],
+  "gyro_percentile_95_rad_s": [
+    -0.009587672539055347,
+    0.0,
+    0.027697721496224403
+  ],
+  "accel_mean_m_s2": [
+    0.6077611123199265,
+    0.20234893988942107,
+    9.820328727086386
+  ],
+  "gravity_direction_sensor": [
+    0.06175682290503486,
+    0.020561413674645212,
+    0.9978794131017917
+  ],
+  "apparent_tilt_deg": 3.7320069480068367,
+  "yaw_drift_if_integrated_deg_per_min": 84.40931385340305,
+  "full_mounting_orientation_verified": false,
+  "limitations": [
+    "single stationary pose cannot distinguish accelerometer bias from mechanical tilt",
+    "horizontal mounting axes require manual tilt or independent orientation reference",
+    "bias is from one powered session; temperature/restart repeatability not yet measured",
+    "X/Y alignment is based on user manual confirmation; mixed nose-up capture is not accepted as a controlled three-axis mounting test"
+  ],
+  "axis_assessment": {
+    "x_positive": "vehicle forward, manually confirmed by user",
+    "y_positive": "vehicle left, manually confirmed by user",
+    "z_positive": "up, inferred from stationary specific force and corrected user interpretation",
+    "z_down_report_explanation": "User confirmed they inferred down-positive from resting +9.8 and downward gravity; this does not mean the accelerometer positive axis points down.",
+    "ros_axis_sign_flip_required": false,
+    "independent_three_axis_rotation_test_complete": false
+  }
+}

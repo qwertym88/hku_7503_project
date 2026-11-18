@@ -6,3 +6,6 @@
 *.stl binary
 *.sldprt binary
 *.sldasm binary
+
+# Preserve imported InvenSense source bytes for official_sources.json checksums.
+firmware/chassis/components/inv_imu/** -text

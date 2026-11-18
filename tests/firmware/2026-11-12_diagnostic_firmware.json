@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-12",
+  "firmware_sha256": "39fb3476b1bb1af539e9d49b2aa3049213eaef8ec1a9fc1e86e0a16f7a50bf07",
+  "size_bytes": 335360,
+  "flash": "verified; bootloader, application and partition table hashes verified",
+  "telemetry_topic": "/chassis/diagnostics",
+  "telemetry_type": "std_msgs/msg/String",
+  "telemetry_rate_hz": 2,
+  "scope": "read-only debug telemetry, no additional motion commands or changed speed limits"
+}

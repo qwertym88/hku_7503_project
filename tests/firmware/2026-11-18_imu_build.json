@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-18",
+  "firmware": "chassis with onboard ICM42670P IMU",
+  "firmware_sha256": "035bb902db397cdcfb27ee69410e4820d3e117eb0574a841ad629905f6d0b65d",
+  "firmware_bytes": 356432,
+  "build": "ESP-IDF 5.1.2 / esp32s3, success",
+  "imu_topic": "/imu/data",
+  "imu_target_hz": 50,
+  "imu_frame": "imu_link",
+  "flash_performed": false,
+  "motion_commands_sent": false,
+  "hardware_imu_test_performed": false,
+  "host_checks": [
+    "SI scale and signs, invalid samples, stale/duplicate/future samples, recovery",
+    "actual main.c IMU callback: payload units, FIFO receipt timestamp, init/read/stale gates, publisher failure",
+    "shared micro-ROS header and library pools: 3 publishers, 4 topics, 1 subscription",
+    "project_description confirms icm42670p / inv_imu / i2c_master / motor / car_motion components linked",
+    "bash syntax, git diff whitespace check"
+  ]
+}

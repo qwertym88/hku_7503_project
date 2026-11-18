@@ -1,0 +1,94 @@
+{
+  "source_archive": "~/Desktop/Samples.zip",
+  "source_prefix": "esp32_samples/read_imu/components/",
+  "files": {
+    "i2c_master/CMakeLists.txt": {
+      "official_sha256": "be094a30bd95fd00c8c1a4b78881d98ecf1c1a7ef62a8b0fa3432b583b10b62f",
+      "modified": false
+    },
+    "i2c_master/i2c_master.c": {
+      "official_sha256": "076c4b44497ad0b36e5396e9c5be2a94383ce1031414d7c937f18f5642279072",
+      "modified": true
+    },
+    "i2c_master/i2c_master.h": {
+      "official_sha256": "4f408a4e7a721074de2dbd30e72179ec5ebafc16597644f72b31b8a4ad9d9d1d",
+      "modified": true
+    },
+    "icm42670p/CMakeLists.txt": {
+      "official_sha256": "52d2abbb33a58938e78b9894acafd3d8d97d8149a0c1f9eccf8f9c4dd1068635",
+      "modified": false
+    },
+    "icm42670p/icm42670p.c": {
+      "official_sha256": "83eed9a26e997b1cf89fa822328cdc0e57d5c03826d9404b63f2b388a087161a",
+      "modified": true
+    },
+    "icm42670p/icm42670p.h": {
+      "official_sha256": "baa6b98afecebe139bddb90713480af44ab7dcd1d48316f84e65763561834ccb",
+      "modified": true
+    },
+    "inv_imu/CMakeLists.txt": {
+      "official_sha256": "24a4a35ffcd43db4707ad30ae4fe5430b11dbfedf6ab9236690bcaf19d360c8e",
+      "modified": false
+    },
+    "inv_imu/InvBool.h": {
+      "official_sha256": "e5f0edd857a6db3926c42482a4738a9698fb600a3c7b4614cfa9e50654ab73fd",
+      "modified": false
+    },
+    "inv_imu/InvError.h": {
+      "official_sha256": "7ecbc3c81b48a5ef7a725ff6be146f68521df813e075bcb6a359a66c550e1a6d",
+      "modified": false
+    },
+    "inv_imu/InvExport.h": {
+      "official_sha256": "edff87071497f357d82d153176079565dc06653e2c1facd1a1f24238c989cb8e",
+      "modified": false
+    },
+    "inv_imu/inv_imu_apex.c": {
+      "official_sha256": "2b5124a478479e4b099e53e32c628e3bfaac5bd7913ce53cde836ad4c3fca79d",
+      "modified": false
+    },
+    "inv_imu/inv_imu_apex.h": {
+      "official_sha256": "f76a7ac8dbed7c344089429e74e0689e8058341287768cfadb4e3d14b8240e69",
+      "modified": false
+    },
+    "inv_imu/inv_imu_defs.h": {
+      "official_sha256": "ebf01ec4a19a6f51bb0b0b94ededa082f67357267466c589239faf3b48ba609b",
+      "modified": false
+    },
+    "inv_imu/inv_imu_driver.c": {
+      "official_sha256": "e481c8b077b5e37ba601d90aab70a89f2f16fbd098c499366c6501652ad51482",
+      "modified": false
+    },
+    "inv_imu/inv_imu_driver.h": {
+      "official_sha256": "7e4247c2f82ff84cb352179242320cf3c9a0855537ce2907021d37ec026e139c",
+      "modified": false
+    },
+    "inv_imu/inv_imu_extfunc.h": {
+      "official_sha256": "3d50f1c7fcc4b10ebc3a77d524c36dde64c3b13121ed15ba20cd25b312e99c50",
+      "modified": false
+    },
+    "inv_imu/inv_imu_regmap_rev_a.h": {
+      "official_sha256": "85de4fdba1fc2ca2a88aa4e107c079ded96dca2a7b9bf142b98ad0e971e6a645",
+      "modified": false
+    },
+    "inv_imu/inv_imu_selftest.c": {
+      "official_sha256": "c02870e5d77247e3f0201cf1b76021fa5730c1ca245704cee6db1826f8922fa1",
+      "modified": false
+    },
+    "inv_imu/inv_imu_selftest.h": {
+      "official_sha256": "c9f35fb8e3df7d4da605fd58c85438a0befc847c284cbd801a2d63915c77bf9d",
+      "modified": false
+    },
+    "inv_imu/inv_imu_transport.c": {
+      "official_sha256": "62db883588cee927e707fb674414bbf73d3dc1c50c5126bb0afe52757d2a4a8a",
+      "modified": false
+    },
+    "inv_imu/inv_imu_transport.h": {
+      "official_sha256": "f85a85a549af0a2c50fb1f33d891ad378f32101f38019cee8f5b30b7dea8ed92",
+      "modified": false
+    },
+    "inv_imu/inv_imu_version.h": {
+      "official_sha256": "f9b5fc3f73c169710a083f1fdb32695f48310e505896b71e8e8c8c5dd57f2d7b",
+      "modified": false
+    }
+  }
+}

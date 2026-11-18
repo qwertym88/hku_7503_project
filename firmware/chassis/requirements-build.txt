@@ -1,0 +1,7 @@
+# Install with the ESP-IDF Python into the project-local target, not system Python.
+catkin_pkg
+colcon-common-extensions
+lark
+empy==3.3.4
+# Match ESP-IDF 5.1.x constraints while sharing its interpreter.
+pyparsing>=3.0.3,<3.1

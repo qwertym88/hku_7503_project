@@ -1,0 +1,11 @@
+diff --git a/esp32_toolchain.cmake.in b/esp32_toolchain.cmake.in
+index 599cca2..c731c97 100644
+--- a/esp32_toolchain.cmake.in
++++ b/esp32_toolchain.cmake.in
+@@ -33,3 +33,6 @@ include_directories(
+         "@BUILD_CONFIG_DIR@"
+         ${idf_path}/components/soc/${idf_target}/include
+     )
++
++# Cross compile must not pick host ROS packages from /opt.
++set(CMAKE_IGNORE_PREFIX_PATH "/opt/ros/jazzy")
