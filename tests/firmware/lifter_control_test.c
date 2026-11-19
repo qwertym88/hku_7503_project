@@ -27,20 +27,20 @@ int main(void)
     assert(lifter_control_blocks_wheels(&l) && l.pulse_us==1389 && l.target_deg==80);
     for(int64_t t=20000;t<610000;t+=10000) {
         assert(lifter_control_command(&l,1,false,t)==LIFTER_DUPLICATE);
-        lifter_control_tick(&l,t,true,false);
+        lifter_control_tick(&l,t,true);
     }
     assert(l.end_us==610000 && l.completed==0);
     assert(lifter_control_command(&l,0,true,610000)==LIFTER_BUSY);
-    lifter_control_tick(&l,610000,true,false);
+    lifter_control_tick(&l,610000,true);
     assert(l.state==LIFTER_IDLE && l.position==1 && l.completed==1 && l.pulse_us==1389);
     // Regression: completion must keep 80 degrees, never write the old 1500us.
-    for(int64_t t=620000;t<5000000;t+=10000) lifter_control_tick(&l,t,true,false);
+    for(int64_t t=620000;t<5000000;t+=10000) lifter_control_tick(&l,t,true);
     assert(l.pulse_us==1389 && l.state==LIFTER_IDLE && l.target_deg==80);
     assert(lifter_control_command(&l,1,true,5000000)==LIFTER_DUPLICATE);
     assert(lifter_control_command(&l,0,true,5010000)==LIFTER_OK && l.pulse_us==500);
-    lifter_control_tick(&l,5610000,true,false);
+    lifter_control_tick(&l,5610000,true);
     assert(l.position==0 && l.completed==2 && l.pulse_us==500);
-    lifter_control_tick(&l,9000000,true,false);
+    lifter_control_tick(&l,9000000,true);
     assert(l.pulse_us==500); // keep lower angle too
     l=fresh();
     assert(lifter_control_command(&l,0,true,0)==LIFTER_OK); // initial lower command must execute
@@ -64,16 +64,13 @@ int main(void)
     assert(lifter_control_blocks_wheels(&l));
     assert(lifter_control_command(&l,0,true,10000)==LIFTER_OK && l.pulse_us==500);
     l=fresh(); lifter_control_command(&l,1,true,0);
-    lifter_control_tick(&l,631000,true,false);
+    lifter_control_tick(&l,631000,true);
     assert(l.fault==LIFTER_TIMEOUT && l.completed==0 && l.pulse_us==0);
     lifter_control_stop(&l,LIFTER_STOPPED);
     assert(l.fault==LIFTER_TIMEOUT && lifter_control_command(&l,0,true,700000)==LIFTER_NOT_READY);
     l=fresh(); lifter_control_command(&l,1,true,0);
-    lifter_control_tick(&l,600000,true,false);
-    lifter_control_tick(&l,700000,false,false); // lease failure while holding also releases PWM
+    lifter_control_tick(&l,600000,true);
+    lifter_control_tick(&l,700000,false); // lease failure while holding also releases PWM
     assert(l.fault==LIFTER_COMM_LOST && l.pulse_us==0);
-    l=fresh(); lifter_control_command(&l,1,true,0);
-    lifter_control_tick(&l,100000,true,true);
-    assert(l.fault==LIFTER_WHEEL_FAULT && l.pulse_us==0);
     puts("PASS: direct positional targets, 0/80 mapping, persistent hold, no arm, duplicate/deadline/fault behavior");
 }

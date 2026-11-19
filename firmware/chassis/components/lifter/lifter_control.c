@@ -75,11 +75,10 @@ void lifter_control_stop(lifter_control_t *l, lifter_fault_t reason)
     l->pulse_us = 0;
 }
 void lifter_control_tick(lifter_control_t *l, int64_t now_us,
-                         bool lease_fresh, bool wheel_fault)
+                         bool lease_fresh)
 {
     if (!lifter_control_available(l) || l->state == LIFTER_FAULT) return;
     if (l->pulse_us && !lease_fresh) { lifter_control_stop(l, LIFTER_COMM_LOST); return; }
-    if (l->pulse_us && wheel_fault) { lifter_control_stop(l, LIFTER_WHEEL_FAULT); return; }
     if (!lifter_control_moving(l)) return;
     if (now_us >= l->timeout_us || now_us > l->end_us + 30000) {
         lifter_control_stop(l, LIFTER_TIMEOUT); return;
@@ -98,7 +97,7 @@ const char *lifter_state_name(lifter_state_t s)
 }
 const char *lifter_fault_name(lifter_fault_t f)
 {
-    static const char *names[] = {"none","operator_stop","timeout","communication","wheel_fault","pwm_error"};
+    static const char *names[] = {"none","operator_stop","timeout","communication","pwm_error"};
     return f >= 0 && f <= LIFTER_IO_FAULT ? names[f] : "invalid";
 }
 const char *lifter_result_name(lifter_result_t r)

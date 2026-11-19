@@ -61,6 +61,10 @@ class FakeROS:
                     'target':[1]*4 if self.enabled or self.scenario=='retained_target' else [0]*4,
                     'pid_output':[20]*4 if self.enabled else [0]*4,
                     'feedback_missing_mask':self.fault, 'feedback_reversed_mask':0}
+                if self.scenario == 'no_guard':
+                    diagnostic.pop('feedback_missing_mask')
+                    diagnostic.pop('feedback_reversed_mask')
+                    diagnostic['feedback_guard_enabled'] = False
                 self.callbacks['/chassis/diagnostics'](SimpleNamespace(data=json.dumps(diagnostic)))
             self.next_diag = self.now+.1
 
@@ -106,6 +110,12 @@ class BenchToolTests(unittest.TestCase):
         self.assertLessEqual(active[-1][0]-active[0][0],1.01)
         self.assertEqual(ros.sent[-1][1:],(0.,0.))
         self.assertIn('pending',report['physical_observation'])
+
+    def test_no_guard_diagnostics_still_runs(self):
+        _, code, report = self.run_tool('no_guard')
+        self.assertEqual(code,0)
+        self.assertFalse(report['diagnostics'][-1]['data']['feedback_guard_enabled'])
+        self.assertNotIn('feedback_missing_mask',report['diagnostics'][-1]['data'])
 
     def test_retained_target_on_disabled_controller(self):
         # A remembered setpoint is not an active output after Motor_Stop.

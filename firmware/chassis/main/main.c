@@ -115,7 +115,7 @@ static void publish_diagnostics(void)
     int length = snprintf(diagnostic.data.data, diagnostic.data.capacity,
         "{\"rx\":%lu,\"rejected\":%lu,\"enabled\":%d,\"age_ms\":%lld,\"cycles\":%lu,"
         "\"battery_v\":%.3f,\"adc_raw\":%d,"
-        "\"feedback_missing_mask\":%u,\"feedback_reversed_mask\":%u,"
+        "\"feedback_guard_enabled\":false,\"lift_inhibited\":%d,"
         "\"counts\":[%d,%d,%d,%d],\"target\":[%.2f,%.2f,%.2f,%.2f],"
         "\"speed\":[%.4f,%.4f,%.4f,%.4f],\"pid_output\":[%.1f,%.1f,%.1f,%.1f],"
         "\"imu_state\":%d,\"imu_whoami\":%u,\"imu_valid\":%d,"
@@ -131,7 +131,7 @@ static void publish_diagnostics(void)
         (unsigned long)command_count, (unsigned long)rejected_commands, motor.enabled,
         (long long)(motor.command_age_us / 1000), (unsigned long)motor.control_cycles,
         millivolts < 0 ? -1.0 : millivolts * .00403, raw,
-        (unsigned)motor.feedback_missing_mask, (unsigned)motor.feedback_reversed_mask,
+        motor.lift_inhibited,
         motor.counts[0], motor.counts[1], motor.counts[2], motor.counts[3],
         motor.target_counts[0], motor.target_counts[1], motor.target_counts[2], motor.target_counts[3],
         motor.speed[0], motor.speed[1], motor.speed[2], motor.speed[3],
@@ -179,7 +179,7 @@ static void command_callback(const void *input)
     float vx = fmaxf(-0.10f, fminf(0.10f, msg->linear.x));
     float wz = fmaxf(-0.40f, fminf(0.40f, msg->angular.z));
     if (vx == 0.0f && wz == 0.0f) Motor_Stop(STOP_BRAKE);
-    else if (Motor_Fault_Latched() || Lifter_Blocks_Chassis()) ++rejected_commands;
+    else if (Lifter_Blocks_Chassis()) ++rejected_commands;
     else Motion_Ctrl(vx, 0.0f, wz);
 }
 

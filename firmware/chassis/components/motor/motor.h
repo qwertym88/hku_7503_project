@@ -34,8 +34,7 @@ void Motor_Read_PID_Parm(float* out_p, float* out_i, float* out_d);
 
 typedef struct {
     bool enabled;
-    uint8_t feedback_missing_mask;
-    uint8_t feedback_reversed_mask;
+    bool lift_inhibited;
     int64_t command_age_us;
     uint32_t control_cycles;
     int counts[4]; // raw PCNT counts; forward increases after correcting wheel ID wiring
@@ -44,8 +43,6 @@ typedef struct {
     float pid_output[4];
 } motor_diagnostics_t;
 void Motor_Get_Diagnostics(motor_diagnostics_t *out);
-// Feedback faults latch until board reset; zero-speed commands do not clear them.
-bool Motor_Fault_Latched(void);
 // Lifter owns this interlock; enforced atomically when wheel commands arrive.
 void Motor_Set_Lift_Inhibit(bool inhibited);
 

@@ -38,7 +38,6 @@ static unsigned wheel_stop_calls, wheel_move_calls;
 #define STOP_BRAKE true
 typedef struct {struct {double x,y,z;} linear,angular;} geometry_msgs__msg__Twist;
 void Motor_Stop(bool brake) {assert(brake);++wheel_stop_calls;}
-bool Motor_Fault_Latched(void) {return false;}
 bool Lifter_Blocks_Chassis(void) {return lifter_control_blocks_wheels(&test_lift);}
 static void Motion_Ctrl(float vx,float vy,float wz) {(void)vx;assert(vy==0);(void)wz;++wheel_move_calls;}
 lifter_result_t Lifter_Command(uint8_t value) {return lifter_control_command(&test_lift,value,true,fake_now);}
@@ -64,7 +63,7 @@ int main(void) {
     assert(test_lift.end_us==deadline);
     command.data=255;lifter_callback(&command);
     assert(test_lift.end_us==deadline && test_lift.state==LIFTER_RAISING);
-    lifter_control_tick(&test_lift,deadline,true,false);
+    lifter_control_tick(&test_lift,deadline,true);
     assert(test_lift.pulse_us==1389 && test_lift.state==LIFTER_IDLE);
     fake_now=deadline+10000;command.data=0;lifter_callback(&command);
     assert(test_lift.state==LIFTER_LOWERING && test_lift.pulse_us==500);
@@ -106,6 +105,9 @@ with tempfile.TemporaryDirectory(prefix='lifter-ros-') as temp:
         str(ROOT/'firmware/chassis/components/lifter/lifter_control.c'),'-lm','-o',str(binary)],check=True)
     output=subprocess.check_output([str(binary)],text=True)
     data=json.loads(output)
+    assert data['feedback_guard_enabled'] is False
+    assert 'feedback_missing_mask' not in data and 'feedback_reversed_mask' not in data
+    assert data['lift_inhibited'] == 0
     assert data['lifter_position_confirmed'] is False
     assert data['lifter_position']==-1
     assert data['lifter_lower_deg']==0 and data['lifter_upper_deg']==80

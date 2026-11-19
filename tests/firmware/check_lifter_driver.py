@@ -47,7 +47,7 @@ typedef struct {int group_id,clk_src,resolution_hz,period_ticks,count_mode;} mcp
 typedef struct {int group_id;} mcpwm_operator_config_t;
 typedef struct {struct {int update_cmp_on_tez;} flags;} mcpwm_comparator_config_t;
 typedef struct {int gen_gpio_num;} mcpwm_generator_config_t;
-typedef struct {bool enabled; int feedback_missing_mask,feedback_reversed_mask;float speed[4];} motor_diagnostics_t;
+typedef struct {bool enabled; float speed[4];} motor_diagnostics_t;
 static int64_t clock_us=10000;
 static motor_diagnostics_t wheel;
 static bool motor_inhibited;

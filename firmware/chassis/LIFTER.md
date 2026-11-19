@@ -75,7 +75,7 @@ ros2 service call /lifter/stop std_srvs/srv/Trigger '{}'
 
 stop把PWM信号强制拉低，不再发送某个位置目标；机构位置标为未知并锁住底盘。没有实际角度反馈，不能实现“读取当前位置并闭环保持”，也不能保证舵机收到撤销信号后立刻停止或保持载荷。支撑载荷后再测试此行为，物理急停另行实现。`success=True`仅表示软件撤销请求被处理。
 
-人工stop后，下一个合法0/1命令在车轮停稳且通信正常时直接恢复，无需arm。通信失联/主循环心跳超过480ms、轮反馈故障、PWM错误或错过任务截止时撤销PWM并锁存，需要排查后RESET；人工stop不能覆盖原硬故障。保持目标期间也监控通信和轮故障，断线撤销后是否回落必须实测。不要把强制信号低等同于切断舵机电源。
+人工stop后，下一个合法0/1命令在车轮停稳且通信正常时直接恢复，无需arm。通信失联/主循环心跳超过480ms、PWM错误或错过任务截止时撤销PWM并锁存，需要排查后RESET；人工stop不能覆盖原硬故障。保持目标期间也监控通信，断线撤销后是否回落必须实测。不要把强制信号低等同于切断舵机电源。
 
 ## 诊断与M5接入
 
@@ -86,7 +86,7 @@ ros2 topic echo /chassis/diagnostics --qos-reliability best_effort --full-length
 | 字段 | 含义 |
 |---|---|
 | lifter_state | disabled/unconfigured/idle/raising/lowering/fault |
-| lifter_fault | none/operator_stop/timeout/communication/wheel_fault/pwm_error |
+| lifter_fault | none/operator_stop/timeout/communication/pwm_error |
 | lifter_target_deg | 当前目标角度；首次命令前或撤销后为-1 |
 | lifter_pulse_us | 当前软件请求脉宽；0表示撤销输出，不是0° |
 | lifter_lower_deg / lifter_upper_deg | 配置的最低/最高角度 |

@@ -8,7 +8,7 @@ typedef enum {
 } lifter_state_t;
 typedef enum {
     LIFTER_NO_FAULT, LIFTER_STOPPED, LIFTER_TIMEOUT, LIFTER_COMM_LOST,
-    LIFTER_WHEEL_FAULT, LIFTER_IO_FAULT
+    LIFTER_IO_FAULT
 } lifter_fault_t;
 typedef enum {
     LIFTER_OK, LIFTER_DUPLICATE, LIFTER_BAD_VALUE, LIFTER_NOT_READY,
@@ -42,7 +42,7 @@ lifter_result_t lifter_control_command(lifter_control_t *l, uint8_t value,
                                        bool wheels_still, int64_t now_us);
 void lifter_control_stop(lifter_control_t *l, lifter_fault_t reason);
 void lifter_control_tick(lifter_control_t *l, int64_t now_us,
-                         bool lease_fresh, bool wheel_fault);
+                         bool lease_fresh);
 const char *lifter_state_name(lifter_state_t value);
 const char *lifter_fault_name(lifter_fault_t value);
 const char *lifter_result_name(lifter_result_t value);

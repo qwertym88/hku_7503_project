@@ -126,7 +126,7 @@ docker run --rm --name hku-chassis-agent --network host --device /dev/ttyUSB0 \
 
 ## 当前硬件状态与历史排查
 
-2026-11-19：用户已更换新电机；板上已烧录含反馈保护及 IMU 的正常 `/chassis` 固件。M1～M3 正常由用户此前确认，新 M4 反馈、四轮闭环和停车需复测。只读检查约50Hz IMU、20Hz odom，新故障位为0，未发送速度命令。版本与烧录见[本轮记录](../../tests/firmware/2026-11-19_feedback_guard.md)，分项交付见[M2清单](../../docs/给队友看/M2底盘进度与交付清单.md)。
+2026-11-19历史记录：用户已更换新电机；当时已烧录含反馈保护及 IMU 的正常 `/chassis` 固件。M1～M3 正常由用户此前确认，新 M4 反馈、四轮闭环和停车需复测。只读检查约50Hz IMU、20Hz odom，新故障位为0，未发送速度命令。版本与烧录见[本轮记录](../../tests/firmware/2026-11-19_feedback_guard.md)，分项交付见[M2清单](../../docs/给队友看/M2底盘进度与交付清单.md)。
 
 此前的 M1 无动作、M3 单轮复测、临时测试版烧录，以及 165mm→170mm 几何修正均保留在[测试总日志](../../tests/TEST_LOG.md)。[独立单轮 PWM/编码器工程](../motor_test/README.md)用于绕过 PID 排查，需临时另行烧录；正常固件不订阅 `/chassis/motor_pwm`。最近正常应用烧录证据见[IMU 板端验证](../../tests/firmware/2026-11-18_imu_flash_verification.md)。
 
@@ -167,27 +167,29 @@ ros2 topic hz /imu/data
 
 ## 轮子安装方向与编码器反馈（2026-11-19修订）
 
-用户已查明换轮布局后未按固件轮ID接线，纠正接线后四轮向车头滚动时原始计数均增加。已参考最近提交 `4943022` 移除后来增加的四轮反馈取反，恢复每周期原始count增量直接用于PID、保护与速度/里程计；诊断 `counts`、`target`和`speed`的前进方向均为正。累计count本身可为负，判断方向应看增量。
+用户已查明换轮布局后未按固件轮ID接线，纠正接线后四轮向车头滚动时原始计数均增加。已参考最近提交 `4943022` 移除后来增加的四轮反馈取反，恢复每周期原始count增量直接用于PID与速度/里程计；诊断 `counts`、`target`和`speed`的前进方向均为正。累计count本身可为负，判断方向应看增量。
 
-编码器、PWM驱动和运动学文件与 `4943022` 逐字节一致；保留后续反馈故障保护、看门狗、升降互锁、已校准IMU和位置舵机。当前修订待烧录与架空实测，详见[方向恢复记录](../../tests/firmware/2026-11-19_encoder_baseline_restore.md)。此前基于误接线观察所做的-1取反修订已作废；供电与物理停车仍需独立验收。
+编码器、PWM驱动和运动学文件与 `4943022` 逐字节一致；保留看门狗、升降互锁、已校准IMU和位置舵机。用户已确认当前基本移动及简单定时前进/右转初步有效，精度和物理停车仍待量测，详见[方向恢复记录](../../tests/firmware/2026-11-19_encoder_baseline_restore.md)。此前基于误接线观察所做的-1取反修订已作废；供电与物理停车仍需独立验收。
 
-## 反馈保护与新电机台架复测（2026-11-19）
+## 电机反馈与停车行为（2026-11-19移除反馈锁存）
 
-每个10ms电机周期先检查四轮反馈再写PWM：目标绝对值≥1 count/周期（当前约0.0196m/s）的轮，在300ms窗口内累计位移<2 count，或净反向≥4 count时，四轮制动并锁存故障。诊断 `feedback_missing_mask` / `feedback_reversed_mask` 的位0～3对应M1～M4（1/2/4/8）。锁存后零速/重复非零命令不会恢复；先排查、停止速度发布者，再按板上RESET。无反馈也可能是堵转/失电，不能仅凭该位判编码器损坏。
+按用户要求，当前源码已移除“300ms无反馈停车锁存”和“反馈反向停车锁存”，此前未提交的1秒启动宽限也一并移除。轮编码器仍用于PID和原始odom；无计数/反向计数本身不再让固件锁住四轮，也不再通过轮反馈故障触发升降故障。
 
-这是待实车调优的初始保护，不覆盖低于检测阈值的慢速、间歇噪声、打滑或完整超速。300ms是算法窗口，不是已经测出的轮子实际停车时延；物理急停及启动后不自动续跑仍需完成。
+保留480ms速度命令超时、显式零速停车、通信异常停车及升降互锁。命令超时后新有效命令可恢复；通信异常仍须RESET。没有独立编码器丢失/反向自动停车或堵转检测，不将持续速度发布视为异常情况下的停止保证。
 
-1. 先架空，供电接线检查后手转新M4，观察 `/chassis/diagnostics` 的第四项counts是否随转动变化；再确认四轮正反符号和每圈计数。
-2. 唯一agent运行，停止其他速度发布者，source ROS并设置domain42。下面命令每次仅执行一个1秒动作，**需操作者确认四轮架空并准备切断电源**：
+诊断新增 `feedback_guard_enabled=false` 明示移除状态，保留 `counts`、`target`、`speed`、`pid_output`；`lift_inhibited`表示当前升降互锁。原 `feedback_missing_mask` / `feedback_reversed_mask`字段已移除。此前带mask的日志是历史版本，不能用于判断当前功能存在。
+
+1. 架空核对M1左前/M2左后/M3右前/M4右后，手转确认前进count增加。
+2. 停止其他速度发布者，source ROS并设置domain42，每次仅一个短动作：
 
 ```bash
-python3 tools/chassis_bench_test.py forward --confirm-wheels-raised \
-  --duration 1 --output /tmp/chassis-forward-20261119.json
+/usr/bin/python3 tools/chassis_bench_test.py forward --confirm-wheels-raised \
+  --duration 1 --output "/tmp/forward_$(date +%Y%m%d_%H%M%S).json"
 ```
 
-`reverse`、`left`、`right`分别后退、原地左/右转，每次人工确认前一结果后单独运行并更换输出路径。默认车速0.03m/s或0.15rad/s，最长2秒；工具不覆盖已有结果。它要求新保护诊断、唯一速度发布者/单一订阅者与新鲜反馈，结束尽力持续发零；强杀、ROS关闭或断线时仍依赖固件看门狗。软件记录不证明四轮物理方向或≤0.5s停车。
+`reverse`、`left`、`right`分别测试后退、原地左/右转，单独观察再执行。工具检查新鲜诊断和唯一速度发布者/单一订阅者，兼容已移除mask的新固件；历史固件非零mask仍会拒绝。结束尽力持续发零，但外部物理方向/停止仍需观察。
 
-3. 四轮通过后另做停止发布、结束agent、拔USB的物理停车测量与地面标定。本轮仅做了软件注入测试和烧录后只读检查，尚未执行上述动作。
+3. 用户确认移除版基本移动及简单定时前进/右转有效，详见[现场确认](../../tests/firmware/2026-11-19_motion_recovered.md)；诊断 `feedback_guard_enabled=false` 可核对版本。实现与软件检查见[移除记录](../../tests/firmware/2026-11-19_feedback_guard_removed.md)。
 
 ## 陀螺零偏的标定与启用
 

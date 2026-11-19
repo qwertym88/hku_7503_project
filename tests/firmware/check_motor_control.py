@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile actual motor.c with host shims and inject stalled/reversed feedback."""
+"""Run actual motor/kinematics: feedback feeds PID without fault latches."""
 from pathlib import Path
 import subprocess
 import tempfile
@@ -14,7 +14,6 @@ stubs = r'''
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "motor_feedback_guard.h"
 #include "motor.h"
 #include "car_motion.h"
 #include <limits.h>
@@ -58,10 +57,9 @@ void Motor_Stop(bool brake);
 '''
 tests = r'''
 static void reset_fixture(void) {
-    pid_enable=0; feedback_missing_mask=feedback_reversed_mask=0;
+    pid_enable=0;
     fake_us=10000; writes=brakes=0; lift_inhibited=false;
     for(int i=0;i<4;++i) {
-        feedback_guard[i]=(motor_feedback_guard_t){0};
         pid_motor[i]=(void*)(uintptr_t)(i+1);
     }
     Motor_PID_Ctrl(); // synchronize production function's last encoder counts.
@@ -69,31 +67,31 @@ static void reset_fixture(void) {
 int main(void) {
     Motor_Init();
     reset_fixture();
-    for(int step=0;step<=31;++step) {
+    // Refreshing commands keeps drive available even with one missing encoder.
+    for(int step=0;step<=150;++step) {
         fake_us=10000+step*10000;
-        Motor_Set_Speed(.03f,.03f,.03f,.03f); // 100Hz commands cannot mask guard.
-        for(int i=0;i<3;++i) ++counts[i]; // forward is raw-positive; missing M4.
-        int previous=writes;
+        Motor_Set_Speed(.03f,.03f,.03f,.03f);
+        for(int i=0;i<3;++i) ++counts[i];
         Motor_PID_Ctrl();
-        if(step==30) assert(writes==previous); // all channels checked before PWM.
+        assert(pid_enable);
     }
-    assert(Motor_Fault_Latched() && feedback_missing_mask==8 && !pid_enable);
-    int previous=writes;
-    Motor_Stop(STOP_BRAKE);
-    Motor_Set_Speed(.03f,.03f,.03f,.03f);
-    Motor_PID_Ctrl();
-    assert(writes==previous && !pid_enable && feedback_missing_mask==8);
     motor_diagnostics_t d;
     Motor_Get_Diagnostics(&d);
-    assert(d.feedback_missing_mask==8 && !d.enabled && d.pid_output[3]==0);
+    assert(d.enabled && d.speed[3]==0 && !d.lift_inhibited);
+    int previous=writes;
+    Motor_Stop(STOP_BRAKE);Motor_PID_Ctrl();
+    assert(!pid_enable && writes==previous);
+    Motor_Set_Speed(.03f,.03f,.03f,.03f);Motor_PID_Ctrl();
+    assert(pid_enable && writes>previous); // no RESET needed after stopped feedback
     reset_fixture();
-    for(int step=0;step<=31;++step) {
+    for(int step=0;step<=150;++step) {
         fake_us=10000+step*10000;
         Motor_Set_Speed(.03f,.03f,.03f,.03f);
         for(int i=0;i<4;++i) counts[i]+=(i==1 ? -1 : 1);
         Motor_PID_Ctrl();
+        assert(pid_enable); // reverse feedback still reaches PID but never latches
     }
-    assert(feedback_reversed_mask==2 && !feedback_missing_mask && !pid_enable);
+    Motor_Get_Diagnostics(&d);assert(d.speed[1]<0 && d.enabled);
     reset_fixture();
     Motor_Set_Speed(.03f,.03f,.03f,.03f);
     for(int step=0;step<48;++step) {
@@ -101,11 +99,13 @@ int main(void) {
         for(int i=0;i<4;++i) ++counts[i];
         Motor_PID_Ctrl();
     }
-    assert(pid_enable && !Motor_Fault_Latched());
+    assert(pid_enable);
     previous=writes;
     fake_us=490000;
     Motor_PID_Ctrl();
-    assert(!pid_enable && writes==previous && !Motor_Fault_Latched());
+    assert(!pid_enable && writes==previous);
+    fake_us=500000;Motor_Set_Speed(.03f,.03f,.03f,.03f);Motor_PID_Ctrl();
+    assert(pid_enable && writes>previous); // watchdog stop accepts a fresh command
     reset_fixture();
     Motor_Set_Lift_Inhibit(true);
     previous=writes;
@@ -154,7 +154,7 @@ int main(void) {
             Motor_PID_Ctrl();
         }
         Motor_Get_Diagnostics(&d);Motion_Get_Speed(&motion);
-        assert(!Motor_Fault_Latched() && fabsf(motion.Vx)<1e-6f && turn*motion.Wz>0);
+        assert(pid_enable && fabsf(motion.Vx)<1e-6f && turn*motion.Wz>0);
         assert(turn*d.speed[0]<0 && turn*d.speed[2]>0);
     }
     // Raw counter wrap must preserve the signed one-count displacement.
@@ -167,7 +167,7 @@ int main(void) {
     for(int i=0;i<4;++i) counts[i]=INT_MIN;
     Motor_PID_Ctrl();Motor_Get_Diagnostics(&d);
     for(int i=0;i<4;++i) assert(fabsf(d.speed[i]-meters_per_count)<1e-6f);
-    puts("PASS: baseline raw-positive feedback, PID errors, forward/reverse/turn odometry, wrap, fault latch, interlock and watchdog");
+    puts("PASS: baseline raw-positive feedback, PID errors, forward/reverse/turn odometry, wrap, no feedback latch, interlock and watchdog");
 }
 '''
 with tempfile.TemporaryDirectory(prefix='chassis-motor-test-') as temp:

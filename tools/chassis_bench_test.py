@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One bounded chassis bench pulse, with telemetry recording and final zero.
 
-Needs ROS2 Jazzy and the feedback-guard firmware. Never runs an automatic sequence.
+Needs ROS2 Jazzy and the normal chassis diagnostics firmware. Never runs an automatic sequence.
 Hardware observation (wheel order/direction, actual stopping) remains necessary.
 """
 import argparse
@@ -65,9 +65,9 @@ def main():
     def validate(require_stopped=False):
         if latest is None or time.monotonic()-latest_at > 1:
             raise RuntimeError('missing or stale diagnostics (>1s)')
-        if not all(k in latest for k in ['feedback_missing_mask','feedback_reversed_mask']):
-            raise RuntimeError('board is not running feedback-guard firmware')
-        if latest['feedback_missing_mask'] or latest['feedback_reversed_mask']:
+        if not all(k in latest for k in ['enabled','pid_output','rx']):
+            raise RuntimeError('board lacks required normal chassis diagnostics')
+        if latest.get('feedback_missing_mask', 0) or latest.get('feedback_reversed_mask', 0):
             raise RuntimeError('latched motor feedback fault; inspect wiring and reset board')
         # Existing firmware retains last target counts after an explicit stop.
         if require_stopped and (latest['enabled'] or any(latest['pid_output'])):

@@ -79,12 +79,11 @@ static void apply_output(void)
     }
 }
 
-static bool wheels_still(int64_t now_us, bool *wheel_fault)
+static bool wheels_still(int64_t now_us)
 {
     motor_diagnostics_t motor;
     Motor_Get_Diagnostics(&motor);
-    *wheel_fault = motor.feedback_missing_mask || motor.feedback_reversed_mask;
-    bool moving = motor.enabled || *wheel_fault;
+    bool moving = motor.enabled;
     for (int i = 0; i < 4; ++i) moving |= fabsf(motor.speed[i]) > 0.005f;
     if (moving) still_since_us = 0;
     else if (!still_since_us) still_since_us = now_us;
@@ -98,10 +97,8 @@ static void lifter_task(void *arg)
     for (;;) {
         xSemaphoreTake(mutex, portMAX_DELAY);
         int64_t now = esp_timer_get_time();
-        bool wheel_fault;
-        wheels_still(now, &wheel_fault);
-        lifter_control_tick(&control, now, heartbeat_us > 0 && now-heartbeat_us <= LIFTER_MAIN_LEASE_US,
-                            wheel_fault);
+        wheels_still(now);
+        lifter_control_tick(&control, now, heartbeat_us > 0 && now-heartbeat_us <= LIFTER_MAIN_LEASE_US);
         apply_output();
         xSemaphoreGive(mutex);
         vTaskDelayUntil(&previous, pdMS_TO_TICKS(10));
@@ -139,11 +136,10 @@ lifter_result_t Lifter_Command(uint8_t value)
 {
     xSemaphoreTake(mutex, portMAX_DELAY);
     int64_t now = esp_timer_get_time();
-    bool wheel_fault;
-    bool stationary = wheels_still(now, &wheel_fault);
+    bool stationary = wheels_still(now);
     bool fresh = heartbeat_us > 0 && now-heartbeat_us <= LIFTER_MAIN_LEASE_US;
     lifter_result_t result;
-    if (!fresh || wheel_fault) {
+    if (!fresh) {
         ++control.rx;
         ++control.rejected;
         result = LIFTER_NOT_READY;

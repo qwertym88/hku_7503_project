@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-19",
+  "reason": "user explicitly requests removal of no-feedback and reverse-feedback stop latches",
+  "build": "passed",
+  "application_bytes": 375424,
+  "application_sha256": "5065335f216c650798dcfd01ea8fcd4d566ee681681dc7971d74f261b377d3cb",
+  "removed": [
+    "300ms missing-feedback latch",
+    "reverse-feedback latch",
+    "uncommitted 1s startup-grace experiment",
+    "motor fault masks and blocking API",
+    "lifter wheel-feedback-fault coupling"
+  ],
+  "retained": [
+    "480ms command watchdog",
+    "explicit zero-speed stop",
+    "communication failure handling",
+    "wheel/lifter mutual exclusion",
+    "PID and encoder odometry",
+    "calibrated IMU bias",
+    "positional servo control"
+  ],
+  "diagnostics": {
+    "feedback_guard_enabled": false,
+    "lift_inhibited": "current wheel/lifter inhibit state",
+    "feedback_masks": "removed"
+  },
+  "imu_bias_enabled": true,
+  "lifter": {
+    "LOWER_DEG": 0,
+    "UPPER_DEG": 80,
+    "UP_MS": 600,
+    "DOWN_MS": 600
+  },
+  "checks": [
+    "actual motor/kinematics forward reverse turning PID wrap",
+    "missing/reversed feedback does not latch under refreshed commands",
+    "watchdog stops at 480ms and new commands resume",
+    "real vendor PID synthetic breakaway plant matches 4943022",
+    "actual lifter driver/ROS and standalone state machine",
+    "7 bench tool tests including new diagnostic schema and legacy compatibility",
+    "IMU callback/bias regression",
+    "ESP-IDF 5.1.2 complete build"
+  ],
+  "flash_performed": false,
+  "motion_commands_sent": false,
+  "limitations": [
+    "no automatic motor stop on encoder loss or reversed feedback",
+    "synthetic breakaway threshold is not a measurement of this vehicle",
+    "actual motion and physical stopping remain to be tested"
+  ]
+}
