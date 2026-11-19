@@ -25,7 +25,7 @@ for arg in "$@"; do
     if [ "$previous_arg" = "-C" ]; then microros_app_dir="$arg"; fi
     previous_arg="$arg"
 done
-if ! python - "$microros_app_dir/app-colcon.meta" "$microros_dir/include/rmw_microxrcedds_c/config.h" <<'PY'
+if ! python - "$microros_app_dir/app-colcon.meta" "$microros_dir/include/rmw_microxrcedds_c/config.h" "$microros_dir/include/uxr/client/config.h" <<'PY'
 import json, re, sys
 from pathlib import Path
 meta = json.loads(Path(sys.argv[1]).read_text())
@@ -37,6 +37,15 @@ for arg in meta['names']['rmw_microxrcedds']['cmake-args']:
         actual = re.search(r'^#define ' + match[1] + r'\s+(\d+)\s*$', config, re.M)
         if not actual or int(actual[1]) < int(match[2]):
             sys.exit(1)
+client_config_path = Path(sys.argv[3])
+client_config = client_config_path.read_text() if client_config_path.exists() else ''
+for arg in meta['names'].get('microxrcedds_client', {}).get('cmake-args', []):
+    match = re.fullmatch(r'-DUCLIENT_CUSTOM_TRANSPORT_MTU=(\d+)', arg)
+    if match:
+        actual = re.search(r'^#define UXR_CONFIG_CUSTOM_TRANSPORT_MTU\s+(\d+)\s*$', client_config, re.M)
+        if not actual or int(actual[1]) < int(match[1]):
+            sys.exit(1)
+
 PY
 then
     touch "$microros_dir/esp32_toolchain.cmake.in"

@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-19",
+  "project": "chassis encoder feedback direction correction",
+  "build": "passed",
+  "application_bytes": 376160,
+  "application_sha256": "c57937ac231764eca0c60188106a036fd0d2e685cd0bafd0070581b160fc7f28",
+  "encoder_signs": [
+    -1,
+    -1,
+    -1,
+    -1
+  ],
+  "raw_diagnostic_counts_preserved": true,
+  "pwm_output_direction_changed": false,
+  "imu_bias_enabled": true,
+  "lifter": {
+    "LOWER_DEG": 0,
+    "UPPER_DEG": 75,
+    "UP_MS": 1200,
+    "DOWN_MS": 1200
+  },
+  "checks": [
+    "actual motor.c + car_motion.c with forward raw-negative, reverse, both turning directions and PID errors",
+    "raw counts unchanged and signed counter wrap",
+    "missing M4 / reversed M2 all-wheel latch; watchdog and lift interlock",
+    "actual lifter driver and ROS callbacks; IMU publication regression",
+    "standalone feedback guard regression",
+    "ESP-IDF 5.1.2 build"
+  ],
+  "flashed": false,
+  "motion_commands_sent": false,
+  "limitations": [
+    "physical PWM drive direction needs raised-wheel verification",
+    "prior missing-mask=10 trigger cause not established; sign change does not prove power or startup behavior fixed"
+  ],
+  "superseded_by": "2026-11-19_encoder_baseline_restore_build.json",
+  "status_note": "Historical build from incorrect wheel-ID assumption; negative feedback inversion removed after wiring correction."
+}

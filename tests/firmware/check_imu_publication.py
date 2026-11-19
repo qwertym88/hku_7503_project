@@ -18,6 +18,7 @@ stubs = r'''
 #include <stdio.h>
 #include <stdint.h>
 #include "icm42670p.h"
+#include "imu_calibration.h"
 typedef int rcl_timer_t;
 #define RCL_RET_OK 0
 struct vector { double x, y, z; };
@@ -47,7 +48,12 @@ int main(void)
     assert(imu_sample_from_raw(&fake_sample, a, g, 4, 2000, 1995000, 1));
     imu_callback(NULL, 0);
     assert(publish_calls == 1 && imu_published == 1 && imu_last_sequence == 1);
-    assert(fabs(imu.angular_velocity.z - 17.45329252) < 0.001); // No double conversion.
+    assert(fabs(imu.angular_velocity.x -
+        chassis_imu_correct_gyro(0, CHASSIS_IMU_BIAS_X_RADS)) < 0.0001);
+    assert(fabs(imu.angular_velocity.y -
+        chassis_imu_correct_gyro(0, CHASSIS_IMU_BIAS_Y_RADS)) < 0.0001);
+    assert(fabs(imu.angular_velocity.z -
+        chassis_imu_correct_gyro(17.45329252f, CHASSIS_IMU_BIAS_Z_RADS)) < 0.001); // No double conversion.
     assert(fabs(imu.linear_acceleration.z - 9.80665) < 0.001);
     assert((int64_t)imu.header.stamp.sec * 1000000000 + imu.header.stamp.nanosec
            == fake_epoch - 5000000); // FIFO receipt time, not publish time.
@@ -79,6 +85,20 @@ with tempfile.TemporaryDirectory(prefix='chassis-imu-check-') as tmp:
     unit = Path(tmp) / 'callback.c'
     binary = Path(tmp) / 'check'
     unit.write_text(stubs + callback + tests)
+    subprocess.run(['gcc', '-std=c11', '-Wall', '-Wextra', '-Werror',
+                    '-Wno-unused-parameter',
+                    '-I' + str(ROOT / 'firmware/chassis/components/icm42670p'),
+                    '-I' + str(ROOT / 'firmware/chassis/main'),
+                    str(unit), '-lm', '-o', str(binary)], check=True)
+    subprocess.run([str(binary)], check=True)
+    # Recompile the SAME callback with a nonzero, enabled calibration to catch
+    # wrong sign, wrong axis and accidental acceleration changes.
+    calibration = (ROOT / 'firmware/chassis/main/imu_calibration.h').read_text()
+    calibration = calibration.replace('CHASSIS_IMU_BIAS_ENABLED 0', 'CHASSIS_IMU_BIAS_ENABLED 1')
+    for axis, value in [('X', '-0.013f'), ('Y', '-0.005f'), ('Z', '0.024f')]:
+        calibration = calibration.replace(f'CHASSIS_IMU_BIAS_{axis}_RADS 0.0f',
+                                          f'CHASSIS_IMU_BIAS_{axis}_RADS {value}')
+    (Path(tmp) / 'imu_calibration.h').write_text(calibration)
     subprocess.run(['gcc', '-std=c11', '-Wall', '-Wextra', '-Werror',
                     '-Wno-unused-parameter',
                     '-I' + str(ROOT / 'firmware/chassis/components/icm42670p'),

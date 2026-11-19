@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-19",
+  "project": "servo_zero",
+  "idf": "5.1.2",
+  "target": "esp32s3",
+  "binary_bytes": 227760,
+  "sha256": "d73b6fe5ba6400ba2f6d22354765e9cd6fcc3fcbff79f26cb30668c680d1f16a",
+  "default_port": "S1 / GPIO8",
+  "default_pulse_us": 1500,
+  "period_us": 20000,
+  "start_delay_ms": 3000,
+  "zero_definition": "zero speed / neutral STOP request; no absolute angle positioning or position hold",
+  "build": "passed",
+  "host_actual_app_checks": "passed S1/1500us, S2/1500us, S2/1475us; invalid ports/pulses rejected",
+  "flashed": false,
+  "servo_motion_tested": false,
+  "pending": "actual no-load neutral pulse calibration and independent mechanical home definition",
+  "previous_provisional_image_sha256": "114efd75d5871abef98496d07e35a219250da07f5c44cca5e3de2ba96ccfdb31",
+  "confirmed_servo": "MG996R 360-degree continuous rotation, user reported",
+  "calibration_pulse_range_us": [
+    1400,
+    1600
+  ]
+}

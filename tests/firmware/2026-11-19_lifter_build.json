@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-19",
+  "project": "normal chassis with continuous-servo lifter",
+  "target": "esp32s3",
+  "idf": "5.1.2",
+  "build": "passed",
+  "application_bytes": 383952,
+  "application_sha256": "f8eabb867ffc72a7a3e0a8035494fee66f3e35bd4d6f70d966fa6bd2d839a2f9",
+  "default_lifter_enabled": false,
+  "default_travel_calibrated": false,
+  "default_up_ms": 0,
+  "default_down_ms": 0,
+  "enabled_fixture": {
+    "bytes": 383952,
+    "sha256": "7650600d096d1a4b8106516ee50582e3e25e3976b36054489a157bedb5d94ff9",
+    "fixture_only": true,
+    "not_measured_travel_ms": [
+      500,
+      700
+    ],
+    "flashed": false
+  },
+  "micro_ros": {
+    "publishers": 3,
+    "subscriptions": 2,
+    "services": 3,
+    "topics": 5,
+    "custom_mtu": 2048,
+    "executor_handles": 7
+  },
+  "user_hardware": {
+    "servo": "MG996R continuous rotation 360",
+    "port": "S1/GPIO8",
+    "up_direction": "clockwise, as observed by user",
+    "down_direction": "counterclockwise",
+    "travel_degrees": 90,
+    "initial_position": "lower mechanical reference, operator assumption",
+    "limit_feedback": "mechanical stops only; no electrical limit signal",
+    "load_retention": "user reports holds when stopped/power off, not hardware-tested in this session"
+  },
+  "checks": [
+    "pure C lifter state machine",
+    "actual driver with disabled/enabled PWM stubs",
+    "actual ROS callbacks and JSON/MTU bounds",
+    "actual wheel driver interlock",
+    "existing IMU, calibration, bench tool and servo installation regressions"
+  ],
+  "flash_performed": false,
+  "motion_commands_sent": false,
+  "limitations": [
+    "90-degree travel times and neutral/direction require physical calibration",
+    "no electrical endpoint or angle feedback; never reports confirmed position",
+    "no measured loaded 20-cycle acceptance or physical stop timing"
+  ]
+}

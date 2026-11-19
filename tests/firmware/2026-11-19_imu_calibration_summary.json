@@ -1,0 +1,366 @@
+{
+  "date": "2026-11-19",
+  "status": "stationary_gyro_calibration_and_onboard_compensation_verified",
+  "operator": "user performed calibration and flashing; assistant reviewed saved records only",
+  "capture_run": "imu_20261119_152637",
+  "bias_rad_s": [
+    -0.01195121942376036,
+    -0.004655358803024368,
+    0.023057152560780503
+  ],
+  "source_header": "firmware/chassis/main/imu_calibration.h",
+  "header_sha256": "7b937ea208171d29570cb4297b1aa0b2aea88ff57629949cd0c47ec52243bb24",
+  "captures": {
+    "raw": {
+      "path": "tests/logs/imu_20261119_152637/imu_raw.json",
+      "sha256": "83aad377ec0f25fb464508f511ba74b694322c73328780283959a35b11f66dcb",
+      "bytes": 1577815,
+      "summary": {
+        "cmd_vel_publishers_seen": [],
+        "label": "stationary_raw",
+        "duration_s": 65.01335454500077,
+        "warmup_s": 5.0,
+        "imu_receive": {
+          "samples": 2881,
+          "hz": 48.001077913805794,
+          "max_interval_ms": 45.99043599955621,
+          "nonpositive_intervals": 0
+        },
+        "imu_header": {
+          "samples": 2881,
+          "hz": 48.00000152587896,
+          "max_interval_ms": 45.37796974182129,
+          "nonpositive_intervals": 0
+        },
+        "odom_receive": {
+          "samples": 1200,
+          "hz": 20.0004606808364,
+          "max_interval_ms": 53.04381799942348,
+          "nonpositive_intervals": 0
+        },
+        "cmd_vel_publishers": [],
+        "last_diagnostic": {
+          "rx": 0,
+          "rejected": 0,
+          "enabled": 0,
+          "age_ms": 0,
+          "cycles": 10855,
+          "battery_v": 3.921,
+          "adc_raw": 1193,
+          "feedback_missing_mask": 0,
+          "feedback_reversed_mask": 0,
+          "counts": [
+            -53,
+            -45,
+            -75,
+            1
+          ],
+          "target": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "speed": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pid_output": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "imu_state": 1,
+          "imu_whoami": 103,
+          "imu_valid": 1,
+          "imu_age_ms": 0,
+          "imu_errors": 0,
+          "imu_published": 5160,
+          "imu_bias_enabled": 0,
+          "imu_bias": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "lifter_state": "idle",
+          "lifter_fault": "none",
+          "lifter_target_deg": -1,
+          "lifter_position": -1,
+          "lifter_position_confirmed": false,
+          "lifter_pulse_us": 0,
+          "lifter_lower_deg": 0,
+          "lifter_upper_deg": 75,
+          "lifter_rx": 0,
+          "lifter_rejected": 0,
+          "lifter_completed": 0,
+          "lifter_pulse_0_deg_us": 500,
+          "lifter_pulse_180_deg_us": 2500,
+          "lifter_up_ms": 1200,
+          "lifter_down_ms": 1200,
+          "lifter_timeout_ms": 5000,
+          "lifter_last_result": "not_ready"
+        },
+        "gyro_rad_s": [
+          {
+            "mean": -0.01195121942376036,
+            "std": 0.003261565064005658,
+            "min": -0.025567127391695976,
+            "max": 0.004261187743395567
+          },
+          {
+            "mean": -0.004655358803024368,
+            "std": 0.0022136414351302163,
+            "min": -0.024501828476786613,
+            "max": 0.015979453921318054
+          },
+          {
+            "mean": 0.023057152560780503,
+            "std": 0.0017766721787785419,
+            "min": 0.015979453921318054,
+            "max": 0.030893610790371895
+          }
+        ],
+        "gyro_mean_deg_s": [
+          -0.6847544330162403,
+          -0.26673241153237104,
+          1.3210775293219812
+        ],
+        "accel_m_s2": [
+          {
+            "mean": -0.11746157386496338,
+            "std": 0.01850247306534304,
+            "min": -0.2094990462064743,
+            "max": 0.019154198467731476
+          },
+          {
+            "mean": 0.48388284646525476,
+            "std": 0.014732315749883306,
+            "min": 0.30766430497169495,
+            "max": 0.5806115865707397
+          },
+          {
+            "mean": 9.843966885599482,
+            "std": 0.021869859769309233,
+            "min": 9.720755577087402,
+            "max": 9.969759941101074
+          }
+        ],
+        "accel_norm": {
+          "mean": 9.856580508963884,
+          "std": 0.021955092067272405,
+          "min": 9.730004665786966,
+          "max": 9.981140123319914
+        },
+        "stamp_age_ms": {
+          "mean": 5.978580731064526,
+          "std": 1.9449356594616123,
+          "min": 2.056121826171875,
+          "max": 9.912490844726562
+        },
+        "frame_ids": [
+          "imu_link"
+        ],
+        "orientation_cov0": [
+          -1.0
+        ],
+        "first_half_gyro_mean_rad_s": [
+          -0.011843291026646814,
+          -0.004636261139077962,
+          0.02308809198697822
+        ],
+        "second_half_gyro_mean_rad_s": [
+          -0.012059072922610811,
+          -0.004674443213907662,
+          0.023026234605385148
+        ]
+      }
+    },
+    "corrected": {
+      "path": "tests/logs/imu_20261119_152637/imu_corrected.json",
+      "sha256": "e35814313659f1f2d214528e50d130622bf3f57ceca99b846594a09e76c643cc",
+      "bytes": 1590671,
+      "summary": {
+        "cmd_vel_publishers_seen": [],
+        "label": "stationary_corrected",
+        "duration_s": 65.00426989799962,
+        "warmup_s": 5.0,
+        "imu_receive": {
+          "samples": 2880,
+          "hz": 47.985013917274664,
+          "max_interval_ms": 44.27883500102325,
+          "nonpositive_intervals": 0
+        },
+        "imu_header": {
+          "samples": 2880,
+          "hz": 47.98333504935112,
+          "max_interval_ms": 40.3289794921875,
+          "nonpositive_intervals": 0
+        },
+        "odom_receive": {
+          "samples": 1200,
+          "hz": 20.001047923461286,
+          "max_interval_ms": 52.519955999741796,
+          "nonpositive_intervals": 0
+        },
+        "cmd_vel_publishers": [],
+        "last_diagnostic": {
+          "rx": 0,
+          "rejected": 0,
+          "enabled": 0,
+          "age_ms": 0,
+          "cycles": 10707,
+          "battery_v": 4.812,
+          "adc_raw": 1472,
+          "feedback_missing_mask": 0,
+          "feedback_reversed_mask": 0,
+          "counts": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "target": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "speed": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "pid_output": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "imu_state": 1,
+          "imu_whoami": 103,
+          "imu_valid": 1,
+          "imu_age_ms": 1,
+          "imu_errors": 0,
+          "imu_published": 4559,
+          "imu_bias_enabled": 1,
+          "imu_bias": [
+            -0.01195122,
+            -0.00465536,
+            0.02305715
+          ],
+          "lifter_state": "idle",
+          "lifter_fault": "none",
+          "lifter_target_deg": -1,
+          "lifter_position": -1,
+          "lifter_position_confirmed": false,
+          "lifter_pulse_us": 0,
+          "lifter_lower_deg": 0,
+          "lifter_upper_deg": 75,
+          "lifter_rx": 0,
+          "lifter_rejected": 0,
+          "lifter_completed": 0,
+          "lifter_pulse_0_deg_us": 500,
+          "lifter_pulse_180_deg_us": 2500,
+          "lifter_up_ms": 1200,
+          "lifter_down_ms": 1200,
+          "lifter_timeout_ms": 5000,
+          "lifter_last_result": "not_ready"
+        },
+        "gyro_rad_s": [
+          {
+            "mean": -0.0006780982539769159,
+            "std": 0.0017745400476668518,
+            "min": -0.028530064970254898,
+            "max": 0.0183430016040802
+          },
+          {
+            "mean": -0.0003348916025263154,
+            "std": 0.0019678689725187147,
+            "min": -0.02197706326842308,
+            "max": 0.02489600144326687
+          },
+          {
+            "mean": 0.0006675273642435462,
+            "std": 0.0017709452518060273,
+            "min": -0.013469480909407139,
+            "max": 0.008901754394173622
+          }
+        ],
+        "gyro_mean_deg_s": [
+          -0.03885216804806747,
+          -0.01918787541913057,
+          0.038246500680647215
+        ],
+        "accel_m_s2": [
+          {
+            "mean": -0.08398001866234052,
+            "std": 0.015529927239724142,
+            "min": -0.2897072434425354,
+            "max": 0.07422251999378204
+          },
+          {
+            "mean": 0.27760867620300916,
+            "std": 0.013958251976467214,
+            "min": 0.10175667703151703,
+            "max": 0.43336373567581177
+          },
+          {
+            "mean": 9.854635926418835,
+            "std": 0.0302525980625814,
+            "min": 9.146129608154297,
+            "max": 10.309747695922852
+          }
+        ],
+        "accel_norm": {
+          "mean": 9.858925227785763,
+          "std": 0.03021414833622032,
+          "min": 9.155688236855188,
+          "max": 10.31528498418979
+        },
+        "stamp_age_ms": {
+          "mean": 5.9462528261873455,
+          "std": 1.6966791730317177,
+          "min": 3.0210018157958984,
+          "max": 10.511398315429688
+        },
+        "frame_ids": [
+          "imu_link"
+        ],
+        "orientation_cov0": [
+          -1.0
+        ],
+        "first_half_gyro_mean_rad_s": [
+          -0.0007191565735006911,
+          -0.00026350191086142635,
+          0.0006301679971834851
+        ],
+        "second_half_gyro_mean_rad_s": [
+          -0.0006370399344531406,
+          -0.0004062812941912044,
+          0.0007048867313036075
+        ]
+      }
+    }
+  },
+  "z_mean_reduction_percent": 97.10490112565336,
+  "residual_z_integration_deg_per_min": 2.294790040838833,
+  "checks": [
+    "raw capture accepted by existing calibration estimator",
+    "raw hash and rounded XYZ bias match enabled source header",
+    "all corrected-window diagnostics show enabled matching compensation and healthy IMU",
+    "no motor commands, wheel count changes or lifter commands during evaluated windows",
+    "positive timestamps and no >100ms sample gaps"
+  ],
+  "limitations": [
+    "one before/after stationary run; no repeated power-cycle or temperature-series qualification",
+    "axis signs, precise mounting transform and acceleration six-face calibration not established",
+    "IMU receives about 48Hz versus 50Hz target; timing cadence remains to review",
+    "orientation unavailable; no absolute heading or long-term drift-free claim",
+    "no new M4/four-wheel, lift motion or physical stop acceptance in these captures",
+    "saved capture does not report running application SHA256"
+  ]
+}

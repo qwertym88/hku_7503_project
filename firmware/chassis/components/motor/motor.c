@@ -1,4 +1,5 @@
 #include "motor.h"
+#include "motor_feedback_guard.h"
 
 #include "stdio.h"
 #include <math.h>
@@ -48,6 +49,9 @@ static SemaphoreHandle_t motor_mutex;
 static int64_t last_command_us;
 static bool brake_requested = true;
 static uint32_t control_cycles;
+static motor_feedback_guard_t feedback_guard[MOTOR_MAX_NUM];
+static uint8_t feedback_missing_mask, feedback_reversed_mask;
+static bool lift_inhibited;
 
 static float Motor_Limit_Speed(float speed)
 {
@@ -67,22 +71,41 @@ static void Motor_PID_Ctrl(void)
 
     xSemaphoreTake(motor_mutex, portMAX_DELAY);
     ++control_cycles;
-    if (pid_enable && esp_timer_get_time() - last_command_us >= MOTOR_COMMAND_TIMEOUT_US)
+    int64_t now_us = esp_timer_get_time();
+    if (pid_enable && now_us - last_command_us >= MOTOR_COMMAND_TIMEOUT_US)
         pid_enable = 0;
-    if (!pid_enable) PwmMotor_Stop(MOTOR_ID_ALL, brake_requested);
+    // Read and validate all four channels BEFORE writing any wheel output.
     for (int i = 0; i < MOTOR_MAX_NUM; i++)
     {
         cur_count[i] = Encoder_Get_Count(ENCODER_ID_M1 + i);
-        real_pulse[i] = cur_count[i] - last_count[i];
+        // Match 4943022: forward wheel rotation produces positive feedback.
+        // Unsigned subtraction also preserves one-step signed counter wrap.
+        int32_t delta = (int32_t)((uint32_t)cur_count[i] - (uint32_t)last_count[i]);
+        real_pulse[i] = delta;
         last_count[i] = cur_count[i];
         read_speed[i] = real_pulse[i] * (MOTOR_WHEEL_CIRCLE/MOTOR_ENCODER_CIRCLE/MOTOR_PID_PERIOD);
+        int result = motor_feedback_guard_update(&feedback_guard[i], pid_enable,
+                                                  pid_target[i], delta, now_us);
+        if (result == MOTOR_FEEDBACK_MISSING) feedback_missing_mask |= 1U << i;
+        if (result == MOTOR_FEEDBACK_REVERSED) feedback_reversed_mask |= 1U << i;
+    }
+    if (feedback_missing_mask || feedback_reversed_mask) {
+        pid_enable = 0;
+        brake_requested = true;
+    }
+    if (!pid_enable) PwmMotor_Stop(MOTOR_ID_ALL, brake_requested);
+    for (int i = 0; i < MOTOR_MAX_NUM; i++)
+    {
         if (pid_enable)
         {
             pid_compute(pid_motor[i], pid_target[i] - real_pulse[i], &new_speed[i]);
             PwmMotor_Set_Speed(MOTOR_ID_M1 + i, (int)new_speed[i]);
             new_pid_output[i] = new_speed[i];
         }
-        else pid_reset_control_block(pid_motor[i]);
+        else {
+            new_pid_output[i] = 0;
+            pid_reset_control_block(pid_motor[i]);
+        }
     }
     xSemaphoreGive(motor_mutex);
 }
@@ -130,6 +153,10 @@ void Motor_Set_Speed(float speed_m1, float speed_m2, float speed_m3, float speed
         return;
     }
     xSemaphoreTake(motor_mutex, portMAX_DELAY);
+    if (lift_inhibited || feedback_missing_mask || feedback_reversed_mask) {
+        xSemaphoreGive(motor_mutex);
+        return;
+    }
     static float speed_m[MOTOR_MAX_NUM] = {0};
     speed_m[0] = Motor_Limit_Speed(speed_m1);
     speed_m[1] = Motor_Limit_Speed(speed_m2);
@@ -165,6 +192,8 @@ void Motor_Get_Diagnostics(motor_diagnostics_t *out)
 {
     xSemaphoreTake(motor_mutex, portMAX_DELAY);
     out->enabled = pid_enable;
+    out->feedback_missing_mask = feedback_missing_mask;
+    out->feedback_reversed_mask = feedback_reversed_mask;
     out->command_age_us = last_command_us ? esp_timer_get_time() - last_command_us : -1;
     out->control_cycles = control_cycles;
     for (int i = 0; i < MOTOR_MAX_NUM; ++i) {
@@ -176,6 +205,25 @@ void Motor_Get_Diagnostics(motor_diagnostics_t *out)
     xSemaphoreGive(motor_mutex);
 }
 
+
+bool Motor_Fault_Latched(void)
+{
+    xSemaphoreTake(motor_mutex, portMAX_DELAY);
+    bool latched = feedback_missing_mask || feedback_reversed_mask;
+    xSemaphoreGive(motor_mutex);
+    return latched;
+}
+
+void Motor_Set_Lift_Inhibit(bool inhibited)
+{
+    xSemaphoreTake(motor_mutex, portMAX_DELAY);
+    lift_inhibited = inhibited;
+    if (inhibited) {
+        pid_enable = 0;
+        brake_requested = true;
+    }
+    xSemaphoreGive(motor_mutex);
+}
 
 // 电机停止，brake=true表示刹车停止，brake=false表示滑行停止。
 // The motor stops. brake=true indicates that the brake stops, and brake=false indicates that the coasting stops.

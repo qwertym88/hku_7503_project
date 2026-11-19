@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-19",
+  "baseline_commit": "4943022",
+  "reason": "user corrected wheel-ID wiring; all four raw encoder counts increase in forward rolling",
+  "build": "passed",
+  "application_bytes": 376096,
+  "application_sha256": "64b70b007054dbcff6128afefba0b003d82d90c2d4c848c71a665313147a7087",
+  "feedback_inverted": false,
+  "baseline_identical_files": [
+    "firmware/chassis/components/encoder/encoder.c",
+    "firmware/chassis/components/encoder/encoder.h",
+    "firmware/chassis/components/pwm_motor/pwm_motor.c",
+    "firmware/chassis/components/pwm_motor/pwm_motor.h",
+    "firmware/chassis/components/car_motion/car_motion.c",
+    "firmware/chassis/components/car_motion/car_motion.h"
+  ],
+  "preserved": [
+    "feedback fault latch and watchdog",
+    "lifter wheel interlock",
+    "enabled calibrated IMU bias",
+    "positional lifter with direct UInt8 commands"
+  ],
+  "imu_header_sha256": "7b937ea208171d29570cb4297b1aa0b2aea88ff57629949cd0c47ec52243bb24",
+  "lifter": {
+    "LOWER_DEG": 0,
+    "UPPER_DEG": 75,
+    "UP_MS": 1200,
+    "DOWN_MS": 1200
+  },
+  "tests": [
+    "actual motor.c + car_motion.c forward/reverse/left/right, PID correction and raw diagnostics",
+    "counter wrap, missing/reversed fault latch, watchdog and lift interlock",
+    "actual lifter driver and ROS callbacks",
+    "actual IMU publication, bias off/on",
+    "independent feedback guard",
+    "full ESP-IDF 5.1.2 build"
+  ],
+  "flashed": false,
+  "motion_commands_sent": false
+}

@@ -1,0 +1,19 @@
+menu "Continuous servo neutral calibration"
+    config SERVO_ZERO_PORT
+        int "Servo connector (1=S1/GPIO8, 2=S2/GPIO21)"
+        default 1
+        range 1 2
+    config SERVO_ZERO_PULSE_US
+        int "Neutral pulse width in microseconds (1500 = nominal stop)"
+        default 1500
+        range 1400 1600
+        help
+            MG996R continuous rotation: PWM commands speed and direction, not
+            shaft angle. Start at 1500us, trim by 5us while unloaded until still.
+            Actual stop pulse depends on the individual servo. This utility
+            cannot home or hold the lift at a mechanical zero.
+    config SERVO_ZERO_START_DELAY_MS
+        int "Delay before servo PWM starts, milliseconds"
+        default 3000
+        range 0 30000
+endmenu

@@ -7,3 +7,45 @@ menu "Project chassis"
         int "micro-ROS UART0 baud rate"
         default 921600
 endmenu
+
+menu "Chassis lifter (180-degree position servo)"
+    config CHASSIS_LIFTER_ENABLE
+        bool "Enable positional lifter (PWM starts on first /lifter command)"
+        default y
+    config CHASSIS_LIFTER_PORT
+        int "Servo port (1=S1/GPIO8, 2=S2/GPIO21)"
+        default 1
+        range 1 2
+    config CHASSIS_LIFTER_LOWER_DEG
+        int "Lower position angle, degrees"
+        default 0
+        range 0 179
+    config CHASSIS_LIFTER_UPPER_DEG
+        int "Upper position angle, degrees (must exceed lower angle)"
+        default 80
+        range 1 180
+    config CHASSIS_LIFTER_PULSE_0_DEG_US
+        int "Calibrated pulse at 0 degrees, microseconds"
+        default 500
+        range 400 2600
+        help
+            Verify the physical endpoint without load. Endpoint pulses interpolate
+            linearly; defaults 500/2500 give 1500us at 90 degrees. Swap endpoint
+            pulses if the physical angle direction is reversed.
+    config CHASSIS_LIFTER_PULSE_180_DEG_US
+        int "Calibrated pulse at 180 degrees, microseconds"
+        default 2500
+        range 400 2600
+    config CHASSIS_LIFTER_UP_MS
+        int "Raise settling wait, milliseconds (does not set angle or speed)"
+        default 600
+        range 1 29999
+    config CHASSIS_LIFTER_DOWN_MS
+        int "Lower settling wait, milliseconds (does not set angle or speed)"
+        default 600
+        range 1 29999
+    config CHASSIS_LIFTER_TIMEOUT_MS
+        int "Task deadline timeout, milliseconds (must exceed settling waits)"
+        default 5000
+        range 251 30000
+endmenu

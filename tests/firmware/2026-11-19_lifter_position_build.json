@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-19",
+  "project": "normal chassis with 180-degree positional lifter",
+  "target": "esp32s3",
+  "idf": "5.1.2",
+  "build": "passed",
+  "application_bytes": 375984,
+  "application_sha256": "d0c9a1c0373a361aaf653c936536ef217e3871f1fadd9dd757e25e3c1778ce7d",
+  "config": {
+    "CONFIG_CHASSIS_LIFTER_ENABLE": "y",
+    "CONFIG_CHASSIS_LIFTER_PORT": 1,
+    "CONFIG_CHASSIS_LIFTER_LOWER_DEG": 0,
+    "CONFIG_CHASSIS_LIFTER_UPPER_DEG": 80,
+    "CONFIG_CHASSIS_LIFTER_PULSE_0_DEG_US": 500,
+    "CONFIG_CHASSIS_LIFTER_PULSE_180_DEG_US": 2500,
+    "CONFIG_CHASSIS_LIFTER_UP_MS": 1200,
+    "CONFIG_CHASSIS_LIFTER_DOWN_MS": 1200,
+    "CONFIG_CHASSIS_LIFTER_TIMEOUT_MS": 5000
+  },
+  "arm_required": false,
+  "startup_pwm": false,
+  "hold_target_after_settling": true,
+  "micro_ros": {
+    "publishers": 3,
+    "subscriptions": 2,
+    "services": 1,
+    "executor_handles": 5,
+    "custom_mtu": 2048
+  },
+  "checks": [
+    "pure C positional state machine",
+    "actual driver with disabled/enabled hardware shims",
+    "actual ROS callbacks and JSON/MTU bounds",
+    "actual wheel driver regression",
+    "actual IMU publication regression"
+  ],
+  "flash_performed": false,
+  "motion_commands_sent": false,
+  "limitations": [
+    "pulse endpoints and actual angle require unloaded calibration",
+    "settling time is not measured arrival feedback or speed control",
+    "no loaded 20-cycle or signal-loss holding acceptance"
+  ]
+}

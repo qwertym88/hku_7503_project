@@ -14,4 +14,4 @@ ESP32 ──USB 串口── micro_ros_agent ── /cmd_vel /odom /imu/data ─
 - [ ] 断线重连 + 心跳检测
 - [ ] 启动脚本与 bringup 集成
 
-当前仍无 ROS 包/启动脚本实现；本机已用 Docker agent 连通正常固件，`/lifter` 尚未在固件实现。串口 UART0、921600、domain42，同串口只运行一个 agent；操作和容器停止/重建步骤见[固件说明](../../../firmware/chassis/README.md)。USB 重连可能需重建容器与板上 RESET，尚未实现自动恢复。Pi 上部署/udev/统一启动仍待完成，见[M2交付清单](../../../docs/给队友看/M2底盘进度与交付清单.md)。
+当前仍无 ROS 包/启动脚本实现；本机已用 Docker agent 连通正常固件，`/lifter` 已实现180°位置控制、默认0°/80°可设且免arm，新版待上板验收。串口 UART0、921600、domain42，同串口只运行一个 agent；操作和容器停止/重建步骤见[固件说明](../../../firmware/chassis/README.md)。USB 重连可能需重建容器与板上 RESET，尚未实现自动恢复。Pi 上部署/udev/统一启动仍待完成，见[M2交付清单](../../../docs/给队友看/M2底盘进度与交付清单.md)。
