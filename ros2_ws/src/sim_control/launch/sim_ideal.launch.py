@@ -30,6 +30,10 @@ def generate_launch_description():
     bridge_config = sim_share + '/config/bridge.yaml'
     rviz_config = sim_share + '/rviz/simulation.rviz'
     model = sim_share + '/models/ideal_robot/model.sdf'
+    # Resolve CAD meshes against the installed ROS package before spawning.
+    with open(model, encoding='utf-8') as f:
+        model_xml = f.read().replace(
+            'package://robot_description/', 'file://' + description_dir + '/')
     default_world = sim_share + '/worlds/dase7503_field.sdf'
 
     return LaunchDescription([
@@ -59,7 +63,7 @@ def generate_launch_description():
         # Let the world server advertise create/set_pose before spawning.
         TimerAction(period=2.0, actions=[Node(
             package='ros_gz_sim', executable='create', name='spawn_ideal_robot',
-            output='screen', arguments=['-file', model, '-name', 'ideal_robot',
+            output='screen', arguments=['-string', model_xml, '-name', 'ideal_robot',
                                         '-world', 'dase7503_field',
                                         '-x', x, '-y', y, '-z', '0', '-Y', yaw])]),
 

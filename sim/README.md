@@ -111,7 +111,7 @@ ros2 launch sim/launch/field_with_robot.launch.py
 
 ### M3/M4/M5 联调场景（理想底盘）
 
-该联调入口在 Gazebo 场地中加载无轮胎动力学的理想运动学底盘，接收 `/cmd_vel` 后直接积分并更新模型位姿。它同时运行离地 `0.09 m` 的 2D 雷达、离地 `0.15 m` 的前置相机，把 `/scan`、`/camera/image_raw` 和 `/camera/camera_info` 桥接到 ROS，并打开带扫描/图像显示的 RViz 和按住移动的控制面板。此模式不模拟轮胎接触、碰撞避让或真实电机误差。
+该联调入口在 Gazebo 场地中加载无轮胎动力学的理想运动学底盘，接收 `/cmd_vel` 后直接积分并更新模型位姿。车体网格及安装位置来自 SolidWorks 导出的 `robotcar.urdf`，雷达和相机 link 离地分别约 `0.101129 m`、`0.143329 m`，相机沿车头 +X 水平观察。它把 `/scan`、`/camera/image_raw` 和 `/camera/camera_info` 桥接到 ROS，并打开带扫描/图像显示的 RViz 和按住移动的控制面板。此模式不模拟轮胎接触、碰撞避让或真实电机误差。
 
 ```bash
 cd ros2_ws

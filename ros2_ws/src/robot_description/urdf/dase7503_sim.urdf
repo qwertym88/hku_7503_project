@@ -1,40 +1,213 @@
-<?xml version="1.0"?>
-<!-- Integration-only ideal base. Sensor heights are measured from the floor. -->
+<?xml version='1.0' encoding='utf-8'?>
 <robot name="dase7503_sim">
-  <link name="base_footprint"/>
-
+  <!-- Adapted from the supplied SolidWorks robotcar URDF. Wheel joints are fixed for the ideal /cmd_vel model. -->
+  <link name="base_footprint" />
   <link name="base_link">
+    <inertial>
+      <origin xyz="-0.0102901357373328 -0.000143152333509986 0.0663039483430274" rpy="0 0 0" />
+      <mass value="0.4421477422976" />
+      <inertia ixx="0.000794932570013433" ixy="-3.77963531214016E-07" ixz="-1.47050334377941E-05" iyy="0.000902471317705811" iyz="-6.64836714952911E-08" izz="0.00116364397013762" />
+    </inertial>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry><box size="0.30 0.30 0.08"/></geometry>
-      <material name="blue"><color rgba="0.20 0.40 0.90 1"/></material>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/base_link.STL" />
+      </geometry>
+      <material name="robotcar_gray">
+        <color rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry><box size="0.30 0.30 0.08"/></geometry>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/base_link.STL" />
+      </geometry>
     </collision>
   </link>
-  <joint name="base_joint" type="fixed">
-    <parent link="base_footprint"/><child link="base_link"/>
-    <origin xyz="0 0 0.04" rpy="0 0 0"/>
+  <link name="LF_link">
+    <inertial>
+      <origin xyz="7.65086724641151E-06 -0.00104129865405139 1.19386371190203E-05" rpy="0 0 0" />
+      <mass value="0.0404606253323268" />
+      <inertia ixx="4.20278091640384E-06" ixy="1.92898538937991E-09" ixz="1.35645529820161E-09" iyy="6.20724619816573E-06" iyz="-2.29126880816458E-09" izz="4.21144838999357E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/LF_link.STL" />
+      </geometry>
+      <material name="robotcar_gray">
+        <color rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/LF_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LF_joint" type="fixed">
+    <origin xyz="0.0850000000000002 0.1012 0.0159999999999996" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="LF_link" />
   </joint>
-
-  <link name="laser"/>
-  <joint name="laser_joint" type="fixed">
-    <parent link="base_footprint"/><child link="laser"/>
-    <origin xyz="0.05 -0.05 0.09" rpy="0 0 0"/>
+  <link name="LB_link">
+    <inertial>
+      <origin xyz="7.64984809098479E-06 -0.0010412984749506 1.19388692482354E-05" rpy="0 0 0" />
+      <mass value="0.0404606264091249" />
+      <inertia ixx="4.20278141251386E-06" ixy="1.9288635764738E-09" ixz="1.35655166693005E-09" iyy="6.20724680171418E-06" iyz="-2.29129067133694E-09" izz="4.21144850573248E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/LB_link.STL" />
+      </geometry>
+      <material name="robotcar_gray">
+        <color rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/LB_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LB_joint" type="fixed">
+    <origin xyz="-0.0849999999999997 0.1012 0.0159999999999995" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="LB_link" />
   </joint>
-
-  <link name="cam_link"/>
+  <link name="RF_link">
+    <inertial>
+      <origin xyz="-7.65112004796897E-06 0.00104129857694946 1.19388216637123E-05" rpy="0 0 0" />
+      <mass value="0.0404606249981401" />
+      <inertia ixx="4.20278084769407E-06" ixy="1.92900651043832E-09" ixz="-1.35663574803246E-09" iyy="6.20724601768134E-06" iyz="2.29125686587E-09" izz="4.21144827378409E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/RF_link.STL" />
+      </geometry>
+      <material name="robotcar_gray">
+        <color rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/RF_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RF_joint" type="fixed">
+    <origin xyz="0.0849999999999997 -0.1012 0.0159999999999876" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="RF_link" />
+  </joint>
+  <link name="RB_link">
+    <inertial>
+      <origin xyz="9.4450241936439E-06 1.05759862263355E-05 0.0994087016547882" rpy="0 0 0" />
+      <mass value="0.0404606251750761" />
+      <inertia ixx="4.21012073836101E-06" ixy="3.40359336821703E-09" ixz="-2.72522281828846E-09" iyy="4.20410850421138E-06" iyz="1.24249493236254E-09" izz="6.20724613985455E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/RB_link.STL" />
+      </geometry>
+      <material name="robotcar_gray">
+        <color rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/RB_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RB_joint" type="fixed">
+    <origin xyz="-0.0849999999999989 -0.000750000000000001 0.0159999999999999" rpy="1.5707963267949 -1.2988328850493 0" />
+    <parent link="base_link" />
+    <child link="RB_link" />
+  </joint>
+  <link name="Lidar">
+    <inertial>
+      <origin xyz="8.95485404259766E-05 6.45031621386606E-05 -0.0175503073701507" rpy="0 0 0" />
+      <mass value="0.0385602030507237" />
+      <inertia ixx="7.05137530779E-06" ixy="-1.60824465882329E-07" ixz="9.50588785071137E-09" iyy="7.10435775569415E-06" iyz="3.99622243002862E-08" izz="7.61279332869612E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/Lidar.STL" />
+      </geometry>
+      <material name="robotcar_gray">
+        <color rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/Lidar.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <origin xyz="0.068835963325927 0 0.0848000000000003" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="Lidar" />
+  </joint>
+  <link name="Camera">
+    <inertial>
+      <origin xyz="-0.00671560436392438 -0.000107338143380788 0.000745945761611133" rpy="0 0 0" />
+      <mass value="0.001522068455105" />
+      <inertia ixx="8.8262588187641E-08" ixy="-1.56892051083876E-10" ixz="-1.27598781480275E-10" iyy="5.7974231554933E-08" iyz="9.67912937674032E-10" izz="4.87939120481317E-08" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/Camera.STL" />
+      </geometry>
+      <material name="robotcar_camera_white">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_description/meshes/robotcar/Camera.STL" />
+      </geometry>
+    </collision>
+  </link>
   <joint name="camera_joint" type="fixed">
-    <parent link="base_footprint"/><child link="cam_link"/>
-    <origin xyz="0.13 0 0.15" rpy="0 0.5 0"/>
+    <origin xyz="0.001 0 0.127" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="Camera" />
   </joint>
-
-  <!-- ROS optical frame: +Z forward, +X right, +Y down. -->
-  <link name="camera_optical_frame"/>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 0.016328981906188" rpy="0 0 0" />
+  </joint>
+  <!-- Ground offset puts the lowest tyre vertex at z=0. Sensor joint origins remain as exported. -->
+  <link name="laser" />
+  <joint name="laser_frame_joint" type="fixed">
+    <parent link="Lidar" />
+    <child link="laser" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+  <link name="cam_link" />
+  <joint name="camera_frame_joint" type="fixed">
+    <parent link="Camera" />
+    <child link="cam_link" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+  <link name="camera_optical_frame" />
   <joint name="camera_optical_joint" type="fixed">
-    <parent link="cam_link"/><child link="camera_optical_frame"/>
-    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679"/>
+    <parent link="cam_link" />
+    <child link="camera_optical_frame" />
+    <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966" />
   </joint>
 </robot>
