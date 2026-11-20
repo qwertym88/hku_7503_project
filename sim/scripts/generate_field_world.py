@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 """生成 DASE7503 比赛场地 的 Gazebo (SDF) 世界文件。
 
-坐标以 ``1.png`` 的俯视图为准。区域尺寸、边界位置和货架中心均以
-图纸的毫米标注换算为米；不从旧的仿真布局推导。
+场地布局以用户于 2026-11-20 手工确认的 Harmonic SDF 为准。
 
-坐标系（与图纸一致）：
-  - 单位：米 (m)
-  - 原点 (0,0) = 场地左下角
-  - +X 向右，+Y 向上，+Z 向上（Gazebo 天向）
-  - 场地是【横向】矩形：X（长/横向）= 3.02 m，Y（宽/纵向）= 2.00 m
-        即 x ∈ [0, 3.02]，y ∈ [0, 2.00]
-  - 围墙贴在场地【外侧】，内表面正好压在 x=0/3.02、y=0/2.00 上，不占用场地面积
-  - 布局（俯视，与图纸一致）：
-        Destination：左侧，x=0.00~0.80，y=0.30~1.70
-        Start：右侧，x=2.42~3.02，y=0.60~1.40
-        货架 A/D 在中部偏左，C/B 在中部偏右。
+当前坐标系：
+  - 单位：米 (m)，+Z 向上；原点在原图纸右下角（旧坐标 3.02, 0）。
+  - +X = 原 +Y，+Y = 原 -X，保持右手系。
+  - x_new = y_old，y_new = 3.02 - x_old；yaw_new = yaw_old - π/2。
+  - 场地范围 x ∈ [0, 2.00]，y ∈ [0, 3.02]。
+  - Start 中心 (1.00, 0.30)，Destination 中心 (1.00, 2.62)。
+  - 货架的物理摆放保持不变；通道沿新 ±Y，二维码朝新 +Y。
 
 用法：
   python3 sim/scripts/generate_field_world.py                    # Harmonic 版（Jazzy/24.04）
@@ -26,13 +21,15 @@
 from __future__ import annotations
 
 import argparse
+import math
 import os
+from pathlib import Path
 
 # --------------------------------------------------------------------------
 # 1. 场地 / 围墙 / 货架基础尺寸
 # --------------------------------------------------------------------------
-FIELD_X = 3.02          # 横向跨度（X，长）
-FIELD_Y = 2.00          # 纵向跨度（Y，宽）
+FIELD_X = 2.00          # 新 X 跨度（原 Y）
+FIELD_Y = 3.02          # 新 Y 跨度（原 X）
 WALL_T = 0.05           # 围墙厚度
 WALL_H = 0.50           # 围墙高度
 
@@ -40,38 +37,45 @@ FLOOR_T = 0.002         # 场地地板厚度（仅视觉，略高于地面避免
 ZONE_T = 0.002          # 区域标记厚度（仅视觉，无碰撞）
 ZONE_Z = FLOOR_T + 0.001
 
-RACK_S = 0.14           # 货架平面边长（图纸标注 140 mm）
-RACK_H = 0.2325         # 货架高
-POST = 0.012            # 货架立柱截面
-POST_H = RACK_H
-SHELF_T = 0.008         # 层板厚度
-SHELF_Z = (0.020, RACK_H / 2, RACK_H - 0.012)   # 三层板的中心高度
+# 2026-11-19：按实物近似为两片侧墙；35 cm 指两内侧面之间的净空。
+# 新坐标下侧墙沿 Y：X 向厚 2.5 cm、Y 向长 15 cm，通道沿 ±Y。
+# 两片墙分别位于通道 X 负/正侧；没有底板、层板或跨通道的碰撞体。
+RACK_GAP = 0.35
+RACK_WALL_T = 0.025
+RACK_WALL_L = 0.15
+RACK_H = 0.23
+QR_CENTER_Z = 0.25      # 二维码中心距地高度；不是在货架顶部再加 25 cm
+QR_SIZE = 0.05          # 二维码边长 5 cm
+SIM_ROOT = Path(__file__).resolve().parents[1]
 
 # --------------------------------------------------------------------------
-# 2. 区域（图纸给定【中心坐标】+ 尺寸，硬编码）
+# 2. 区域（新坐标：中心 + X/Y 尺寸）
 # --------------------------------------------------------------------------
-# destination（绿）：左贴边，宽 0.80、高 1.40
-#                     → x 0.00~0.80，y 0.30~1.70
-# start（蓝）：右贴边，宽 0.60、高 0.80
-#                     → x 2.42~3.02，y 0.60~1.40
-# 二者之间的主通道净宽 1.62 m。
 ZONES = {
-    "destination": dict(cx=0.40, cy=1.00, w=0.80, h=1.40),
-    "start":       dict(cx=2.72, cy=1.00, w=0.60, h=0.80),
+    "destination": dict(cx=1.00, cy=2.62, w=1.40, h=0.80),
+    "start":       dict(cx=1.00, cy=0.30, w=0.80, h=0.60),
 }
 
 # --------------------------------------------------------------------------
-# 3. 货架（图纸给定【中心坐标】，硬编码）
+# 3. 货架（由用户确认的 SDF 布局转换，2026-11-20）
 # --------------------------------------------------------------------------
-# 图纸俯视图的货架中心（单位 m）。
-# A 与 C 的水平中心距 650 mm；B 与 C 同列。货架到场地边缘的标注
-# （A 顶部 350 mm、C 顶部 210 mm、B 底部 440 mm、D 底部 300 mm）
-# 均量到 140 mm 货架的边缘，故下列为其中心坐标。
+# 新坐标：cx=旧 y，cy=3.02-旧 x。二维码网格原始正面 -Y，yaw=π 后朝新 +Y。
 RACKS = {
-    "a": dict(cx=1.20, cy=1.58),   # 左上
-    "b": dict(cx=1.85, cy=0.51),   # 右下
-    "c": dict(cx=1.85, cy=1.72),   # 右上
-    "d": dict(cx=1.35, cy=0.37),   # 左下
+    "a": dict(cx=0.550, cy=1.895, qr_yaw=math.pi),
+    "b": dict(cx=1.360, cy=1.195, qr_yaw=math.pi),
+    "c": dict(cx=1.670, cy=1.695, qr_yaw=math.pi),
+    "d": dict(cx=0.410, cy=1.095, qr_yaw=math.pi),
+}
+
+# 起终点标志柱：新场景坐标，尺寸单位 m；高度“20”按 20 cm 处理。
+MARKER_DIAMETER = 0.10
+MARKER_H = 0.20
+MARKER_QR_SIZE = 0.05
+MARKER_QR_CENTER_Z = MARKER_H + MARKER_QR_SIZE / 2  # 下边缘位于柱顶
+# 网格正面原为 -Y，yaw=π/4 后法向为 (1,-1)/sqrt(2)。
+MARKERS = {
+    "s": dict(cx=0.60, cy=0.60, texture="Start.png", qr_yaw=math.pi / 4),
+    "e": dict(cx=0.30, cy=2.22, texture="End.png", qr_yaw=math.pi / 4),
 }
 
 # --------------------------------------------------------------------------
@@ -112,8 +116,14 @@ def collect_rects() -> list[tuple[str, float, float, float, float, bool]]:
         items.append(
             (f"{key}_zone", r["x0"], r["x1"], r["y0"], r["y1"], False))
     for key, k in RACKS.items():
-        r = rect_of(k["cx"], k["cy"], RACK_S, RACK_S)
-        items.append((f"rack_{key}", r["x0"], r["x1"], r["y0"], r["y1"], True))
+        for side, sign in (("west", -1), ("east", 1)):
+            cx = k["cx"] + sign * (RACK_GAP + RACK_WALL_T) / 2
+            r = rect_of(cx, k["cy"], RACK_WALL_T, RACK_WALL_L)
+            items.append((f"rack_{key}_{side}", r["x0"], r["x1"],
+                          r["y0"], r["y1"], True))
+    for key, marker in MARKERS.items():
+        r = rect_of(marker["cx"], marker["cy"], MARKER_DIAMETER, MARKER_DIAMETER)
+        items.append((f"marker_{key}", r["x0"], r["x1"], r["y0"], r["y1"], True))
     return items
 
 
@@ -125,12 +135,13 @@ def sdf_header(target: str) -> str:
               "fortress": "Gazebo Fortress (ign-gazebo6), SDF 1.9"}[target]
     return f"""<?xml version="1.0" ?>
 <!--
-  DASE7503 比赛场地 —— Gazebo 世界文件（图纸横向布局）
+  DASE7503 比赛场地 —— Gazebo 世界文件（右下角原点的新坐标系）
   *** 本文件由 sim/scripts/generate_field_world.py 自动生成，请勿手改 ***
-  改坐标请改脚本里的 ZONES / RACKS 两张表，然后重新生成。
+  改坐标请改脚本里的 ZONES / RACKS / MARKERS 三张表，然后重新生成。
 
-  坐标系：原点在场地左下角，+X 向右(长 {FIELD_X:.2f})，+Y 向上(宽 {FIELD_Y:.2f})，+Z 天向。
-  布局：左侧 Destination(绿) → 中部 A/D/C/B 货架 → 右侧 Start(蓝)。
+  坐标系：原点在旧图右下角；新 +X=旧 +Y，新 +Y=旧 -X，+Z 天向。
+  转换：新 x=旧 y，新 y=3.02-旧 x；场地 X={FIELD_X:.2f} m，Y={FIELD_Y:.2f} m。
+  Start=(1.00,0.30)，Destination=(1.00,2.62)；Rack 布局来自用户确认的 SDF。
   目标格式：{pretty}
 -->
 <sdf version="{SDF_VERSION[target]}">
@@ -192,10 +203,72 @@ def box_model(name: str, size, pose, ambient, diffuse, *, static=True, collision
     return "\n".join(out) + "\n"
 
 
+def rack_model(key: str, rack: dict, resource_base: str) -> str:
+    """两片实体侧墙 + 悬空二维码（仅视觉），保留通道完整碰撞净空。"""
+    cx, cy = rack["cx"], rack["cy"]
+    out = [f"    <model name='rack_{key}'>\n      <static>true</static>\n"
+           f"      <pose>{cx:.6f} {cy:.6f} 0 0 0 0</pose>\n"]
+    for side, sign in (("west", -1), ("east", 1)):
+        dx = sign * (RACK_GAP + RACK_WALL_T) / 2
+        geometry = (f"<geometry><box><size>{RACK_WALL_T:.6f} "
+                    f"{RACK_WALL_L:.6f} {RACK_H:.6f}</size></box></geometry>")
+        out.append(f"      <link name='{side}_wall'>\n"
+                   f"        <pose>{dx:.6f} 0 {RACK_H / 2:.6f} 0 0 0</pose>\n"
+                   f"        <collision name='collision'>{geometry}</collision>\n"
+                   f"        <visual name='visual'>\n          {geometry}\n"
+                   + material(*COL_WOOD, "          ") +
+                   "        </visual>\n      </link>\n")
+    out.append(qr_panel_link(resource_base, f"{key.upper()}.png",
+                             QR_SIZE, QR_CENTER_Z, rack["qr_yaw"]))
+    out.append("    </model>\n")
+    return "".join(out)
+
+
+def qr_panel_link(resource_base: str, texture: str, size: float,
+                  center_z: float, yaw: float) -> str:
+    """共用双面二维码网格：局部 XY 原点、正面原始法向 -Y，仅视觉。"""
+    return (f"      <link name='qr_panel'>\n"
+            f"        <pose>0 0 {center_z:.6f} 0 0 {yaw:.6f}</pose>\n"
+            "        <visual name='qr_image'>\n"
+            "          <cast_shadows>false</cast_shadows>\n"
+            "          <geometry><mesh>\n"
+            f"            <uri>{resource_base}/meshes/qr_panel.dae</uri>\n"
+            f"            <scale>{size:.6f} 1 {size:.6f}</scale>\n"
+            "          </mesh></geometry>\n"
+            "          <material>\n"
+            "            <ambient>1 1 1 1</ambient>\n"
+            "            <diffuse>1 1 1 1</diffuse>\n"
+            "            <specular>0 0 0 1</specular>\n"
+            "            <pbr><metal>\n"
+            f"              <albedo_map>{resource_base}/materials/textures/{texture}</albedo_map>\n"
+            "              <metalness>0</metalness><roughness>1</roughness>\n"
+            "            </metal></pbr>\n"
+            "          </material>\n"
+            "        </visual>\n      </link>\n")
+
+
+def marker_model(key: str, marker: dict, resource_base: str) -> str:
+    """固定圆柱有碰撞，5 cm 二维码竖直安装在柱顶、无碰撞。"""
+    geometry = (f"<geometry><cylinder><radius>{MARKER_DIAMETER / 2:.6f}</radius>"
+                f"<length>{MARKER_H:.6f}</length></cylinder></geometry>")
+    return (f"    <model name='marker_{key}'>\n      <static>true</static>\n"
+            f"      <pose>{marker['cx']:.6f} {marker['cy']:.6f} 0 0 0 0</pose>\n"
+            "      <link name='pillar'>\n"
+            f"        <pose>0 0 {MARKER_H / 2:.6f} 0 0 0</pose>\n"
+            f"        <collision name='collision'>{geometry}</collision>\n"
+            "        <visual name='visual'>\n"
+            f"          {geometry}\n"
+            + material(*COL_GREY_WALL, "          ") +
+            "        </visual>\n      </link>\n"
+            + qr_panel_link(resource_base, marker["texture"], MARKER_QR_SIZE,
+                            MARKER_QR_CENTER_Z, marker["qr_yaw"]) +
+            "    </model>\n")
+
+
 # --------------------------------------------------------------------------
 # 7. 组装世界
 # --------------------------------------------------------------------------
-def build_world(target: str = "harmonic") -> str:
+def build_world(target: str = "harmonic", resource_base: str = "..") -> str:
     p = [sdf_header(target)]
 
     # ---- 物理 / 插件 ----
@@ -214,10 +287,10 @@ def build_world(target: str = "harmonic") -> str:
     p.append(f"""
     <light type='directional' name='sun'>
       <cast_shadows>true</cast_shadows>
-      <pose>0 0 6 0 0 0</pose>
+      <pose>0 3.02 6 0 0 0</pose>
       <diffuse>0.95 0.95 0.92 1</diffuse>
       <specular>0.2 0.2 0.2 1</specular>
-      <direction>-0.45 0.25 -0.86</direction>
+      <direction>0.25 0.45 -0.86</direction>
     </light>
 
     <light type='point' name='fill_light'>
@@ -239,6 +312,7 @@ def build_world(target: str = "harmonic") -> str:
     # ---- 地面 ----
     p.append("""    <model name='ground_plane'>
       <static>true</static>
+      <pose>0 3.02 0 0 0 -1.570796326795</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry><plane><normal>0 0 1</normal><size>50 50</size></plane></geometry>
@@ -263,15 +337,15 @@ def build_world(target: str = "harmonic") -> str:
         "    <!-- ===== 围墙：高度 {:.2f} m，内表面即场界线 ===== -->\n".format(WALL_H))
     half = WALL_T / 2
     walls = {
-        # 南/北墙沿 X（横向），长度 = 场地长 + 两侧墙厚
-        "wall_south": ((FIELD_X + 2 * WALL_T, WALL_T, WALL_H),
+        # 新南/北墙对应旧东/西墙，长 2.00 m
+        "wall_south": ((FIELD_X, WALL_T, WALL_H),
                        (FIELD_X / 2, -half, WALL_H / 2, 0, 0, 0)),
-        "wall_north": ((FIELD_X + 2 * WALL_T, WALL_T, WALL_H),
+        "wall_north": ((FIELD_X, WALL_T, WALL_H),
                        (FIELD_X / 2, FIELD_Y + half, WALL_H / 2, 0, 0, 0)),
-        # 西/东墙沿 Y（纵向），长度 = 场地宽
-        "wall_west": ((WALL_T, FIELD_Y, WALL_H),
+        # 新西/东墙对应旧南/北墙，保留墙角搭接长度
+        "wall_west": ((WALL_T, FIELD_Y + 2 * WALL_T, WALL_H),
                       (-half, FIELD_Y / 2, WALL_H / 2, 0, 0, 0)),
-        "wall_east": ((WALL_T, FIELD_Y, WALL_H),
+        "wall_east": ((WALL_T, FIELD_Y + 2 * WALL_T, WALL_H),
                       (FIELD_X + half, FIELD_Y / 2, WALL_H / 2, 0, 0, 0)),
     }
     for name, (size, pose) in walls.items():
@@ -287,41 +361,15 @@ def build_world(target: str = "harmonic") -> str:
                            (z["cx"], z["cy"], ZONE_Z, 0, 0, 0),
                            *ZONE_COLORS[key], collision=False))
 
-    # ---- 货架 ----
-    p.append("    <!-- ===== 货架：{} x {} x {} m，多层结构 ===== -->\n".format(
-        RACK_S, RACK_S, RACK_H))
+    # ---- 开放式货架（仅侧墙有碰撞）与真实二维码贴图 ----
+    p.append(f"    <!-- ===== 货架：净空 {RACK_GAP:.2f} m；两侧墙 "
+             f"X/Y/Z={RACK_WALL_T:.3f}/{RACK_WALL_L:.2f}/{RACK_H:.2f} m；通道沿 Y ===== -->\n")
     for key, k in RACKS.items():
-        cx, cy = k["cx"], k["cy"]
-        p.append(
-            "    <!-- RACK {}: 中心 ({:.3f}, {:.3f}) -->\n".format(key.upper(), cx, cy))
-        p.append(f"    <model name='rack_{key}'>\n      <static>true</static>\n"
-                 f"      <pose>{cx:.6f} {cy:.6f} 0 0 0 0</pose>\n")
-        # 四根立柱
-        off = RACK_S / 2 - POST / 2
-        for i, (dx, dy) in enumerate(((-off, -off), (-off, off), (off, -off), (off, off))):
-            p.append(f"      <link name='post_{i}'>\n"
-                     f"        <pose>{dx:.6f} {dy:.6f} {POST_H / 2:.6f} 0 0 0</pose>\n"
-                     f"        <collision name='collision'>\n          <geometry>\n"
-                     f"            <box><size>{POST} {POST} {POST_H}</size></box>\n"
-                     f"          </geometry>\n        </collision>\n"
-                     f"        <visual name='visual'>\n          <geometry>\n"
-                     f"            <box><size>{POST} {POST} {POST_H}</size></box>\n"
-                     f"          </geometry>\n"
-                     + material(*COL_WOOD, "          ").rstrip("\n") +
-                     "\n        </visual>\n      </link>\n")
-        # 三层层板
-        for i, z in enumerate(SHELF_Z):
-            p.append(f"      <link name='shelf_{i}'>\n"
-                     f"        <pose>0 0 {z:.6f} 0 0 0</pose>\n"
-                     f"        <collision name='collision'>\n          <geometry>\n"
-                     f"            <box><size>{RACK_S} {RACK_S} {SHELF_T}</size></box>\n"
-                     f"          </geometry>\n        </collision>\n"
-                     f"        <visual name='visual'>\n          <geometry>\n"
-                     f"            <box><size>{RACK_S} {RACK_S} {SHELF_T}</size></box>\n"
-                     f"          </geometry>\n"
-                     + material(*COL_WOOD, "          ").rstrip("\n") +
-                     "\n        </visual>\n      </link>\n")
-        p.append("    </model>\n")
+        p.append(rack_model(key, k, resource_base))
+
+    p.append("    <!-- ===== 起终点圆柱 S/E + 柱顶二维码，正面朝 (1,-1) ===== -->\n")
+    for key, marker in MARKERS.items():
+        p.append(marker_model(key, marker, resource_base))
 
     p.append(SDF_TAIL)
     return "".join(p)
@@ -334,8 +382,8 @@ def audit() -> int:
     items = collect_rects()
     hard = 0
     print("=" * 100)
-    print("几何自检 —— 以 1.png 图纸的毫米标注换算（不沿用旧仿真布局）")
-    print(f"场地 {FIELD_X:.2f} (X/横向) x {FIELD_Y:.2f} (Y/纵向)  [横向布局]")
+    print("几何自检 —— 右下角原点的新坐标 + 2026-11-20 用户确认布局")
+    print(f"场地 {FIELD_X:.2f} (X/横向) x {FIELD_Y:.2f} (Y/纵向)  [新坐标布局]")
     print("=" * 100)
     print(f"  {'对象':<17}{'x 范围':<21}{'y 范围':<21}{'尺寸':<12}"
           f"{'距左':>7}{'距右':>7}{'距底':>7}{'距顶':>7}")
@@ -350,17 +398,26 @@ def audit() -> int:
               f"{y0:6.3f} {FIELD_Y-y1:6.3f}{tag}")
 
     print("-" * 100)
-    racks = [it for it in items if it[5]]
+    for asset in [SIM_ROOT / "meshes" / "qr_panel.dae", *[
+            SIM_ROOT / "materials" / "textures" / f"{key.upper()}.png" for key in RACKS], *[
+            SIM_ROOT / "materials" / "textures" / m["texture"] for m in MARKERS.values()]]:
+        if not asset.is_file():
+            print(f"  [✗ 缺少二维码资源] {asset}")
+            hard += 1
+    print(f"  [i] 货架通道沿 ±Y（X 向净宽 {RACK_GAP:.3f} m）；"
+          f"二维码中心高 {QR_CENTER_Z:.3f} m，边长 {QR_SIZE:.3f} m（仅视觉）")
+    solids = [it for it in items if it[5]]
+    racks = [it for it in solids if it[0].startswith("rack_")]
     zones = [it for it in items if not it[5]]
 
-    # 货架之间：不允许重叠
-    for i in range(len(racks)):
-        for j in range(i + 1, len(racks)):
-            a, b = racks[i], racks[j]
+    # 静态障碍不允许重叠；圆柱保守使用外接正方形。
+    for i in range(len(solids)):
+        for j in range(i + 1, len(solids)):
+            a, b = solids[i], solids[j]
             if a[1] < b[2] and b[1] < a[2] and a[3] < b[4] and b[3] < a[4]:
-                print(f"  [✗ 货架重叠] {a[0]} <-> {b[0]}")
+                print(f"  [✗ 实体包围盒重叠] {a[0]} <-> {b[0]}")
                 hard += 1
-    print(f"  [{'OK' if hard == 0 else '✗'}] 货架之间无重叠；"
+    print(f"  [{'OK' if hard == 0 else '✗'}] 侧墙与圆柱包围盒无重叠；"
           f"全部实体在 {FIELD_X:.2f} x {FIELD_Y:.2f} 边界内")
 
     # 区域之间 / 区域与货架
@@ -415,29 +472,33 @@ def ascii_map(target_rows: int = 30, max_width: int = 78) -> str:
                 grid[r][c] = ch
 
     for name, x0, x1, y0, y1, solid in collect_rects():
-        ch = {"destination_zone": "G", "start_zone": "S"}.get(
-            name, name[-1].upper())
+        ch = {"destination_zone": "G", "start_zone": "s", "marker_s": "S", "marker_e": "E"}.get(
+            name, name.split("_")[1].upper())
         put(x0, x1, y0, y1, ch)
 
     top = "+" + "-" * width + "+"
     body = "\n".join("|" + "".join(r) + "|" for r in grid)
     return (f"{top}\n{body}\n{top}\n"
             f"  上方 = 场地顶部(y={FIELD_Y:.2f})，下方 = 场地底部(y=0)，左 = x=0，右 = x={FIELD_X:.2f}\n"
-            f"  G=Destination绿(左)  S=Start蓝(右)  A左上 D左下  C右上 B右下\n"
-            f"  场地 {FIELD_X:.2f}(X/横向) x {FIELD_Y:.2f}(Y/纵向) m，横向")
+            f"  G=Destination绿（高 Y 侧）  s=Start蓝（低 Y 侧）  S/E=圆柱  A/B/C/D=货架\n"
+            f"  场地 {FIELD_X:.2f}(X/横向) x {FIELD_Y:.2f}(Y/纵向) m，新坐标")
 
 
 def summary() -> str:
     L = []
-    L.append("场地: {:.2f} (X/横向) x {:.2f} (Y/纵向) m  —— 横向矩形，围墙高 {:.2f} m".format(
+    L.append("场地: {:.2f} (X/横向) x {:.2f} (Y/纵向) m  —— 右下角原点的新坐标，围墙高 {:.2f} m".format(
         FIELD_X, FIELD_Y, WALL_H))
     for key, z in ZONES.items():
         r = rect_of(z["cx"], z["cy"], z["w"], z["h"])
         L.append("{:<12} 中心 ({:.2f}, {:.2f})  {}x{} m  x {:.3f}~{:.3f}  y {:.3f}~{:.3f}".format(
             key, z["cx"], z["cy"], z["w"], z["h"], r["x0"], r["x1"], r["y0"], r["y1"]))
     for key, k in RACKS.items():
-        L.append("RACK {:<8} 中心 ({:.2f}, {:.2f})".format(
-            key.upper(), k["cx"], k["cy"]))
+        L.append("RACK {:<8} 中心 ({:.3f}, {:.3f})；净空 {:.2f} m，两片 {:.3f}x{:.2f}x{:.2f} m 侧墙".format(
+            key.upper(), k["cx"], k["cy"], RACK_GAP, RACK_WALL_T, RACK_WALL_L, RACK_H))
+    for key, marker in MARKERS.items():
+        L.append(f"圆柱 {key.upper()} 中心 ({marker['cx']:.3f}, {marker['cy']:.3f})；"
+                 f"直径 {MARKER_DIAMETER:.2f} m，高 {MARKER_H:.2f} m；"
+                 f"二维码 {MARKER_QR_SIZE:.2f} m，中心高 {MARKER_QR_CENTER_Z:.3f} m，朝 (1,-1)")
     return "\n".join(L)
 
 
@@ -458,16 +519,16 @@ def main() -> None:
     print(ascii_map())
     if args.check:
         raise SystemExit(1 if hard else 0)
-
-    text = build_world(args.target)
+    if hard:
+        raise SystemExit("几何或资源自检失败，未生成世界文件。")
+    default_name = ("dase7503_field.sdf" if args.target == "harmonic"
+                    else "dase7503_field_fortress.sdf")
+    out = Path(args.out).resolve() if args.out else SIM_ROOT / "worlds" / default_name
+    resource_base = os.path.relpath(SIM_ROOT, out.parent)
+    text = build_world(args.target, resource_base)
     if args.stdout:
         print(text)
         return
-    default_name = ("dase7503_field.sdf" if args.target == "harmonic"
-                    else "dase7503_field_fortress.sdf")
-    out = args.out or os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   "..", "worlds", default_name)
-    out = os.path.abspath(out)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         f.write(text)

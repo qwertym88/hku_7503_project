@@ -15,7 +15,7 @@ linorobot2 那边会自动完成：生成机器人、起 EKF、桥接全部话�
   ros2 launch sim/launch/field_with_robot.launch.py
   ros2 launch sim/launch/field_with_robot.launch.py gui:=false     # 无界面（跑回归时用）
 
-出生点默认在【Start 区】：中心 (2.72, 1.00)，朝向 -X（yaw = π）。
+出生点默认在【Start 区】：新坐标中心 (1.00, 0.30)，朝向 +Y（yaw = π/2）。
 """
 
 import os
@@ -30,11 +30,11 @@ from launch_ros.substitutions import FindPackageShare
 HERE = os.path.dirname(os.path.abspath(__file__))
 WORLD = os.path.abspath(os.path.join(HERE, "..", "worlds", "dase7503_field.sdf"))
 
-# Start 区：x 2.42~3.02, y 0.60~1.40 → 中心 (2.72, 1.00)
-SPAWN_X = "2.72"
-SPAWN_Y = "1.00"
+# 右下角原点的新坐标：Start 中心 (1.00, 0.30)，车头朝 +Y
+SPAWN_X = "1.00"
+SPAWN_Y = "0.30"
 SPAWN_Z = "0.0"        # 机器人陷地/悬空时改这里（每次 ±0.02 试）
-SPAWN_YAW = "3.1416"   # π → 车头朝 -X（从右侧驶向场地内部）
+SPAWN_YAW = "1.570796326795"   # π/2 → 车头朝新 +Y（场地内部）
 
 
 def generate_launch_description():
