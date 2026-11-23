@@ -1,5 +1,7 @@
 # M3/M4/M5 Gazebo integration rig
 
+For the autonomous ABCD photo/pickup/transport/drop mission, build as below and launch `ros2 launch sim_control fixed_route_sim.launch.py` in isolated `ROS_DOMAIN_ID=77`. It reads `mission_control/config/fixed_route_sim.yaml`, generates matching world poses, disables teleop, and waits for `/mission/start`. Cargo attachment is kinematic and acknowledged by Gazebo services. See the [mission/calibration guide](../../../docs/给队友看/固定路线仿真使用说明.md) for start/cancel/reset, route review, photos and limitations. The manual rig below remains available.
+
 Run from the repository root after sourcing ROS 2 Jazzy and this workspace:
 
 ```bash

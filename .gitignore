@@ -15,6 +15,7 @@ __pycache__/
 *.bag
 *.db3
 tests/logs/*
+tests/simulation/*
 !tests/logs/.gitkeep
 
 # 本地参考与临时文件

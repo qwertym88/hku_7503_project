@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="510.0" height="734.4">
+<rect width="100%" height="100%" fill="white"/>
+<rect x="35" y="35" width="440.0" height="664.4" fill="#eee" stroke="black"/>
+<polygon points="101.00,211.00 409.00,211.00 409.00,35.00 101.00,35.00" fill="#cdeccd" opacity="1.0"/>
+<circle cx="167.00" cy="567.40" r="11.0" fill="#555"/><text x="167.00" y="567.40" fill="white">S</text>
+<circle cx="101.00" cy="211.00" r="11.0" fill="#555"/><text x="101.00" y="211.00" fill="white">E</text>
+<polygon points="112.00,299.00 117.50,299.00 117.50,266.00 112.00,266.00" fill="#986b32" opacity="1.0"/>
+<polygon points="194.50,299.00 200.00,299.00 200.00,266.00 194.50,266.00" fill="#986b32" opacity="1.0"/>
+<circle cx="156.00" cy="359.50" r="4" fill="#d62728"/><text x="161.0" y="359.50" font-size="12">A photo</text>
+<circle cx="178.00" cy="79.00" r="4" fill="#1f77b4"/><text x="183.0" y="79.00" font-size="12">A drop</text>
+<polygon points="290.20,453.00 295.70,453.00 295.70,420.00 290.20,420.00" fill="#986b32" opacity="1.0"/>
+<polygon points="372.70,453.00 378.20,453.00 378.20,420.00 372.70,420.00" fill="#986b32" opacity="1.0"/>
+<circle cx="334.20" cy="513.50" r="4" fill="#d62728"/><text x="339.2" y="513.50" font-size="12">B photo</text>
+<circle cx="310.00" cy="79.00" r="4" fill="#1f77b4"/><text x="315.0" y="79.00" font-size="12">B drop</text>
+<polygon points="358.40,343.00 363.90,343.00 363.90,310.00 358.40,310.00" fill="#986b32" opacity="1.0"/>
+<polygon points="440.90,343.00 446.40,343.00 446.40,310.00 440.90,310.00" fill="#986b32" opacity="1.0"/>
+<circle cx="402.40" cy="403.50" r="4" fill="#d62728"/><text x="407.4" y="403.50" font-size="12">C photo</text>
+<circle cx="178.00" cy="171.40" r="4" fill="#1f77b4"/><text x="183.0" y="171.40" font-size="12">C drop</text>
+<polygon points="81.20,475.00 86.70,475.00 86.70,442.00 81.20,442.00" fill="#986b32" opacity="1.0"/>
+<polygon points="163.70,475.00 169.20,475.00 169.20,442.00 163.70,442.00" fill="#986b32" opacity="1.0"/>
+<circle cx="125.20" cy="513.50" r="4" fill="#d62728"/><text x="130.2" y="513.50" font-size="12">D photo</text>
+<circle cx="310.00" cy="171.40" r="4" fill="#1f77b4"/><text x="315.0" y="171.40" font-size="12">D drop</text>
+<polyline points="255.00,633.40 255.00,359.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>A_TO_PHOTO_000</title></polyline>
+<polyline points="255.00,359.50 156.00,359.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>A_TO_PHOTO_002</title></polyline>
+<polyline points="156.00,359.50 156.00,282.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>A_ENTER_006</title></polyline>
+<polyline points="156.00,282.50 156.00,247.30" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>A_CLEAR_RACK_009</title></polyline>
+<polyline points="156.00,247.30 178.00,79.00" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>A_TO_DROP_011</title></polyline>
+<polyline points="178.00,79.00 178.00,156.00" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>A_EXIT_015</title></polyline>
+<polyline points="178.00,156.00 255.00,156.00" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>B_TO_PHOTO_017</title></polyline>
+<polyline points="255.00,156.00 255.00,513.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>B_TO_PHOTO_019</title></polyline>
+<polyline points="255.00,513.50 334.20,513.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>B_TO_PHOTO_021</title></polyline>
+<polyline points="334.20,513.50 334.20,436.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>B_ENTER_025</title></polyline>
+<polyline points="334.20,436.50 334.20,392.50" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>B_CLEAR_RACK_028</title></polyline>
+<polyline points="334.20,392.50 255.00,392.50" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>B_TO_DROP_030</title></polyline>
+<polyline points="255.00,392.50 255.00,156.00" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>B_TO_DROP_032</title></polyline>
+<polyline points="255.00,156.00 310.00,156.00" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>B_TO_DROP_034</title></polyline>
+<polyline points="310.00,156.00 310.00,79.00" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>B_TO_DROP_036</title></polyline>
+<polyline points="310.00,79.00 310.00,156.00" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>B_EXIT_039</title></polyline>
+<polyline points="310.00,156.00 310.00,403.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>C_TO_PHOTO_041</title></polyline>
+<polyline points="310.00,403.50 402.40,403.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>C_TO_PHOTO_043</title></polyline>
+<polyline points="402.40,403.50 402.40,326.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>C_ENTER_047</title></polyline>
+<polyline points="402.40,326.50 402.40,249.50" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>C_CLEAR_RACK_050</title></polyline>
+<polyline points="402.40,249.50 178.00,171.40" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>C_TO_DROP_052</title></polyline>
+<polyline points="178.00,171.40 178.00,248.40" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>C_EXIT_056</title></polyline>
+<polyline points="178.00,248.40 255.00,248.40" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>D_TO_PHOTO_058</title></polyline>
+<polyline points="255.00,248.40 255.00,513.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>D_TO_PHOTO_060</title></polyline>
+<polyline points="255.00,513.50 125.20,513.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>D_TO_PHOTO_062</title></polyline>
+<polyline points="125.20,513.50 125.20,458.50" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>D_ENTER_066</title></polyline>
+<polyline points="125.20,458.50 125.20,381.50" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>D_CLEAR_RACK_069</title></polyline>
+<polyline points="125.20,381.50 310.00,171.40" fill="none" stroke="#1f77b4" stroke-width="1.5" opacity="0.7"><title>D_TO_DROP_071</title></polyline>
+<polyline points="310.00,171.40 310.00,248.40" fill="none" stroke="#d62728" stroke-width="1.5" opacity="0.7"><title>D_EXIT_075</title></polyline>
+</svg>

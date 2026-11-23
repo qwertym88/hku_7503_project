@@ -30,6 +30,7 @@ setup(
           for directory, files in sim_assets],
     ],
     install_requires=['setuptools'],
+    tests_require=['pytest'],
     zip_safe=True,
     maintainer='DASE7503 project team',
     maintainer_email='team@dase7503.invalid',
@@ -39,6 +40,7 @@ setup(
         'console_scripts': [
             'ideal_base = sim_control.ideal_base:main',
             'control_panel = sim_control.control_panel:main',
+            'cargo_simulator = sim_control.cargo:main',
         ],
     },
 )

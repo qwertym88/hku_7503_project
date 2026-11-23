@@ -8,7 +8,10 @@ import rclpy
 from geometry_msgs.msg import TransformStamped, Twist
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
+from rclpy.callback_groups import ReentrantCallbackGroup
 from ros_gz_interfaces.srv import SetEntityPose
+from std_msgs.msg import String
+from std_srvs.srv import Trigger
 from tf2_ros import TransformBroadcaster
 
 
@@ -30,13 +33,18 @@ class IdealBase(Node):
         self.pose_future = None
         self.pose_service_confirmed = False
         self.pose_failure_reported = False
+        self.resetting = False
+        self.last_pose_success = 0.0
 
         world = self.get_parameter('world_name').value
         self.entity_name = self.get_parameter('entity_name').value
+        self.io_group = ReentrantCallbackGroup()
         self.pose_client = self.create_client(
-            SetEntityPose, f'/world/{world}/set_pose')
+            SetEntityPose, f'/world/{world}/set_pose', callback_group=self.io_group)
         self.create_subscription(Twist, '/cmd_vel', self.on_command, 10)
         self.odom_pub = self.create_publisher(Odometry, '/odom', 10)
+        self.status_pub = self.create_publisher(String, '/sim/base/status', 10)
+        self.create_service(Trigger, '/sim/reset_base', self.reset_base, callback_group=self.io_group)
         self.tf_pub = TransformBroadcaster(self)
         self.create_timer(1.0 / 30.0, self.tick)
         self.get_logger().info(
@@ -44,9 +52,40 @@ class IdealBase(Node):
             'linear.x and angular.z are integrated without wheel dynamics.')
 
     def on_command(self, msg):
+        if self.resetting:
+            return
         self.vx = max(-0.5, min(0.5, float(msg.linear.x)))
         self.wz = max(-1.5, min(1.5, float(msg.angular.z)))
         self.last_command_wall = time.monotonic()
+
+    async def reset_base(self, request, response):
+        if self.resetting or not self.pose_client.service_is_ready():
+            response.success, response.message = False, 'Base reset busy / Gazebo unavailable'
+            return response
+        self.resetting = True
+        self.vx = self.wz = 0.0
+        try:
+            if self.pose_future is not None:
+                await self.pose_future
+                self.pose_future = None
+            self.x = float(self.get_parameter('start_x').value)
+            self.y = float(self.get_parameter('start_y').value)
+            self.yaw = float(self.get_parameter('start_yaw').value)
+            req = SetEntityPose.Request()
+            req.entity.name = self.entity_name
+            req.pose.position.x, req.pose.position.y = self.x, self.y
+            req.pose.orientation.z, req.pose.orientation.w = math.sin(self.yaw/2), math.cos(self.yaw/2)
+            result = await self.pose_client.call_async(req)
+            self.pose_service_confirmed = bool(result.success)
+            self.last_pose_success = time.monotonic() if result.success else 0.0
+            self.last_tick = self.get_clock().now()
+            self.last_command_wall = 0.0
+            response.success, response.message = result.success, 'Base reset to configured spawn'
+        except Exception as exc:
+            response.success, response.message = False, str(exc)
+        finally:
+            self.resetting = False
+        return response
 
     def _move_gazebo_model(self):
         if self.pose_future is not None:
@@ -55,13 +94,16 @@ class IdealBase(Node):
             try:
                 result = self.pose_future.result()
                 if not result.success:
+                    self.pose_service_confirmed = False
                     if not self.pose_failure_reported:
                         self.get_logger().warning(
                             'Gazebo set_pose returned success=false; waiting for model spawn')
                         self.pose_failure_reported = True
-                elif not self.pose_service_confirmed:
-                    self.get_logger().info('Gazebo ideal_robot pose service connected')
-                    self.pose_service_confirmed = True
+                else:
+                    self.last_pose_success = time.monotonic()
+                    if not self.pose_service_confirmed:
+                        self.get_logger().info('Gazebo ideal_robot pose service connected')
+                        self.pose_service_confirmed = True
             except Exception as exc:  # service may race the initial model spawn
                 self.get_logger().warning(f'Gazebo set_pose failed: {exc}')
             self.pose_future = None
@@ -78,6 +120,8 @@ class IdealBase(Node):
         self.pose_future = self.pose_client.call_async(request)
 
     def tick(self):
+        if self.resetting:
+            return
         now = self.get_clock().now()
         dt = (now - self.last_tick).nanoseconds / 1e9
         self.last_tick = now
@@ -121,6 +165,8 @@ class IdealBase(Node):
         odom.twist.twist.linear.x = self.vx
         odom.twist.twist.angular.z = self.wz
         self.odom_pub.publish(odom)
+        ready = self.pose_service_confirmed and time.monotonic()-self.last_pose_success < 0.5
+        self.status_pub.publish(String(data='ready' if ready else 'waiting'))
         self._move_gazebo_model()
 
 
