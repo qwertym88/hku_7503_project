@@ -175,9 +175,11 @@ static void command_callback(const void *input)
         Motor_Stop(STOP_BRAKE);
         return;
     }
-    // Initial bench limits. Revisit only after wheel directions and stopping tests.
-    float vx = fmaxf(-0.10f, fminf(0.10f, msg->linear.x));
-    float wz = fmaxf(-0.40f, fminf(0.40f, msg->angular.z));
+    // Fixed-route trial envelope; the caller chooses the operating speed.
+    float vx = fmaxf(-CHASSIS_MAX_LINEAR_MPS,
+                     fminf(CHASSIS_MAX_LINEAR_MPS, msg->linear.x));
+    float wz = fmaxf(-CHASSIS_MAX_ANGULAR_RADPS,
+                     fminf(CHASSIS_MAX_ANGULAR_RADPS, msg->angular.z));
     if (vx == 0.0f && wz == 0.0f) Motor_Stop(STOP_BRAKE);
     else if (Lifter_Blocks_Chassis()) ++rejected_commands;
     else Motion_Ctrl(vx, 0.0f, wz);

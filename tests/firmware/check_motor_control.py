@@ -2,6 +2,7 @@
 """Run actual motor/kinematics: feedback feeds PID without fault latches."""
 from pathlib import Path
 import subprocess
+import re
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -54,6 +55,18 @@ static void vTaskDelete(void *p) {(void)p;}
 static void xTaskCreatePinnedToCore(void (*f)(void*),const char*n,int s,void*a,int pr,void*o,int c)
 {(void)f;(void)n;(void)s;(void)a;(void)pr;(void)o;(void)c;}
 void Motor_Stop(bool brake);
+'''
+# Exercise the production ROS callback as well as the motor/kinematics bodies.
+main_source = (ROOT / 'firmware/chassis/main/main.c').read_text()
+callback = re.search(
+    r'static void command_callback\(const void \*input\)\n\{.*?\n\}',
+    main_source, re.S,
+).group(0)
+callback_stubs = r'''
+typedef struct { double x,y,z; } test_vector_t;
+typedef struct { test_vector_t linear,angular; } geometry_msgs__msg__Twist;
+static uint32_t command_count, rejected_commands;
+static bool Lifter_Blocks_Chassis(void) {return lift_inhibited;}
 '''
 tests = r'''
 static void reset_fixture(void) {
@@ -157,6 +170,55 @@ int main(void) {
         assert(pid_enable && fabsf(motion.Vx)<1e-6f && turn*motion.Wz>0);
         assert(turn*d.speed[0]<0 && turn*d.speed[2]>0);
     }
+    // Low-speed callers retain their targets; combined commands preserve curvature.
+    const float count_unit=MOTOR_WHEEL_CIRCLE/MOTOR_ENCODER_CIRCLE/MOTOR_PID_PERIOD;
+    for(int v_sign=-1;v_sign<=1;++v_sign) {
+        for(int w_sign=-1;w_sign<=1;++w_sign) {
+            reset_fixture();
+            geometry_msgs__msg__Twist cmd={0};
+            cmd.linear.x=v_sign*CHASSIS_MAX_LINEAR_MPS;
+            cmd.angular.z=w_sign*CHASSIS_MAX_ANGULAR_RADPS;
+            command_callback(&cmd);
+            float left=cmd.linear.x-cmd.angular.z*ROBOT_APB;
+            float right=cmd.linear.x+cmd.angular.z*ROBOT_APB;
+            assert(fabsf(left)<=MOTOR_MAX_SPEED && fabsf(right)<=MOTOR_MAX_SPEED);
+            if(v_sign || w_sign) {
+                assert(pid_enable);
+                Motor_Get_Diagnostics(&d);
+                for(int i=0;i<4;++i)
+                    assert(fabsf(d.target_counts[i]*count_unit-(i<2 ? left : right))<1e-6f);
+            } else assert(!pid_enable);
+        }
+    }
+    for(int sign=-1;sign<=1;sign+=2) {
+        reset_fixture();
+        geometry_msgs__msg__Twist cmd={0};
+        cmd.linear.x=sign*10.; cmd.angular.z=sign*10.;
+        command_callback(&cmd); Motor_Get_Diagnostics(&d);
+        assert(fabsf(d.target_counts[0]*count_unit-sign*(CHASSIS_MAX_LINEAR_MPS-CHASSIS_MAX_ANGULAR_RADPS*ROBOT_APB))<1e-6f);
+        assert(fabsf(d.target_counts[2]*count_unit-sign*(CHASSIS_MAX_LINEAR_MPS+CHASSIS_MAX_ANGULAR_RADPS*ROBOT_APB))<1e-6f);
+    }
+    reset_fixture();
+    geometry_msgs__msg__Twist cmd={0};
+    cmd.linear.x=.03;
+    command_callback(&cmd); Motor_Get_Diagnostics(&d);
+    for(int i=0;i<4;++i) assert(fabsf(d.target_counts[i]*count_unit-.03f)<1e-6f);
+    cmd.linear.y=.01; command_callback(&cmd); assert(!pid_enable);
+    cmd.linear.y=0; cmd.linear.x=NAN; command_callback(&cmd); assert(!pid_enable);
+    cmd.linear.x=.03; cmd.angular.z=INFINITY; command_callback(&cmd); assert(!pid_enable);
+    cmd.angular.z=0;
+    Motor_Set_Lift_Inhibit(true); command_callback(&cmd); assert(!pid_enable);
+    Motor_Set_Lift_Inhibit(false); command_callback(&cmd); assert(pid_enable);
+    cmd.linear.x=0; command_callback(&cmd); assert(!pid_enable);
+    // Independent wheel API still clamps and stops on invalid inputs.
+    Motor_Set_Speed(10,-10,10,-10); Motor_Get_Diagnostics(&d);
+    for(int i=0;i<4;++i)
+        assert(fabsf(d.target_counts[i]*count_unit-(i%2 ? -MOTOR_MAX_SPEED : MOTOR_MAX_SPEED))<1e-6f);
+    Motor_Set_Speed(NAN,0,0,0); assert(!pid_enable);
+    // Raised command speeds retain the independent command watchdog.
+    command_callback(&(geometry_msgs__msg__Twist){.linear={.x=CHASSIS_MAX_LINEAR_MPS}});
+    fake_us+=MOTOR_COMMAND_TIMEOUT_US;
+    previous=writes; Motor_PID_Ctrl(); assert(!pid_enable && writes==previous);
     // Raw counter wrap must preserve the signed one-count displacement.
     reset_fixture();
     for(int i=0;i<4;++i) counts[i]=INT_MIN;
@@ -167,7 +229,7 @@ int main(void) {
     for(int i=0;i<4;++i) counts[i]=INT_MIN;
     Motor_PID_Ctrl();Motor_Get_Diagnostics(&d);
     for(int i=0;i<4;++i) assert(fabsf(d.speed[i]-meters_per_count)<1e-6f);
-    puts("PASS: baseline raw-positive feedback, PID errors, forward/reverse/turn odometry, wrap, no feedback latch, interlock and watchdog");
+    puts("PASS: baseline raw-positive feedback, PID errors, forward/reverse/turn odometry, wrap, command/wheel limits, invalid inputs, interlock and watchdog");
 }
 '''
 with tempfile.TemporaryDirectory(prefix='chassis-motor-test-') as temp:
@@ -175,7 +237,7 @@ with tempfile.TemporaryDirectory(prefix='chassis-motor-test-') as temp:
     binary = Path(temp) / 'check'
     motion_source=(ROOT/'firmware/chassis/components/car_motion/car_motion.c').read_text()
     motion_source='\n'.join(line for line in motion_source.splitlines() if not line.startswith('#include'))
-    unit.write_text(stubs + source + motion_source + tests)
+    unit.write_text(stubs + source + motion_source + callback_stubs + callback + tests)
     subprocess.run(['gcc','-std=c11','-Wall','-Wextra','-Werror','-Wno-unused-variable','-Wno-unused-parameter',
                     '-I'+str(ROOT/'firmware/chassis/components/motor'),
                     '-I'+str(ROOT/'firmware/chassis/components/pwm_motor'),

@@ -2,6 +2,7 @@
 
 import math
 
+from .motion import motion_request, ramp_command
 from .route import angle, cargo_offset, collision, compose, pose, validate_geometry
 
 
@@ -97,26 +98,11 @@ class Mission:
         v, w = 0., 0.
         done = False
         error = 0.
-        heading = angle(a.target[2] - p[2])
-        if a.kind == 'turn':
-            error = abs(heading)
-            done = error <= c['yaw_tolerance_rad']
-            w = max(-a.speed, min(a.speed, 3.0*heading)) if not done else 0.
-        elif a.kind == 'drive':
-            dx, dy = a.target[0] - p[0], a.target[1] - p[1]
-            along = dx*math.cos(a.target[2]) + dy*math.sin(a.target[2])
-            cross = -dx*math.sin(a.target[2]) + dy*math.cos(a.target[2])
-            error = math.hypot(dx, dy)
-            if abs(cross) > c['max_cross_track_m'] or abs(heading) > c['max_heading_error_rad']:
-                self.stop(f'{a.id}: cross-track/heading limit')
+        if a.kind in ('turn', 'drive'):
+            (v, w), done, error, motion_fault = motion_request(a, p, c)
+            if motion_fault:
+                self.stop(f'{a.id}: {motion_fault}')
                 return self.command
-            done = error <= c['position_tolerance_m']
-            if along*a.value < -c['position_tolerance_m'] and not done:
-                self.stop(f'{a.id}: overshot target')
-                return self.command
-            if not done:
-                v = math.copysign(min(a.speed, 2.5*abs(along)), a.value)
-                w = max(-c['turn_rps'], min(c['turn_rps'], 3.*heading + math.copysign(2.0, v)*cross))
         elif a.kind == 'wait':
             done = now - self.entered >= a.value
         else:
@@ -133,10 +119,7 @@ class Mission:
         dt = min(0.1, max(0., now - self.last_tick))
         self.last_tick = now
         if not done and a.kind in ('drive', 'turn'):
-            def ramp(old, new, amount):
-                return old + max(-amount, min(amount, new-old))
-            v = ramp(self.command[0], v, c['acceleration_mps2']*dt)
-            w = ramp(self.command[1], w, c['angular_acceleration_rps2']*dt)
+            v, w = ramp_command(self.command, (v, w), dt, c)
         self.command = (v, w)
         if done:
             self.command = (0., 0.)

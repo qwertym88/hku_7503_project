@@ -15,6 +15,8 @@ setup(
     license='Proprietary',
     entry_points={'console_scripts': [
         'fixed_route = mission_control.node:main',
+        'chassis_compare = mission_control.chassis_compare:main',
+        'chassis_segment = mission_control.chassis_segment:main',
         'validate_route = mission_control.validate:main',
     ]},
 )

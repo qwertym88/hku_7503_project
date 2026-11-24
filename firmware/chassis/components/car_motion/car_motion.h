@@ -17,6 +17,10 @@ extern "C" {
 #define ROBOT_APB                    ((ROBOT_WIDTH + ROBOT_LENGTH) / 2.0f)
 
 
+// Command envelope for the fixed-route speed trial; physical performance is unverified.
+#define CHASSIS_MAX_LINEAR_MPS       (0.45f)
+#define CHASSIS_MAX_ANGULAR_RADPS    (1.50f)
+
 #define ROBOT_SPIN_SCALE             (5.0f)
 
 

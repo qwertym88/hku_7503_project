@@ -16,8 +16,9 @@ extern "C" {
 #define MOTOR_WHEEL_CIRCLE              (65.0f * 3.14159265358979323846f)
 // PID算法计算周期，单位：ms
 #define MOTOR_PID_PERIOD                (10)
-// 设置电机最大速度，单位：ms/s。
-#define MOTOR_MAX_SPEED                 (0.20f)
+// Per-wheel command limit in m/s, not a measured motor capability.
+// Covers 0.45 + ROBOT_APB(0.185) * 1.50 = 0.7275 m/s for combined commands.
+#define MOTOR_MAX_SPEED                 (0.75f)
 
 // Check in the independent motor task; leaves one 10ms cycle of margin below 0.5s.
 #define MOTOR_COMMAND_TIMEOUT_US        (480000)
