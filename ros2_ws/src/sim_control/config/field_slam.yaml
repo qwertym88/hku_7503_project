@@ -1,0 +1,20 @@
+slam_toolbox:
+  ros__parameters:
+    mode: mapping
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_footprint
+    scan_topic: /scan
+    use_map_saver: true
+    resolution: 0.02
+    map_update_interval: 1.0
+    minimum_time_interval: 0.15
+    minimum_travel_distance: 0.06
+    minimum_travel_heading: 0.12
+    max_laser_range: 5.0
+    # The Gazebo base supplies exact odometry in field coordinates. Keep the
+    # known coordinates when long, parallel walls give ambiguous scan matches.
+    use_scan_matching: false
+    do_loop_closing: false
+    enable_interactive_mode: true
+    solver_plugin: solver_plugins::CeresSolver

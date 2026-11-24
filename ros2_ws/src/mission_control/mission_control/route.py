@@ -6,6 +6,8 @@ from pathlib import Path
 
 import yaml
 
+from .curve import advance, samples
+
 
 def angle(value):
     return math.atan2(math.sin(value), math.cos(value))
@@ -108,8 +110,10 @@ def _finite_tree(value, path='config'):
 
 def validate_config(cfg):
     _finite_tree(cfg)
-    if cfg['simulation_only'] is not True or cfg['frame'] != 'field':
-        raise ValueError('This implementation requires simulation_only: true and frame: field')
+    if not isinstance(cfg['simulation_only'], bool) or cfg['frame'] != 'field':
+        raise ValueError('Expected a boolean simulation_only and frame: field')
+    if not isinstance(cfg.get('qr_faces_negative_y', False), bool):
+        raise ValueError('qr_faces_negative_y must be a boolean')
     if sorted(cfg['order']) != list('ABCD') or set(cfg['racks']) != set('ABCD'):
         raise ValueError('order must contain each of A/B/C/D exactly once')
     if not isinstance(cfg['version'], str) or not cfg['version'].strip():
@@ -127,6 +131,10 @@ def validate_config(cfg):
     for section in ('robot', 'rack'):
         if any(not isinstance(v, (float, int)) or v <= 0 for v in cfg['scene'][section].values()):
             raise ValueError(f'scene.{section}: positive dimensions required')
+    if 'planning' in cfg:
+        clearance = cfg['planning']['clearance_m']
+        if isinstance(clearance, bool) or not isinstance(clearance, (int, float)) or clearance <= 0:
+            raise ValueError('planning.clearance_m must be positive and finite')
     if cfg['scene']['clearance_m'] < 0:
         raise ValueError('clearance_m must be nonnegative')
     if set(cfg['scene']['markers']) != {'S', 'E'}:
@@ -144,6 +152,12 @@ def validate_config(cfg):
         models.add(r['model'])
         for field in ('pose', 'photo_pose', 'drop_pose', 'pickup_offset'):
             pose(r[field])
+        if not isinstance(r.get('photo_in_docking_zone', False), bool):
+            raise ValueError(f'{key}.photo_in_docking_zone must be a boolean')
+        if cfg.get('qr_faces_negative_y'):
+            photo = pose(r['photo_pose'])
+            if photo[1] >= r['pose']['y'] or abs(angle(photo[2] - math.pi / 2)) > 1e-6:
+                raise ValueError(f'{key}: photograph from negative Y facing positive Y')
         for field in ('enter_distance_m', 'clear_distance_m', 'exit_distance_m'):
             if not isinstance(r[field], (int, float)) or r[field] <= 0:
                 raise ValueError(f'{key}.{field} must be positive')
@@ -155,6 +169,18 @@ def validate_config(cfg):
             for name in r[field]:
                 if name not in cfg['transit_points']:
                     raise ValueError(f'{key}.{field}: unknown point {name}')
+            curve = f'{field}_curve'
+            if curve in r:
+                spec = r[curve]
+                if not cfg.get('planning') or not isinstance(spec, dict):
+                    raise ValueError(f'{key}.{curve}: curve requires a planning clearance and a mapping')
+                pose(spec['start'])
+                pose(spec['end'])
+                if not spec['segments'] or any(
+                    len(segment) != 2 or any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in segment)
+                    or segment[0] <= 0 for segment in spec['segments']
+                ):
+                    raise ValueError(f'{key}.{curve}: expected positive arc lengths and signed curvatures')
         pickup = pickup_pose(r)
         delta = relative(pose(r['pose']), pickup)
         offset = pose(r['pickup_offset'])
@@ -189,6 +215,7 @@ class Action:
     value: float
     speed: float
     timeout: float
+    segments: tuple = ()
 
 
 def compile_route(cfg):
@@ -197,13 +224,13 @@ def compile_route(cfg):
     current = pose(cfg['start_pose'])
     c = cfg['control']
 
-    def add(key, state, kind, target=None, value=0., speed=0.):
+    def add(key, state, kind, target=None, value=0., speed=0., segments=()):
         nonlocal current
-        timeout = c['segment_timeout_s'] if kind in ('turn', 'drive') else c['effect_timeout_s']
+        timeout = c['segment_timeout_s'] if kind in ('turn', 'drive', 'curve') else c['effect_timeout_s']
         if kind == 'wait':
             timeout = value + c['effect_timeout_s']
         a = Action(f'{key}_{state}_{len(actions):03d}', key, state, kind,
-                   current, target or current, value, speed, timeout)
+                   current, target or current, value, speed, timeout, segments)
         actions.append(a)
         current = a.target
 
@@ -215,7 +242,23 @@ def compile_route(cfg):
     def drive(key, state, distance, speed):
         add(key, state, 'drive', compose(current, (distance, 0, 0)), distance, speed)
 
-    def route(key, state, points, final, speed):
+    def route(key, state, field, final, speed):
+        rack = cfg['racks'][key]
+        spec = rack.get(f'{field}_curve')
+        if spec:
+            start, end = pose(spec['start']), pose(spec['end'])
+            turn(key, state, start[2])
+            segments = tuple(tuple(segment) for segment in spec['segments'])
+            actual = current
+            for length, curvature in segments:
+                actual = advance(actual, length, curvature)
+            if (math.dist(current[:2], start[:2]) > 1e-6 or math.dist(actual[:2], final[:2]) > 1e-6
+                    or math.dist(actual[:2], end[:2]) > 1e-6 or abs(angle(actual[2] - end[2])) > 1e-6):
+                raise ValueError(f'{key}.{field}_curve: arc geometry does not connect the declared poses')
+            add(key, state, 'curve', end, sum(length for length, _ in segments), speed, segments)
+            turn(key, state, final[2])
+            return
+        points = rack[field]
         for point in [cfg['transit_points'][name] for name in points] + [final[:2]]:
             dx, dy = point[0] - current[0], point[1] - current[1]
             length = math.hypot(dx, dy)
@@ -226,7 +269,7 @@ def compile_route(cfg):
 
     for key in cfg['order']:
         r = cfg['racks'][key]
-        route(key, 'TO_PHOTO', r['to_photo'], pose(r['photo_pose']), c['cruise_mps'])
+        route(key, 'TO_PHOTO', 'to_photo', pose(r['photo_pose']), c['cruise_mps'])
         add(key, 'DWELL', 'wait', value=cfg['timing']['photo_dwell_s'])
         add(key, 'PHOTO', 'photo')
         drive(key, 'ENTER', r['enter_distance_m'], c['approach_mps'])
@@ -234,7 +277,7 @@ def compile_route(cfg):
         add(key, 'LIFT_WAIT', 'wait', value=cfg['timing']['lift_wait_s'])
         clear_sign = 1 if r.get('clear_direction', 'backward') == 'forward' else -1
         drive(key, 'CLEAR_RACK', clear_sign*r['clear_distance_m'], c['approach_mps'])
-        route(key, 'TO_DROP', r['to_drop'], pose(r['drop_pose']), c['loaded_mps'])
+        route(key, 'TO_DROP', 'to_drop', pose(r['drop_pose']), c['loaded_mps'])
         add(key, 'LOWER', 'lower')
         add(key, 'LOWER_WAIT', 'wait', value=cfg['timing']['lower_wait_s'])
         drive(key, 'EXIT', -r['exit_distance_m'], c['approach_mps'])
@@ -242,6 +285,9 @@ def compile_route(cfg):
 
 
 def action_samples(action, linear_step=0.005, angular_step=0.015):
+    if action.kind == 'curve':
+        yield from (p for _, p, _ in samples(action.start, action.segments, linear_step, angular_step))
+        return
     distance = math.hypot(action.target[0]-action.start[0], action.target[1]-action.start[1])
     turn = angle(action.target[2]-action.start[2])
     n = max(1, math.ceil(distance / linear_step), math.ceil(abs(turn) / angular_step))
@@ -253,7 +299,10 @@ def action_samples(action, linear_step=0.005, angular_step=0.015):
 
 
 def validate_geometry(cfg, actions=None):
+    from .clearance import SceneClearance, action_violation, clearance_setting
+
     actions = compile_route(cfg) if actions is None else actions
+    minimum = clearance_setting(cfg)
     racks = {key: pose(r['pose']) for key, r in cfg['racks'].items()}
     stationary = []
     for key, p in racks.items():
@@ -270,6 +319,10 @@ def validate_geometry(cfg, actions=None):
     carrying = None
     placed = {}
     for action in actions:
+        if minimum:
+            hit = action_violation(SceneClearance(cfg, racks, carrying), action, minimum)
+            if hit:
+                raise ValueError(f'{action.id}: less than {minimum:.3f} m clearance from {hit}')
         for p in action_samples(action):
             hit = collision(cfg, p, racks, carrying)
             if hit:

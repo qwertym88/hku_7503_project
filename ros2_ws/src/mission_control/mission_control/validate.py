@@ -7,7 +7,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape
 
 from .core import Mission
-from .route import load_config, pose, rack_polygons
+from .route import action_samples, load_config, pose, rack_polygons
 
 
 def rehearse(cfg, dt=0.02):
@@ -56,9 +56,10 @@ def write_svg(cfg, actions, path):
             x, y = point(pose(r[name])).split(',')
             out.append(f'<circle cx="{x}" cy="{y}" r="4" fill="{color}"/><text x="{float(x)+5}" y="{y}" font-size="12">{key} {name.split("_")[0]}</text>')
     for a in actions:
-        if a.kind == 'drive':
+        if a.kind in ('drive', 'curve'):
             color = '#1f77b4' if a.state in ('CLEAR_RACK','TO_DROP') else '#d62728'
-            out.append(f'<polyline points="{point(a.start)} {point(a.target)}" fill="none" stroke="{color}" stroke-width="1.5" opacity="0.7"><title>{escape(a.id)}</title></polyline>')
+            points = action_samples(a, linear_step=0.02, angular_step=0.05) if a.kind == 'curve' else (a.start, a.target)
+            out.append(f'<polyline points="{" ".join(map(point, points))}" fill="none" stroke="{color}" stroke-width="1.5" opacity="0.7"><title>{escape(a.id)}</title></polyline>')
     out.append('</svg>')
     Path(path).write_text('\n'.join(out), encoding='utf-8')
 

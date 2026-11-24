@@ -128,6 +128,59 @@ ros2 launch sim_control sim_ideal.launch.py
 
 项目运行目标为 Jazzy + Harmonic。Fortress 是遗留兼容文件，本次 S/E 标志未同步到该文件；后续计划移除。
 
+### 几何地图、AMCL 与 RViz
+
+先从仓库根目录构建 ROS 工作区。定位使用 Jazzy 的 `nav2_bringup`，独立扫图使用 `slam_toolbox`。
+
+```zsh
+cd ros2_ws
+source /opt/ros/jazzy/setup.zsh
+colcon build --packages-up-to sim_control
+source install/setup.zsh
+```
+
+启动任务时，程序根据 `config` 中的场地边界和 S/E 圆柱生成 1 cm 分辨率的 `field_map.yaml` 和 `field_map.pgm`。Gazebo 使用同一份场地配置。可移动货架由任务维护，定位地图只包含固定结构。`map_server` 发布静态 `/map`，AMCL 根据雷达和 `/odom` 发布 `map→odom`。任务等待定位就绪，直行与转向仍用仿真 `/odom` 闭环。
+
+```zsh
+export ROS_DOMAIN_ID=77
+GZ_PARTITION=dase7503_mission ros2 launch sim_control fixed_route_sim.launch.py \
+  plan_route:=true autostart:=true
+```
+
+终端会打印定位地图路径。省略 `autostart` 时，在同一 ROS 域的另一个终端执行 `ros2 service call /mission/start std_srvs/srv/Trigger '{}'`。RViz 的 `Saved field map` 显示定位地图，`AMCL pose` 显示定位，深紫色为整轮路线，青绿色为当前动作尚待执行的路段。`Field and stationary racks` 是可选的几何显示层，随任务更新货架位置。
+
+### 独立自主扫图
+
+`field_mapping.launch.py` 在空场里沿预检过的短回路行驶，回到起点停稳后保存 2 cm 分辨率的雷达栅格，随后自动退出。默认 ROS 域为 78。
+
+```zsh
+map_dir=$(mktemp -d /tmp/dase7503-map-XXXXXX)
+GZ_PARTITION=dase7503_mapping ros2 launch sim_control field_mapping.launch.py \
+  output:="$map_dir/field_lidar"
+```
+
+`output` 是文件名前缀。省略时自动在 `/tmp` 生成新目录，终端会打印保存路径。需要对比扫图结果时，在任务启动命令中追加 `map:="$map_dir/field_lidar.yaml"`。地图 YAML 和 PGM 应一起保存，并与任务使用同一场地坐标系。也可用 `field_slam.launch.py` 手动采图，再用 `ros2 run nav2_map_server map_saver_cli -f "$map_dir/field_lidar"` 在同一 ROS 域导出。
+
+### 10 cm 连续曲线规划
+
+任务默认走原固定路线。在任务启动命令上追加 `plan_route:=true clearance:=0.10`，即可在启动 Gazebo 前按当前场地规划连续曲线。终端会给出 `planned_route.yaml`、`route.svg` 和 `field_map.yaml` 的位置。也可选择已生成的[连续曲线路线](routes/offline_10cm_curves.yaml)，或从仓库根目录离线生成并预览：
+
+```bash
+PYTHONPATH=ros2_ws/src/mission_control python3 -m mission_control.offline_plan \
+  ros2_ws/src/mission_control/config/fixed_route_sim.yaml \
+  --clearance 0.10 --output sim/routes/offline_10cm_curves.yaml --map /tmp/field_geometry.yaml
+PYTHONPATH=ros2_ws/src/mission_control python3 -m mission_control.validate \
+  sim/routes/offline_10cm_curves.yaml --svg /tmp/offline_curves.svg
+```
+
+规划器先用 A* 找可行通道，再为去拍照位和去放架位的路段搜索相切的直线和圆弧，找不到合格曲线时沿原折线路段执行。车头方向在接点连续，曲率可以变化，控制器会在急弯处降速。拍照和放架需要到位停稳，窄处允许在端点原地对正，进架、离架和退出沿货架轴线直行。RViz 和 `route.svg` 显示实际下发给控制器的曲线。
+
+每次放货后更新障碍，按扫掠外廓检查车体和载荷到 S/E 柱及其他货架的 10 cm 净空，并在规划时预留 1.2 cm 跟踪余量。当前操作货架在对接时按实际通道校验，35 cm 通道配 25 cm 车体，居中每侧为 5 cm。外墙沿用场地边界净空校验。
+
+当前布局的八段转运均找到曲线。与[原离线折线路线](routes/offline_10cm.yaml)相比，规划移动距离从 14.65 m 增至 15.02 m，原地转向动作从 25 次降至 8 次。可用上述离线命令的 `--polyline` 参数生成折线路线作为对照。
+
+迁移实车时，可沿用静态地图加 AMCL 的结构。地图可来自场地实测尺寸或独立雷达采图，再对齐现场墙体、圆柱和任务航点。用实测雷达及编码器/IMU 融合里程计接入定位。货架位置变动时更新路线使用的障碍布局，固定结构变动时更新定位地图。
+
 ## 验证记录
 
 2026-11-20 起终点标志：

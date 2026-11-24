@@ -11,6 +11,8 @@ sim_assets = [
     ('models/ideal_robot', [sim_root / 'models' / 'ideal_robot' / 'model.sdf']),
     ('meshes', [sim_root / 'meshes' / 'qr_panel.dae']),
     ('materials/textures', sorted((sim_root / 'materials' / 'textures').glob('*.png'))),
+    ('maps', sorted((sim_root / 'maps').glob('*'))),
+    ('routes', sorted((sim_root / 'routes').glob('*.yaml'))),
 ]
 sim_assets = [(directory, [os.path.relpath(path, Path(__file__).parent)
                            for path in files])
@@ -41,6 +43,7 @@ setup(
             'ideal_base = sim_control.ideal_base:main',
             'control_panel = sim_control.control_panel:main',
             'cargo_simulator = sim_control.cargo:main',
+            'map_sweep = sim_control.map_sweep:main',
         ],
     },
 )

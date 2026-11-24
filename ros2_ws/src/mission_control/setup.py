@@ -11,10 +11,11 @@ setup(
     install_requires=['setuptools', 'PyYAML'], zip_safe=True,
     tests_require=['pytest'],
     maintainer='DASE7503 project team', maintainer_email='team@dase7503.invalid',
-    description='Fixed-route mission with simulation-only cargo and camera integration',
+    description='Fixed-route mission with Gazebo and firmware cargo integration',
     license='Proprietary',
     entry_points={'console_scripts': [
         'fixed_route = mission_control.node:main',
+        'fixed_route_hardware = mission_control.hardware:main',
         'chassis_compare = mission_control.chassis_compare:main',
         'chassis_segment = mission_control.chassis_segment:main',
         'validate_route = mission_control.validate:main',

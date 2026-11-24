@@ -26,6 +26,7 @@ URDF_PATH = os.path.join(
 def generate_launch_description():
     port = LaunchConfiguration('port')
     frame_id = LaunchConfiguration('frame_id')
+    urdf = LaunchConfiguration('urdf')
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -35,6 +36,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'frame_id', default_value='laser',
             description='/scan 的 frame_id（接口契约固定为 laser）'),
+        DeclareLaunchArgument('urdf', default_value=URDF_PATH),
 
         # MS200 驱动（Oradar 官方 ROS 2 驱动，230400 波特率，47 字节定长包协议）
         Node(
@@ -65,7 +67,7 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'robot_description': ParameterValue(
-                    Command(['xacro ', URDF_PATH]), value_type=str),
+                    Command(['xacro "', urdf, '"']), value_type=str),
                 'use_sim_time': False,
             }],
         ),

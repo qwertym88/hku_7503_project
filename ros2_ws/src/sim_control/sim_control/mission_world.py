@@ -4,7 +4,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 
-def render_world(source, target, cfg):
+def render_world(source, target, cfg, *, include_racks=True):
     source = Path(source).resolve()
     root = ET.parse(source).getroot()
     world = root.find('world')
@@ -39,6 +39,9 @@ def render_world(source, target, cfg):
     g = scene['rack']
     for r in cfg['racks'].values():
         model = models[r['model']]
+        if not include_racks:
+            world.remove(model)
+            continue
         p = r['pose']
         model.find('pose').text = f'{p["x"]} {p["y"]} 0 0 0 {p["yaw"]}'
         for side, sign in (('west',-1),('east',1)):

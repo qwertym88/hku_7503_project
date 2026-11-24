@@ -1,0 +1,25 @@
+# Overrides for mission_control/config/fixed_route_sim.yaml.
+version: hardware-2026-11-24-standard-field
+simulation_only: false
+qr_faces_negative_y: true
+
+control:
+  cruise_mps: 0.20
+  loaded_mps: 0.16
+  approach_mps: 0.09
+  turn_rps: 0.80
+  acceleration_mps2: 0.30
+  angular_acceleration_rps2: 1.5
+  position_tolerance_m: 0.012
+  yaw_tolerance_rad: 0.035
+  settle_s: 0.45
+  cargo_timeout_s: 1.6
+  segment_timeout_s: 40.0
+  effect_timeout_s: 10.0
+  mission_timeout_s: 420.0
+
+racks:
+  D:
+    photo_pose: {x: 0.410, y: 0.895, yaw: 1.5707963267948966}
+    enter_distance_m: 0.20
+    photo_in_docking_zone: true

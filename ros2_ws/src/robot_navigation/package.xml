@@ -18,7 +18,10 @@
   <exec_depend>oradar_lidar</exec_depend>
   <exec_depend>robot_description</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
   <exec_depend>robot_localization</exec_depend>
+  <exec_depend>mission_control</exec_depend>
+  <exec_depend>qr_perception</exec_depend>
   <exec_depend>slam_toolbox</exec_depend>
   <exec_depend>nav2_bringup</exec_depend>
   <exec_depend>nav2_map_server</exec_depend>

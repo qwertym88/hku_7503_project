@@ -41,6 +41,7 @@ def generate_launch_description():
                               description='Gazebo world SDF'),
         DeclareLaunchArgument('gui', default_value='true', description='Show Gazebo GUI'),
         DeclareLaunchArgument('rviz', default_value='true', description='Show RViz'),
+        DeclareLaunchArgument('rviz_config', default_value=rviz_config),
         DeclareLaunchArgument('panel', default_value='true', description='Show /cmd_vel panel'),
         DeclareLaunchArgument('spawn_x', default_value='1.0', description='Initial X in metres'),
         DeclareLaunchArgument('spawn_y', default_value='0.3', description='Initial Y in metres'),
@@ -83,7 +84,7 @@ def generate_launch_description():
              }]),
 
         Node(package='rviz2', executable='rviz2', name='rviz2', output='screen',
-             arguments=['-d', rviz_config], parameters=[{'use_sim_time': True}],
+             arguments=['-d', LaunchConfiguration('rviz_config')], parameters=[{'use_sim_time': True}],
              condition=IfCondition(rviz)),
 
         Node(package='sim_control', executable='control_panel', name='control_panel',

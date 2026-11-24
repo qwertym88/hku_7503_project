@@ -2,7 +2,9 @@
 
 import math
 
-from .motion import motion_request, ramp_command
+from .clearance import SceneClearance, clearance_setting, docking_rack
+from .curve import samples
+from .motion import curve_request, motion_request, ramp_command
 from .route import angle, cargo_offset, collision, compose, pose, validate_geometry
 
 
@@ -10,6 +12,7 @@ class Mission:
     def __init__(self, cfg):
         self.cfg = cfg
         self.actions = validate_geometry(cfg)
+        self.minimum_clearance = clearance_setting(cfg)
         self.events = []
         self.reset()
 
@@ -57,6 +60,9 @@ class Mission:
         self.best_error = math.inf
         self.last_progress = now
         a = self.action
+        if a.kind == 'curve':
+            self.curve_path = tuple(zip(*samples(a.start, a.segments)))
+            self.curve_progress = 0.
         self.emit('action_enter', id=a.id, rack=a.rack, state=a.state, kind=a.kind,
                   target=list(a.target), value=a.value)
 
@@ -95,20 +101,32 @@ class Mission:
             self.stop(f'{a.id}: predicted footprint intersects {hit}')
             return self.command
 
+        if self.minimum_clearance:
+            scene = SceneClearance(self.cfg, self.racks, self.carrying)
+            hit = scene.violation(p, self.minimum_clearance, docking=docking_rack(a, self.cfg))
+            if hit:
+                self.stop(f'{a.id}: {hit} inside {self.minimum_clearance:.3f} m clearance')
+                return self.command
+
         v, w = 0., 0.
         done = False
         error = 0.
-        if a.kind in ('turn', 'drive'):
+        moving = a.kind in ('turn', 'drive', 'curve')
+        if a.kind == 'curve':
+            (v, w), done, error, motion_fault = curve_request(a, self.curve_path, self.curve_progress, p, c)
+            self.curve_progress = max(0., a.value - error) if v else self.curve_progress
+        elif moving:
             (v, w), done, error, motion_fault = motion_request(a, p, c)
-            if motion_fault:
-                self.stop(f'{a.id}: {motion_fault}')
-                return self.command
         elif a.kind == 'wait':
             done = now - self.entered >= a.value
         else:
             done = self.effect_done
+        if moving:
+            if motion_fault:
+                self.stop(f'{a.id}: {motion_fault}')
+                return self.command
 
-        if a.kind in ('drive', 'turn') and not done:
+        if moving and not done:
             if error < self.best_error - 0.001:
                 self.best_error = error
                 self.last_progress = now
@@ -118,7 +136,7 @@ class Mission:
 
         dt = min(0.1, max(0., now - self.last_tick))
         self.last_tick = now
-        if not done and a.kind in ('drive', 'turn'):
+        if not done and moving:
             v, w = ramp_command(self.command, (v, w), dt, c)
         self.command = (v, w)
         if done:
