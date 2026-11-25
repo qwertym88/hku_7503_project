@@ -85,6 +85,8 @@ class HardwareMission(MissionNode):
         status = self.cargo_status
         if not status or not self.fresh('cargo', self.cfg['control']['cargo_timeout_s']):
             return 'Chassis diagnostics missing/stale/invalid'
+        if status.get('command_locked'):
+            return 'Chassis commands are locked after reconnect; stop controllers and call /chassis/unlock'
         if not status['imu_valid']:
             return 'Chassis reports invalid IMU'
         if status['lifter_fault'] != 'none' or status['lifter_state'] not in ('idle', 'raising', 'lowering'):

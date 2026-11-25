@@ -7,7 +7,9 @@ import tempfile
 
 ROOT=Path(__file__).resolve().parents[2]
 main=(ROOT/'firmware/chassis/main/main.c').read_text()
-callbacks=main[main.index('static void command_callback('):main.index('static void odom_callback(')]
+restart=main[main.index('static void __attribute__((noreturn)) restart_disconnected('):
+             main.index('static bool motion_requests_locked(')]
+callbacks=main[main.index('static bool motion_requests_locked('):main.index('static void odom_callback(')]
 fmt=main[main.index('    int length = snprintf('):main.index('    if (length > 0')]
 stubs=r'''
 #include <assert.h>
@@ -15,9 +17,10 @@ stubs=r'''
 #include <stdbool.h>
 #include <stdint.h>
 #include <limits.h>
+#include <setjmp.h>
 #include <stdio.h>
 #include <string.h>
-#include "motor.h"
+#include "car_motion.h"
 #include "lifter.h"
 #define CHASSIS_IMU_BIAS_ENABLED 0
 #define CHASSIS_IMU_BIAS_X_RADS 0.0
@@ -32,16 +35,29 @@ static bool rosidl_runtime_c__String__assign(rosidl_runtime_c__String *s,const c
 {size_t n=strlen(text);assert(n<s->capacity);memcpy(s->data,text,n+1);s->size=n;return true;}
 static lifter_control_t test_lift;
 static bool fault;
+static bool command_locked;
+static const uint32_t recovery_cookie=0x43484b31;
+static uint32_t recovery_marker;
+static lifter_fault_t recovery_lifter_fault;
+static jmp_buf reboot;
+static int64_t last_locked_command_us;
 static int64_t fake_now=10000;
 static uint32_t command_count, rejected_commands;
 static unsigned wheel_stop_calls, wheel_move_calls;
 #define STOP_BRAKE true
 typedef struct {struct {double x,y,z;} linear,angular;} geometry_msgs__msg__Twist;
+static int64_t esp_timer_get_time(void) {return fake_now;}
+static float test_wheel_speed;
+void Motor_Get_Diagnostics(motor_diagnostics_t *out) {*out=(motor_diagnostics_t){.speed={test_wheel_speed}};}
 void Motor_Stop(bool brake) {assert(brake);++wheel_stop_calls;}
 bool Lifter_Blocks_Chassis(void) {return lifter_control_blocks_wheels(&test_lift);}
-static void Motion_Ctrl(float vx,float vy,float wz) {(void)vx;assert(vy==0);(void)wz;++wheel_move_calls;}
+void Motion_Ctrl(float vx,float vy,float wz) {(void)vx;assert(vy==0);(void)wz;++wheel_move_calls;}
 lifter_result_t Lifter_Command(uint8_t value) {return lifter_control_command(&test_lift,value,true,fake_now);}
 void Lifter_Stop(lifter_fault_t reason) {lifter_control_stop(&test_lift,reason);}
+void Lifter_Get_Snapshot(lifter_control_t *out) {*out=test_lift;}
+#define pdMS_TO_TICKS(ms) (ms)
+static void vTaskDelay(int ticks) {assert(ticks>=250);}
+static _Noreturn void esp_restart(void) {longjmp(reboot,1);}
 '''
 tests=r'''
 int main(void) {
@@ -74,6 +90,43 @@ int main(void) {
     lifter_stop_callback(NULL,&response);
     assert(!fault);
 
+    lifter_control_init(&test_lift,&config);
+    lifter_callback(&command);
+    assert(test_lift.pulse_us!=0);
+    const unsigned previous_stops=wheel_stop_calls;
+    if (setjmp(reboot)==0) restart_disconnected();
+    assert(wheel_stop_calls==previous_stops+1 && test_lift.pulse_us==0 && test_lift.fault==LIFTER_COMM_LOST);
+    assert(recovery_marker==recovery_cookie);
+
+    lifter_control_init(&test_lift,&config);
+    Lifter_Stop(LIFTER_IO_FAULT);
+    if (setjmp(reboot)==0) restart_disconnected();
+    assert(recovery_marker==recovery_cookie && recovery_lifter_fault==LIFTER_IO_FAULT);
+
+    lifter_control_init(&test_lift,&config);
+    command_locked=true;
+    unlock_callback(NULL,&response);
+    assert(!response.success && command_locked);
+    velocity.linear.x=.03;
+    fake_now+=500000;
+    command_callback(&velocity);
+    fake_now+=900000;
+    lifter_callback(&command);
+    assert(wheel_move_calls==0 && test_lift.rx==0 && test_lift.pulse_us==0);
+    unlock_callback(NULL,&response);
+    assert(!response.success && recovery_marker==recovery_cookie);
+    fake_now+=1000000;
+    test_wheel_speed=.02;
+    unlock_callback(NULL,&response);
+    assert(!response.success && command_locked);
+    test_wheel_speed=0;
+    unlock_callback(NULL,&response);
+    assert(response.success && !command_locked && recovery_marker==0);
+    assert(wheel_move_calls==0 && test_lift.rx==0);
+    lifter_callback(&command);
+    assert(test_lift.state==LIFTER_RAISING);
+    lifter_stop_callback(NULL,&response);
+
     // Worst-sized representative integer diagnostics must fit the message and
     // XRCE best-effort MTU. Use the production snprintf expression verbatim.
     motor_diagnostics_t motor={.enabled=false,.command_age_us=INT64_MAX,.control_cycles=UINT32_MAX};
@@ -97,8 +150,9 @@ finish=r'''
 '''
 with tempfile.TemporaryDirectory(prefix='lifter-ros-') as temp:
     unit=Path(temp)/'ros.c';binary=Path(temp)/'check'
-    unit.write_text(stubs+callbacks+tests+fmt+finish)
+    unit.write_text(stubs+restart+callbacks+tests+fmt+finish)
     subprocess.run(['gcc','-std=c11','-Wall','-Wextra','-Werror',
+        '-I'+str(ROOT/'firmware/chassis/components/car_motion'),
         '-I'+str(ROOT/'firmware/chassis/components/lifter'),
         '-I'+str(ROOT/'firmware/chassis/components/motor'),
         '-I'+str(ROOT/'firmware/chassis/components/pwm_motor'),str(unit),
@@ -106,6 +160,7 @@ with tempfile.TemporaryDirectory(prefix='lifter-ros-') as temp:
     output=subprocess.check_output([str(binary)],text=True)
     data=json.loads(output)
     assert data['feedback_guard_enabled'] is False
+    assert data['command_locked'] is False
     assert 'feedback_missing_mask' not in data and 'feedback_reversed_mask' not in data
     assert data['lift_inhibited'] == 0
     assert data['lifter_position_confirmed'] is False
@@ -113,4 +168,4 @@ with tempfile.TemporaryDirectory(prefix='lifter-ros-') as temp:
     assert data['lifter_lower_deg']==0 and data['lifter_upper_deg']==80
     assert data['lifter_target_deg']==-1 and data['lifter_pulse_us']==0
     assert data['lifter_pulse_0_deg_us']==500 and data['lifter_pulse_180_deg_us']==2500
-print('PASS: actual ROS direct up/down, persistent angle hold, stop/resume, UInt8 rejection and JSON/MTU bounds')
+print('PASS: ROS lift controls, reconnect command lock, quiet/stationary unlock and JSON/MTU bounds')

@@ -18,6 +18,7 @@ setup(
         'fixed_route_hardware = mission_control.hardware:main',
         'chassis_compare = mission_control.chassis_compare:main',
         'chassis_segment = mission_control.chassis_segment:main',
+        'hardware_self_check = mission_control.hardware_self_check:main',
         'validate_route = mission_control.validate:main',
     ]},
 )

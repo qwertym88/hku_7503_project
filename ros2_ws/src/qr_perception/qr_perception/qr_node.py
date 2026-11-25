@@ -21,7 +21,9 @@
 """
 
 import rclpy
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
+from rcl_interfaces.msg import ParameterDescriptor
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
@@ -49,7 +51,7 @@ class QrPerceptionNode(Node):
         super().__init__("qr_perception")
 
         # ---- 参数（全部有默认值，直接 ros2 run 也能跑） ----
-        self.declare_parameter("source", "picamera2")
+        self.declare_parameter("source", "picamera2", ParameterDescriptor(read_only=True))
         self.declare_parameter("file_path", "")
         self.declare_parameter("replay_fps", 10.0)
         self.declare_parameter("replay_loop", True)
@@ -143,6 +145,7 @@ class QrPerceptionNode(Node):
         reopen_left = 3  # 断流自动重连次数（瞬时故障不杀节点）
         try:
             while rclpy.ok():
+                rclpy.spin_once(self, timeout_sec=0.0)
                 try:
                     frame, stamp = self._src.capture()
                 except sources.FrameSourceError as e:
@@ -174,11 +177,11 @@ def main(args=None):
     node = QrPerceptionNode()
     try:
         node.run()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        rclpy.try_shutdown()
 
 
 if __name__ == "__main__":

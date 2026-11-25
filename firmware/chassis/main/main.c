@@ -5,6 +5,8 @@
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_attr.h"
+#include "esp_system.h"
 #include "esp_timer.h"
 #include "car_motion.h"
 #include <rcl/rcl.h>
@@ -42,6 +44,11 @@ static rcl_publisher_t imu_publisher;
 static sensor_msgs__msg__Imu imu;
 static uint32_t imu_last_sequence;
 static uint32_t imu_published;
+static const uint32_t recovery_cookie = 0x43484b31;
+static RTC_NOINIT_ATTR volatile uint32_t recovery_marker;
+static RTC_NOINIT_ATTR volatile lifter_fault_t recovery_lifter_fault;
+static bool command_locked;
+static int64_t last_locked_command_us;
 
 static void imu_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
@@ -115,7 +122,7 @@ static void publish_diagnostics(void)
     int length = snprintf(diagnostic.data.data, diagnostic.data.capacity,
         "{\"rx\":%lu,\"rejected\":%lu,\"enabled\":%d,\"age_ms\":%lld,\"cycles\":%lu,"
         "\"battery_v\":%.3f,\"adc_raw\":%d,"
-        "\"feedback_guard_enabled\":false,\"lift_inhibited\":%d,"
+        "\"feedback_guard_enabled\":false,\"lift_inhibited\":%d,\"command_locked\":%s,"
         "\"counts\":[%d,%d,%d,%d],\"target\":[%.2f,%.2f,%.2f,%.2f],"
         "\"speed\":[%.4f,%.4f,%.4f,%.4f],\"pid_output\":[%.1f,%.1f,%.1f,%.1f],"
         "\"imu_state\":%d,\"imu_whoami\":%u,\"imu_valid\":%d,"
@@ -131,7 +138,7 @@ static void publish_diagnostics(void)
         (unsigned long)command_count, (unsigned long)rejected_commands, motor.enabled,
         (long long)(motor.command_age_us / 1000), (unsigned long)motor.control_cycles,
         millivolts < 0 ? -1.0 : millivolts * .00403, raw,
-        motor.lift_inhibited,
+        motor.lift_inhibited, command_locked ? "true" : "false",
         motor.counts[0], motor.counts[1], motor.counts[2], motor.counts[3],
         motor.target_counts[0], motor.target_counts[1], motor.target_counts[2], motor.target_counts[3],
         motor.speed[0], motor.speed[1], motor.speed[2], motor.speed[3],
@@ -156,19 +163,36 @@ static void publish_diagnostics(void)
     }
 }
 
-// On communication failure remain stopped until a physical reset.
-static void halt(void)
+static void __attribute__((noreturn)) restart_disconnected(void)
 {
-    Lifter_Stop(LIFTER_COMM_LOST);
     Motor_Stop(STOP_BRAKE);
-    vTaskDelete(NULL);
+    lifter_control_t lift;
+    Lifter_Get_Snapshot(&lift);
+    recovery_lifter_fault = lift.fault;
+    recovery_marker = recovery_cookie;
+    Lifter_Stop(LIFTER_COMM_LOST);
+    vTaskDelay(pdMS_TO_TICKS(250));
+    esp_restart();
 }
-#define CHECK(call) do { if ((call) != RCL_RET_OK) halt(); } while (0)
+#define CHECK(call) do { if ((call) != RCL_RET_OK) restart_disconnected(); } while (0)
+
+static bool motion_requests_locked(void)
+{
+    if (fault) return true;
+    if (!command_locked) return false;
+    last_locked_command_us = esp_timer_get_time();
+    return true;
+}
 
 static void command_callback(const void *input)
 {
     const geometry_msgs__msg__Twist *msg = input;
     ++command_count;
+    if (motion_requests_locked()) {
+        ++rejected_commands;
+        Motor_Stop(STOP_BRAKE);
+        return;
+    }
     if (!isfinite(msg->linear.x) || !isfinite(msg->linear.y) ||
         !isfinite(msg->angular.z) || msg->linear.y != 0.0) {
         ++rejected_commands;
@@ -187,6 +211,7 @@ static void command_callback(const void *input)
 
 static void lifter_callback(const void *input)
 {
+    if (motion_requests_locked()) return;
     const std_msgs__msg__UInt8 *msg = input;
     (void)Lifter_Command(msg->data);
 }
@@ -204,6 +229,39 @@ static void lifter_stop_callback(const void *request, void *response)
     Lifter_Stop(LIFTER_STOPPED);
     service_result(&r->success, &r->message, LIFTER_OK);
 }
+
+static void unlock_callback(const void *request, void *response)
+{
+    (void)request;
+    std_srvs__srv__Trigger_Response *reply = response;
+    reply->success = false;
+    const char *message = "Already unlocked";
+    bool allow = true;
+    if (command_locked) {
+        motor_diagnostics_t motor;
+        Motor_Get_Diagnostics(&motor);
+        bool stopped = !motor.enabled;
+        for (int wheel = 0; wheel < MOTOR_MAX_NUM; ++wheel)
+            stopped &= fabsf(motor.speed[wheel]) <= 0.005f;
+        if (fault || !stopped || Lifter_Blocks_Chassis() ||
+            esp_timer_get_time() - last_locked_command_us < 1000000) {
+            allow = false;
+            message = "Stop controllers and wait 1 s with wheels still and lifter clear";
+        } else {
+            message = "Unlocked; send new commands only";
+        }
+    }
+    if (!rosidl_runtime_c__String__assign(&reply->message, message)) {
+        fault = true;
+        return;
+    }
+    if (allow) {
+        recovery_marker = 0;
+        command_locked = false;
+        reply->success = true;
+    }
+}
+
 static void odom_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
     int64_t now = esp_timer_get_time();
@@ -235,12 +293,17 @@ static void odom_callback(rcl_timer_t *timer, int64_t last_call_time)
 
 void app_main(void)
 {
+    command_locked = esp_reset_reason() != ESP_RST_POWERON && recovery_marker == recovery_cookie;
+    if (!command_locked) recovery_marker = 0;
     Motor_Init();
     Motor_Stop(STOP_BRAKE);
     Lifter_Init();
+    if (command_locked &&
+        (recovery_lifter_fault == LIFTER_TIMEOUT || recovery_lifter_fault == LIFTER_IO_FAULT))
+        Lifter_Stop(recovery_lifter_fault);
     battery_init();
     Icm42670p_Init();
-    if (!chassis_serial_init()) halt();
+    if (!chassis_serial_init()) restart_disconnected();
     while (rmw_uros_ping_agent(100, 1) != RMW_RET_OK)
         vTaskDelay(pdMS_TO_TICKS(100));
 
@@ -251,7 +314,8 @@ void app_main(void)
     rclc_support_t support;
     CHECK(rclc_support_init_with_options(&support, 0, NULL, &options, &allocator));
     CHECK(rcl_init_options_fini(&options));
-    if (rmw_uros_sync_session(1000) != RMW_RET_OK || !rmw_uros_epoch_synchronized()) halt();
+    if (rmw_uros_sync_session(1000) != RMW_RET_OK || !rmw_uros_epoch_synchronized())
+        restart_disconnected();
 
     rcl_node_t node = rcl_get_zero_initialized_node();
     CHECK(rclc_node_init_default(&node, "chassis", "", &support));
@@ -265,7 +329,7 @@ void app_main(void)
     CHECK(rclc_publisher_init_best_effort(&imu_publisher, &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu/data"));
     if (!sensor_msgs__msg__Imu__init(&imu) ||
-        !rosidl_runtime_c__String__assign(&imu.header.frame_id, "imu_link")) halt();
+        !rosidl_runtime_c__String__assign(&imu.header.frame_id, "imu_link")) restart_disconnected();
     imu.orientation.w = 1.0;
     // No attitude estimate. All-zero gyro/accel covariance means unknown until measured.
     imu.orientation_covariance[0] = -1.0;
@@ -273,13 +337,13 @@ void app_main(void)
     memset(diagnostic_storage, ' ', sizeof(diagnostic_storage) - 1);
     diagnostic_storage[sizeof(diagnostic_storage) - 1] = '\0';
     if (!std_msgs__msg__String__init(&diagnostic) ||
-        !rosidl_runtime_c__String__assign(&diagnostic.data, diagnostic_storage)) halt();
+        !rosidl_runtime_c__String__assign(&diagnostic.data, diagnostic_storage)) restart_disconnected();
     rcl_subscription_t subscription = rcl_get_zero_initialized_subscription();
     CHECK(rclc_subscription_init_default(&subscription, &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist), "/cmd_vel"));
     rcl_subscription_t lift_subscription = rcl_get_zero_initialized_subscription();
     std_msgs__msg__UInt8 lift_command;
-    if (!std_msgs__msg__UInt8__init(&lift_command)) halt();
+    if (!std_msgs__msg__UInt8__init(&lift_command)) restart_disconnected();
     CHECK(rclc_subscription_init_default(&lift_subscription, &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt8), "/lifter"));
     rcl_service_t stop_service = rcl_get_zero_initialized_service();
@@ -289,10 +353,21 @@ void app_main(void)
     std_srvs__srv__Trigger_Response stop_response;
     if (!std_srvs__srv__Trigger_Request__init(&stop_request) ||
         !std_srvs__srv__Trigger_Response__init(&stop_response) ||
-        !rosidl_runtime_c__String__assign(&stop_response.message, "service response storage reserved")) halt();
+        !rosidl_runtime_c__String__assign(&stop_response.message, "service response storage reserved"))
+        restart_disconnected();
+    rcl_service_t unlock_service = rcl_get_zero_initialized_service();
+    CHECK(rclc_service_init_default(&unlock_service, &node,
+        ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, Trigger), "/chassis/unlock"));
+    std_srvs__srv__Trigger_Request unlock_request;
+    std_srvs__srv__Trigger_Response unlock_response;
+    if (!std_srvs__srv__Trigger_Request__init(&unlock_request) ||
+        !std_srvs__srv__Trigger_Response__init(&unlock_response) ||
+        !rosidl_runtime_c__String__assign(&unlock_response.message,
+            "Stop controllers and wait 1 s with wheels still and lifter clear"))
+        restart_disconnected();
     if (!nav_msgs__msg__Odometry__init(&odom) || !geometry_msgs__msg__Twist__init(&command) ||
         !rosidl_runtime_c__String__assign(&odom.header.frame_id, "odom") ||
-        !rosidl_runtime_c__String__assign(&odom.child_frame_id, "base_footprint")) halt();
+        !rosidl_runtime_c__String__assign(&odom.child_frame_id, "base_footprint")) restart_disconnected();
     // Conservative initial uncertainties, to be replaced by measured values.
     for (int i = 0; i < 6; ++i) {
         odom.pose.covariance[7 * i] = (i == 0 || i == 1 || i == 5) ? 0.05 : 1e6;
@@ -303,27 +378,30 @@ void app_main(void)
     rcl_timer_t imu_timer = rcl_get_zero_initialized_timer();
     CHECK(rclc_timer_init_default2(&imu_timer, &support, RCL_MS_TO_NS(20), imu_callback, true));
     rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-    CHECK(rclc_executor_init(&executor, &support.context, 5, &allocator));
+    CHECK(rclc_executor_init(&executor, &support.context, 6, &allocator));
     CHECK(rclc_executor_add_subscription(&executor, &subscription, &command,
                                          command_callback, ON_NEW_DATA));
     CHECK(rclc_executor_add_subscription(&executor, &lift_subscription, &lift_command,
                                          lifter_callback, ON_NEW_DATA));
     CHECK(rclc_executor_add_service(&executor, &stop_service, &stop_request, &stop_response,
                                     lifter_stop_callback));
+    CHECK(rclc_executor_add_service(&executor, &unlock_service, &unlock_request, &unlock_response,
+                                    unlock_callback));
     CHECK(rclc_executor_add_timer(&executor, &timer));
     CHECK(rclc_executor_add_timer(&executor, &imu_timer));
     previous_update_us = esp_timer_get_time();
     int64_t health_check_us = previous_update_us;
+    last_locked_command_us = health_check_us;
     while (!fault) {
         Lifter_Heartbeat();
         rcl_ret_t rc = rclc_executor_spin_some(&executor, RCL_MS_TO_NS(5));
         if (rc != RCL_RET_OK && rc != RCL_RET_TIMEOUT) break;
         bool lifting = Lifter_Is_Moving();
-        if (esp_timer_get_time() - health_check_us >= (lifting ? 100000 : 1000000)) {
-            if (rmw_uros_ping_agent(lifting ? 20 : 100, 1) != RMW_RET_OK) break;
+        if (esp_timer_get_time() - health_check_us >= (lifting ? 100000 : 250000)) {
+            if (rmw_uros_ping_agent(lifting ? 20 : 50, 1) != RMW_RET_OK) break;
             health_check_us = esp_timer_get_time();
         }
         vTaskDelay(pdMS_TO_TICKS(1));
     }
-    halt();
+    restart_disconnected();
 }

@@ -2,7 +2,7 @@
 
 2026-11-18，根据用户重新测量更新：**左右轮组中心间距200mm、前后轮组中心间距170mm**，标称轮径65mm。前后间距由首次提供的165mm修正为170mm；旋转几何系数由0.1825m更新为0.185m。测量应以轮组中心为基准。保留官方不横移模型，`linear.y`必须为0。
 
-当前为底盘bring-up固件，完整M2交付仍待验收：包含`/cmd_vel`订阅、四轮编码器PID、20Hz目标频率的原始`/odom`、50Hz目标频率的板载IMU `/imu/data`发布与电机任务超时停车，另有诊断ADC估算；**IMU已烧录并完成静态检查，静态陀螺零偏校准、板端补偿与静态复测已完成（本次IMU47.985Hz），完整安装外参待验证；升降已改为180°位置控制（默认0°/80°、免arm，新版已见板端诊断，实物端点/载荷待验收），物理急停输入及自动断线恢复尚未实现**。通信失败后保持停车，需要按板上RESET重新连接。实际方向、频率、精度、停车延时必须实测。
+当前为底盘bring-up固件，包含`/cmd_vel`订阅、四轮编码器PID、20Hz目标频率的原始`/odom`、50Hz目标频率的板载IMU `/imu/data`发布与电机任务超时停车，另有诊断ADC估算。2026-11-25版新增通信断开后软件复位和带锁重连。旧版通信故障后仍需按板上RESET。方向、频率、精度和停车延时以实测为准。
 
 ## 参数在哪里
 
@@ -11,7 +11,7 @@
 | 左右间距 | `components/car_motion/car_motion.h`，`ROBOT_WIDTH` | 0.200m |
 | 前后间距 | 同上，`ROBOT_LENGTH` | 0.170m |
 | 旋转几何系数 | 同上，`ROBOT_APB` | 自动计算(W+L)/2 = 0.185m |
-| 轮周长 | `components/motor/motor.h`，`MOTOR_WHEEL_CIRCLE` | π×65 = 204.2035mm |
+| 轮周长 | `components/motor/motor.h`，`MOTOR_WHEEL_CIRCLE` | π×63.5 ≈ 199.4911mm，按实测直径64mm试用63.5mm有效滚动直径 |
 | 编码器每输出轴转计数 | 同上，`MOTOR_ENCODER_CIRCLE` | 1040，假设官方310电机、13线×20减速×4倍频，须转轮实测 |
 | PID周期 | 同上，`MOTOR_PID_PERIOD` | 10ms |
 | 速度命令有效期 | 同上，`MOTOR_COMMAND_TIMEOUT_US` | 480ms，由独立电机任务每10ms检查；<0.5s仍待实测 |
@@ -97,7 +97,7 @@ export ROS_DOMAIN_ID=42
 ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0 -b 921600
 ```
 
-启动agent后按RESET，等待节点出现。先只观察：
+启动agent，等待节点出现。先只观察：
 
 ```bash
 ros2 node list
@@ -107,6 +107,18 @@ ros2 topic info /cmd_vel -v
 ```
 
 确认`/odom`是本固件唯一发布，frame为`odom`/`base_footprint`。本固件不发TF；首次架空测试不需要启动EKF或导航。后续按当前接口文档接EKF，不直接套用旧的将滤波结果重映射回`/odom`的launch。
+
+### Agent 重启后的恢复
+
+检测到通信故障后，固件切断驱动并释放舵机 PWM，随后软件复位、等待 Agent 并重建 micro-ROS 会话。恢复后 `/odom` 从零开始，升降位置为未知，诊断中的 `command_locked=true` 表示 `/cmd_vel` 和 `/lifter` 仍被屏蔽。通信恢复期间会保留已锁存的升降超时和 PWM 故障。
+
+退出固定路线、遥控和所有动作测试程序，确认轮子停稳、机构及周围安全，至少 1 秒没有收到上述两类指令后，调用：
+
+```bash
+ros2 service call /chassis/unlock std_srvs/srv/Trigger '{}'
+```
+
+解锁本身不驱动车轮或舵机。确认诊断变为 `command_locked=false` 后，再进行新动作。使用固定路线前，重新初始化定位，在机构可安全下降时发送一次 `/lifter=0`，确认机构实际低位且诊断为 `lifter_position=0`。若 `lifter_fault` 为 `timeout` 或 `pwm_error`，先排查固件和硬件故障，通信解锁不会清除这些故障。
 
 车轮保持架空，唯一速度发布者用以下命令持续发送0.03m/s：
 
@@ -140,7 +152,7 @@ docker run --rm --name hku-chassis-agent --network host --device /dev/ttyUSB0 \
   serial --dev /dev/ttyUSB0 -b 921600 -v4
 ```
 
-如果容器已经运行，不重复启动；`docker logs -f --tail 30 hku-chassis-agent`查看，`docker stop hku-chassis-agent`停止。退出日志窗口不等于停止后台容器；`--rm` 容器停止后被删除，重新连接用 `docker run` 重建。复连异常先 `docker ps -a` 排除其他 agent/串口占用，再重建 agent 并按板上 RESET；仅换名字会让多个进程争抢同一串口。Pi 固定设备名/一键启动尚待集成。
+如果容器已经运行，不重复启动；`docker logs -f --tail 30 hku-chassis-agent`查看，`docker stop hku-chassis-agent`停止。退出日志窗口不等于停止后台容器；`--rm` 容器停止后被删除，重新连接用 `docker run` 重建。复连异常先 `docker ps -a` 排除其他 agent/串口占用，再按本页恢复流程处理；仅换名字会让多个进程争抢同一串口。
 
 ## 当前硬件状态与历史排查
 
@@ -164,7 +176,7 @@ ros2 topic echo /chassis/diagnostics --qos-reliability best_effort --full-length
 - 只发布六轴测量，不解算姿态：orientation.w=1作为占位，orientation_covariance[0]=-1表示姿态不可用。角速度/加速度协方差暂为全0，表示未知，待静态实测或消费者明确配置；不伪造校准精度。
 - 时间戳使用micro-ROS同步时钟回推到FIFO样本被MCU接收时刻；这是读取时间，不是芯片硬件采样时间，正常还包含FIFO/调度延迟。
 - 保留传感器原生轴方向；当前陀螺零偏已补偿，加速度保留重力；重新校准流程见下文。`base_link→imu_link`安装外参及静态偏置须实测，当前URDF中的identity不能当作已确认结果；未将IMU混入固件原始odom。
-- 启动未就绪、WHOAMI/自检失败、I2C读取失败、样本过期100ms或重复序号时不发布假数据。IMU故障本身不改变当前底盘指令接受逻辑；必要IMU断流的任务级停车仍需M4/M5按接口实现。通信失败仍按现有固件停车并等待RESET。
+- 启动未就绪、WHOAMI/自检失败、I2C读取失败、样本过期100ms或重复序号时不发布假数据。IMU故障本身不改变当前底盘指令接受逻辑；必要IMU断流由任务层停车处理。
 - `/chassis/diagnostics`新增`imu_state`（0初始化/1已配置/-1初始化失败）、`imu_whoami`、`imu_valid`、`imu_age_ms`（无样本为-1）、累计`imu_errors`、`imu_published`；`imu_state=1`不等于一定有新鲜数据，要结合valid/age/计数判断。
 - micro-ROS池容量现为5 topics、3 publishers、2 subscriptions、3 services，自定义MTU为2048；`idf.sh`检查共享缓存容量并同步头文件，避免motor_test构建留下较小容量。两个工程不要并发构建。
 
@@ -193,7 +205,7 @@ ros2 topic hz /imu/data
 
 按用户要求，当前源码已移除“300ms无反馈停车锁存”和“反馈反向停车锁存”，此前未提交的1秒启动宽限也一并移除。轮编码器仍用于PID和原始odom；无计数/反向计数本身不再让固件锁住四轮，也不再通过轮反馈故障触发升降故障。
 
-保留480ms速度命令超时、显式零速停车、通信异常停车及升降互锁。命令超时后新有效命令可恢复；通信异常仍须RESET。没有独立编码器丢失/反向自动停车或堵转检测，不将持续速度发布视为异常情况下的停止保证。
+保留480ms速度命令超时、显式零速停车、通信异常停车及升降互锁。单独的速度命令超时后，新有效命令可恢复。通信异常后的恢复见本页 Agent 重启流程。没有独立编码器丢失/反向自动停车或堵转检测，不将持续速度发布视为异常情况下的停止保证。
 
 诊断新增 `feedback_guard_enabled=false` 明示移除状态，保留 `counts`、`target`、`speed`、`pid_output`；`lift_inhibited`表示当前升降互锁。原 `feedback_missing_mask` / `feedback_reversed_mask`字段已移除。此前带mask的日志是历史版本，不能用于判断当前功能存在。
 

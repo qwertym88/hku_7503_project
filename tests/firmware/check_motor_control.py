@@ -66,8 +66,12 @@ callback_stubs = r'''
 typedef struct { double x,y,z; } test_vector_t;
 typedef struct { test_vector_t linear,angular; } geometry_msgs__msg__Twist;
 static uint32_t command_count, rejected_commands;
+static bool command_locked, fault;
+static int64_t last_locked_command_us;
 static bool Lifter_Blocks_Chassis(void) {return lift_inhibited;}
 '''
+lock_gate = main_source[main_source.index('static bool motion_requests_locked('):
+                        main_source.index('static void command_callback(')]
 tests = r'''
 static void reset_fixture(void) {
     pid_enable=0;
@@ -209,6 +213,10 @@ int main(void) {
     cmd.angular.z=0;
     Motor_Set_Lift_Inhibit(true); command_callback(&cmd); assert(!pid_enable);
     Motor_Set_Lift_Inhibit(false); command_callback(&cmd); assert(pid_enable);
+    command_locked=true;
+    command_callback(&cmd);
+    assert(!pid_enable && last_locked_command_us==fake_us);
+    command_locked=false;
     cmd.linear.x=0; command_callback(&cmd); assert(!pid_enable);
     // Independent wheel API still clamps and stops on invalid inputs.
     Motor_Set_Speed(10,-10,10,-10); Motor_Get_Diagnostics(&d);
@@ -237,7 +245,7 @@ with tempfile.TemporaryDirectory(prefix='chassis-motor-test-') as temp:
     binary = Path(temp) / 'check'
     motion_source=(ROOT/'firmware/chassis/components/car_motion/car_motion.c').read_text()
     motion_source='\n'.join(line for line in motion_source.splitlines() if not line.startswith('#include'))
-    unit.write_text(stubs + source + motion_source + callback_stubs + callback + tests)
+    unit.write_text(stubs + source + motion_source + callback_stubs + lock_gate + callback + tests)
     subprocess.run(['gcc','-std=c11','-Wall','-Wextra','-Werror','-Wno-unused-variable','-Wno-unused-parameter',
                     '-I'+str(ROOT/'firmware/chassis/components/motor'),
                     '-I'+str(ROOT/'firmware/chassis/components/pwm_motor'),
