@@ -12,7 +12,7 @@ import yaml
 from .clearance import SceneClearance, curve_violation, drive_violation, turn_violation
 from .curve import tangent_paths
 from .field_map import rasterize
-from .route import angle, cargo_offset, compose, load_config, pose, validate_geometry
+from .route import angle, cargo_offset, compose, load_config, marker_scan_pose, pose, qr_approach_side, validate_geometry
 
 
 # Each edge is an in-place turn followed by a forward drive, like the executor.
@@ -187,6 +187,13 @@ def plan_route(source, clearance=0.10, *, smooth=True):
     p = pose(cfg['start_pose'])
     minimum = clearance + TRACKING_RESERVE
     control = cfg['control']
+    markers = cfg.get('marker_scans')
+    if markers is not None:
+        start_scan = marker_scan_pose(cfg, 'START')
+        hit = turn_violation(SceneClearance(cfg, racks), p, start_scan[2], minimum)
+        if hit:
+            raise ValueError(f'START scan: not enough clearance from {hit}')
+        p = start_scan
     for key in cfg['order']:
         rack = cfg['racks'][key]
         original = source['racks'][key]
@@ -195,7 +202,9 @@ def plan_route(source, clearance=0.10, *, smooth=True):
         drop = pose(original['drop_pose'])
         exit_pose = compose(drop, (-original['exit_distance_m'], 0., 0.))
         failures = set()
-        headings = (pickup[2],) if cfg.get('qr_faces_negative_y') else (pickup[2], angle(pickup[2] + math.pi))
+        headings = (pickup[2],)
+        if qr_approach_side(cfg, original) is None:
+            headings += (angle(pickup[2] + math.pi),)
         for yaw in headings:
             pickup = (*pickup[:2], yaw)
             rack['pickup_offset']['yaw'] = angle(yaw - racks[key][2])
@@ -259,6 +268,22 @@ def plan_route(source, clearance=0.10, *, smooth=True):
                     rack[f'{name}_curve'] = curve
         racks[key] = dropped
         p = exit_pose
+    if markers is not None:
+        end_scan = marker_scan_pose(cfg, 'END')
+        empty = SceneClearance(cfg, racks)
+        points = waypoints(empty, p, end_scan, minimum, control['cruise_mps'], control['turn_rps'])
+        if points is None:
+            raise ValueError(f'END scan: no route with {minimum:.3f} m planning clearance')
+        markers['to_end'] = []
+        markers.pop('to_end_curve', None)
+        for i, point in enumerate(points, 1):
+            label = f'to_end_{i:02d}'
+            cfg['transit_points'][label] = list(point)
+            markers['to_end'].append(label)
+        if smooth and math.dist(p[:2], end_scan[:2]) > 1e-8:
+            curve = smooth_leg(empty, p, end_scan, points, minimum)
+            if curve:
+                markers['to_end_curve'] = curve
     validate_geometry(cfg)
     return cfg
 

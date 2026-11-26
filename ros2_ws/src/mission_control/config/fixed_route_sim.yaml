@@ -1,11 +1,17 @@
 # 仿真初值，非实车标定。单位 m / rad / s；原点为场地右下角。
 # +X=旧图+Y，+Y=旧图-X；yaw=0朝+X，pi/2朝+Y。
 # 所有 photo_pose / drop_pose / transit_points 均为 base_footprint 车中心。
-version: sim-2026-11-23-south-approach-v2
+version: sim-2026-11-25-start-end-qr-d-north
 simulation_only: true
 frame: field
+qr_faces_negative_y: true
 order: [A, B, C, D]
 start_pose: {x: 1.0, y: 0.30, yaw: 1.5707963267948966}
+
+# START 在初始位置转向 S。END 从 E 柱东南侧拍摄，车头自动对准柱心。
+marker_scans:
+  end_xy: [0.60, 1.92]
+  to_end: []
 
 scene:
   field: {x_min: 0.0, x_max: 2.0, y_min: 0.0, y_max: 3.02}
@@ -14,8 +20,8 @@ scene:
   robot: {length: 0.25, width: 0.25}
   rack: {gap: 0.35, wall_thickness: 0.025, depth: 0.15, height: 0.23, qr_height: 0.25}
   markers:
-    S: {x: 0.60, y: 0.60, radius: 0.05}
-    E: {x: 0.30, y: 2.22, radius: 0.05}
+    S: {x: 0.60, y: 0.60, radius: 0.03}
+    E: {x: 0.30, y: 2.22, radius: 0.03}
   clearance_m: 0.005
 
 control:
@@ -54,8 +60,6 @@ transit_points:
   b_clear_lane: [1.00, 1.395]
   b_drop_lane: [1.25, 2.47]
   c_south_lane: [1.25, 1.345]
-  d_return_lane: [1.00, 2.05]
-  d_south_lane: [1.00, 0.845]
 
 racks:
   A:
@@ -100,13 +104,14 @@ racks:
   D:
     model: rack_d
     pose: {x: 0.410, y: 1.095, yaw: 0.0}
-    pickup_offset: {x: 0.0, y: 0.0, yaw: 1.5707963267948966}
-    # 拍照位高于S柱，避免横向接近时扫到柱体。
-    photo_pose: {x: 0.410, y: 0.845, yaw: 1.5707963267948966}
-    enter_distance_m: 0.25
+    qr_approach_side: positive_y
+    pickup_offset: {x: 0.0, y: 0.0, yaw: -1.5707963267948966}
+    # 从 +Y 侧朝 −Y 停稳扫码，进架后带载退回同一侧。
+    photo_pose: {x: 0.410, y: 1.445, yaw: -1.5707963267948966}
+    enter_distance_m: 0.35
     clear_distance_m: 0.35
-    clear_direction: forward
+    clear_direction: backward
     drop_pose: {x: 1.25, y: 2.40, yaw: 1.5707963267948966}
     exit_distance_m: 0.35
-    to_photo: [d_return_lane, d_south_lane]
+    to_photo: []
     to_drop: []

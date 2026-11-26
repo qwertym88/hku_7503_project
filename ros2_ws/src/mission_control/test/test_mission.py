@@ -27,6 +27,9 @@ def test_closed_loop_collects_each_rack_and_exits(cfg):
     assert mission.carrying is None
     assert mission.command == (0.,0.)
     entered = [e for e in mission.events if e['event'] == 'action_enter']
+    assert [e['rack'] for e in entered if e['kind'] == 'photo'] == ['START', 'A', 'B', 'C', 'D', 'END']
+    assert mission.actions[0].target[2] == pytest.approx(math.atan2(0.30, -0.40))
+    assert mission.actions[-1].target[2] == pytest.approx(3 * math.pi / 4)
     for key in cfg['order']:
         states = [e['state'] for e in entered if e['rack'] == key]
         for required in ('TO_PHOTO','DWELL','PHOTO','ENTER','LIFT','CLEAR_RACK','TO_DROP','LOWER','EXIT'):
@@ -56,6 +59,35 @@ def test_photo_failure_stops_before_enter_and_lift(cfg):
     assert not any(e.get('state') == 'ENTER' for e in mission.events)
 
 
+def test_photo_timeout_override_is_independent_of_lifter_and_waits(cfg):
+    cfg['control'].update(photo_first_frame_timeout_s=10., photo_timeout_s=15.)
+    actions = compile_route(validate_config(cfg))
+    assert {a.timeout for a in actions if a.kind == 'photo'} == {15.}
+    assert {a.timeout for a in actions if a.kind in ('lift', 'lower')} == {cfg['control']['effect_timeout_s']}
+    assert all(a.timeout == a.value + cfg['control']['effect_timeout_s'] for a in actions if a.kind == 'wait')
+    cfg['control']['photo_timeout_s'] = 9.
+    with pytest.raises(ValueError, match='First-frame timeout'):
+        validate_config(cfg)
+
+
+def test_hardware_scan_timeout_continues_to_next_action(cfg):
+    cfg['simulation_only'] = False
+    mission = Mission(cfg)
+    assert mission.start(0., pose(cfg['start_pose']))[0]
+    mission.index = next(i for i, a in enumerate(mission.actions) if a.kind == 'photo')
+    mission._enter(1.)
+    scan = mission.action
+    deadline = mission.entered + scan.timeout
+
+    assert mission.tick(deadline - 0.01, scan.target) == (0., 0.)
+    assert mission.action == scan
+    assert mission.tick(deadline, scan.target) == (0., 0.)
+    assert mission.tick(deadline + cfg['control']['settle_s'] + 0.01, scan.target) == (0., 0.)
+    assert mission.state == 'RUNNING' and mission.action != scan
+    assert [e['id'] for e in mission.events if e['event'] == 'photo_skipped'] == [scan.id]
+    assert not any(e['event'] == 'effect_complete' for e in mission.events)
+
+
 @pytest.mark.parametrize('fault', ['odom missing/stale','scan missing/stale','Gazebo cargo adapter not ready/healthy'])
 def test_feedback_fault_is_immediate_and_latched(cfg,fault):
     m = Mission(cfg)
@@ -79,6 +111,23 @@ def test_no_progress_and_deadline_are_independent_of_waits(cfg):
     m._enter(cfg['control']['mission_timeout_s']-0.1)
     assert m.tick(cfg['control']['mission_timeout_s'],m.action.start) == (0.,0.)
     assert m.reason == 'mission deadline exceeded'
+
+
+def test_localization_pause_keeps_action_and_restarts_velocity_ramp(cfg):
+    mission = Mission(cfg)
+    start = pose(cfg['start_pose'])
+    assert mission.start(0., start)[0]
+    action = mission.action
+    assert mission.tick(0.1, start)[1] != 0.
+
+    assert mission.tick(0.2, (0., 0., 0.), paused=True) == (0., 0.)
+    assert mission.tick(5., (0., 0., 0.), paused=True) == (0., 0.)
+    assert mission.state == 'RUNNING' and mission.action == action
+
+    mission.resume_after_pause(5., 0.2)
+    assert mission.tick(5., start) == (0., 0.)
+    assert mission.tick(5.02, start)[1] != 0.
+    assert mission.entered == pytest.approx(4.8)
 
 
 def test_cancel_while_carrying_preserves_support_and_ignores_late_effect(cfg):
@@ -107,9 +156,9 @@ def test_turn_crosses_pi_boundary_in_short_direction(cfg):
 
 
 def test_placed_racks_and_marker_are_checked(cfg):
-    # Advancing too far with A passes too close to E before turning toward drop.
+    # A marker inside the pickup lane obstructs the approach.
     bad = copy.deepcopy(cfg)
-    bad['racks']['A']['clear_distance_m'] = 0.35
+    bad['scene']['markers']['E'].update(x=0.55, y=1.75)
     with pytest.raises(ValueError,match='marker E'):
         validate_geometry(bad)
     bad = copy.deepcopy(cfg)
@@ -118,17 +167,19 @@ def test_placed_racks_and_marker_are_checked(cfg):
         validate_geometry(bad)
 
 
-def test_default_approaches_from_south_and_leaves_forward(cfg):
+def test_default_rack_approach_and_departure_directions(cfg):
     actions = compile_route(cfg)
     for key in cfg['order']:
         r = cfg['racks'][key]
-        assert r['photo_pose']['y'] < r['pose']['y']
-        assert r['photo_pose']['yaw'] == pytest.approx(math.pi/2)
+        north_approach = key == 'D'
+        assert (r['photo_pose']['y'] > r['pose']['y']) == north_approach
+        assert r['photo_pose']['yaw'] == pytest.approx(-math.pi/2 if north_approach else math.pi/2)
         enter = next(a for a in actions if a.rack == key and a.state == 'ENTER')
         clear = next(a for a in actions if a.rack == key and a.state == 'CLEAR_RACK')
         exit_action = next(a for a in actions if a.rack == key and a.state == 'EXIT')
-        assert enter.target[1] > enter.start[1]
-        assert clear.value > 0 and clear.target[1] > clear.start[1]
+        assert (enter.target[1] < enter.start[1]) == north_approach
+        assert (clear.value < 0) == north_approach
+        assert clear.target[1] > clear.start[1]
         assert exit_action.value < 0  # Unloading still needs to release the forks.
 
 

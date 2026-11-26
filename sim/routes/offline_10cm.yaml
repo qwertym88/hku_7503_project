@@ -1,6 +1,7 @@
-version: sim-2026-11-23-south-approach-v2-offline-10.0cm
+version: sim-2026-11-25-start-end-qr-d-north-offline-10.0cm
 simulation_only: true
 frame: field
+qr_faces_negative_y: true
 order:
 - A
 - B
@@ -10,6 +11,11 @@ start_pose:
   x: 1.0
   y: 0.3
   yaw: 1.5707963267948966
+marker_scans:
+  end_xy:
+  - 0.6
+  - 1.92
+  to_end: []
 scene:
   field:
     x_min: 0.0
@@ -34,11 +40,11 @@ scene:
     S:
       x: 0.6
       y: 0.6
-      radius: 0.05
+      radius: 0.03
     E:
       x: 0.3
       y: 2.22
-      radius: 0.05
+      radius: 0.03
   clearance_m: 0.005
 control:
   cruise_mps: 0.45
@@ -79,7 +85,7 @@ transit_points:
   - 1.5
   a_to_drop_01:
   - 0.7
-  - 2.0
+  - 2.2
   b_to_photo_01:
   - 0.9
   - 0.9
@@ -96,8 +102,8 @@ transit_points:
   - 1.3
   - 1.4
   d_to_drop_01:
-  - 0.6
-  - 1.1
+  - 0.7
+  - 1.3
 racks:
   A:
     model: rack_a
@@ -114,8 +120,8 @@ racks:
       y: 1.545
       yaw: 1.5707963267948966
     enter_distance_m: 0.35
-    clear_direction: backward
-    clear_distance_m: 0.1
+    clear_direction: forward
+    clear_distance_m: 0.06
     drop_pose:
       x: 0.65
       y: 2.82
@@ -185,17 +191,18 @@ racks:
       x: 0.41
       y: 1.095
       yaw: 0.0
+    qr_approach_side: positive_y
     pickup_offset:
       x: 0.0
       y: 0.0
-      yaw: -1.5707963267948968
+      yaw: -1.5707963267948966
     photo_pose:
-      x: 0.41000000000000003
+      x: 0.41
       y: 1.4449999999999998
-      yaw: -1.5707963267948968
+      yaw: -1.5707963267948966
     enter_distance_m: 0.35
-    clear_distance_m: 0.1
-    clear_direction: forward
+    clear_distance_m: 0.35
+    clear_direction: backward
     drop_pose:
       x: 1.25
       y: 2.4

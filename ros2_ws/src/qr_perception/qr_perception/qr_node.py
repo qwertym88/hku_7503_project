@@ -20,6 +20,8 @@
   publish_image: true               是否发 /camera/image_raw
 """
 
+import json
+
 import rclpy
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
@@ -102,6 +104,7 @@ class QrPerceptionNode(Node):
         self.target_fps = float(p("target_fps"))
 
         self.qr_pub = self.create_publisher(String, "/qr", 10)
+        self.qr_frame_pub = self.create_publisher(String, "/qr/frame_detections", 10)
         self.img_pub = self.create_publisher(Image, "/camera/image_raw", 10) \
             if self.publish_image else None
 
@@ -112,6 +115,7 @@ class QrPerceptionNode(Node):
 
     def on_frame(self, frame, stamp_wall):
         """处理一帧：解码 → 投票 → 发布。返回本帧确认的文本列表。"""
+        stamp = self.get_clock().now()
         results = self.decoder.decode(frame, stamp_wall)
         confirmed = self.voter.update([r.text for r in results])
 
@@ -122,8 +126,12 @@ class QrPerceptionNode(Node):
             self.get_logger().info(f"/qr -> '{text}'")
 
         if self.img_pub is not None and self.img_pub.get_subscription_count() > 0:
-            self.img_pub.publish(bgr_to_image(frame, self.frame_id,
-                                              self.get_clock().now().to_msg()))
+            self.img_pub.publish(bgr_to_image(frame, self.frame_id, stamp.to_msg()))
+            if results and self.qr_frame_pub.get_subscription_count() > 0:
+                self.qr_frame_pub.publish(String(data=json.dumps({
+                    'stamp_ns': stamp.nanoseconds,
+                    'texts': [result.text for result in results],
+                })))
 
         self._n_frames += 1
         if results:

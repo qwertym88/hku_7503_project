@@ -2,7 +2,7 @@
 <!--
   DASE7503 比赛场地 —— Gazebo 世界文件（右下角原点的新坐标系）
   *** 本文件由 sim/scripts/generate_field_world.py 自动生成，请勿手改 ***
-  改坐标请改脚本里的 ZONES / RACKS 两张表，然后重新生成。
+  改坐标请改脚本里的 ZONES / RACKS / MARKERS 三张表，然后重新生成。
 
   坐标系：原点在旧图右下角；新 +X=旧 +Y，新 +Y=旧 -X，+Z 天向。
   转换：新 x=旧 y，新 y=3.02-旧 x；场地 X=2.00 m，Y=3.02 m。
@@ -233,7 +233,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.250000 0 0 3.141593</pose>
+        <pose>0 0 0.250000 0 0 0.000000</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -246,6 +251,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/A.png</albedo_map>
+              <emissive_map>../materials/textures/A.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>
@@ -280,7 +286,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.250000 0 0 3.141593</pose>
+        <pose>0 0 0.250000 0 0 0.000000</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -293,6 +304,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/B.png</albedo_map>
+              <emissive_map>../materials/textures/B.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>
@@ -327,7 +339,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.250000 0 0 3.141593</pose>
+        <pose>0 0 0.250000 0 0 0.000000</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -340,6 +357,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/C.png</albedo_map>
+              <emissive_map>../materials/textures/C.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>
@@ -374,7 +392,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.250000 0 0 3.141593</pose>
+        <pose>0 0 0.250000 0 0 0.000000</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -387,6 +410,90 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/D.png</albedo_map>
+              <emissive_map>../materials/textures/D.png</emissive_map>
+              <metalness>0</metalness><roughness>1</roughness>
+            </metal></pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <!-- ===== 起终点圆柱 S/E + 柱顶二维码，正面朝 (1,-1) ===== -->
+    <model name='marker_s'>
+      <static>true</static>
+      <pose>0.600000 0.600000 0 0 0 0</pose>
+      <link name='pillar'>
+        <pose>0 0 0.100000 0 0 0</pose>
+        <collision name='collision'><geometry><cylinder><radius>0.030000</radius><length>0.200000</length></cylinder></geometry></collision>
+        <visual name='visual'>
+          <geometry><cylinder><radius>0.030000</radius><length>0.200000</length></cylinder></geometry>
+          <material>
+            <ambient>0.45 0.45 0.48 1</ambient>
+            <diffuse>0.55 0.55 0.58 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+      <link name='qr_panel'>
+        <pose>0 0 0.245000 0 0 0.785398</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
+        <visual name='qr_image'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><mesh>
+            <uri>../meshes/qr_panel.dae</uri>
+            <scale>0.050000 1 0.050000</scale>
+          </mesh></geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0 0 0 1</specular>
+            <pbr><metal>
+              <albedo_map>../materials/textures/Start.png</albedo_map>
+              <emissive_map>../materials/textures/Start.png</emissive_map>
+              <metalness>0</metalness><roughness>1</roughness>
+            </metal></pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name='marker_e'>
+      <static>true</static>
+      <pose>0.300000 2.220000 0 0 0 0</pose>
+      <link name='pillar'>
+        <pose>0 0 0.100000 0 0 0</pose>
+        <collision name='collision'><geometry><cylinder><radius>0.030000</radius><length>0.200000</length></cylinder></geometry></collision>
+        <visual name='visual'>
+          <geometry><cylinder><radius>0.030000</radius><length>0.200000</length></cylinder></geometry>
+          <material>
+            <ambient>0.45 0.45 0.48 1</ambient>
+            <diffuse>0.55 0.55 0.58 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+      <link name='qr_panel'>
+        <pose>0 0 0.245000 0 0 0.785398</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
+        <visual name='qr_image'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><mesh>
+            <uri>../meshes/qr_panel.dae</uri>
+            <scale>0.050000 1 0.050000</scale>
+          </mesh></geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0 0 0 1</specular>
+            <pbr><metal>
+              <albedo_map>../materials/textures/End.png</albedo_map>
+              <emissive_map>../materials/textures/End.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>

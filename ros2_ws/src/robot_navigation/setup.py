@@ -5,7 +5,8 @@ from setuptools import setup
 
 package_name = 'robot_navigation'
 package_root = Path(__file__).resolve().parent
-standard_map = package_root.parents[2] / 'sim' / 'maps'
+sim = package_root.parents[2] / 'sim'
+standard_map = sim / 'maps'
 
 setup(
     name=package_name,
@@ -18,6 +19,9 @@ setup(
         (f'share/{package_name}/launch', glob('launch/*.launch.py')),
         (f'share/{package_name}/config', glob('config/*.yaml')),
         (f'share/{package_name}/rviz', glob('rviz/*.rviz')),
+        (f'share/{package_name}/routes',
+         [os.path.relpath(sim / 'routes' / name, package_root)
+          for name in ('offline_10cm_curves.yaml', 'encoder_a_offset.yaml')]),
         (f'share/{package_name}/maps', [os.path.relpath(standard_map / name, package_root)
                                        for name in ('field_geometry.yaml', 'field_geometry.pgm')]),
     ],

@@ -30,7 +30,16 @@ def test_yaml_scene_and_resource_paths_are_applied_without_editing_source(tmp_pa
     marker = root.find("world/model[@name='marker_s']")
     assert float(marker.find('pose').text.split()[0]) == 0.8
     assert float(marker.find('.//cylinder/radius').text) == 0.08
-    for tag in ('uri','albedo_map'):
+    for tag in ('uri','albedo_map','emissive_map'):
         for node in root.iter(tag):
             assert Path(node.text).is_absolute() and Path(node.text).exists()
     assert hashlib.sha256(source.read_bytes()).digest() == before
+
+
+def test_field_markers_use_six_centimetre_cylinders_and_rack_qr_faces_south():
+    root = ET.parse(ROOT / 'sim/worlds/dase7503_field.sdf').getroot()
+    for label in ('s', 'e'):
+        marker = root.find(f"world/model[@name='marker_{label}']")
+        assert float(marker.find('.//collision/geometry/cylinder/radius').text) == pytest.approx(0.03)
+    rack = root.find("world/model[@name='rack_a']/link[@name='qr_panel']/pose")
+    assert float(rack.text.split()[5]) == pytest.approx(0.)

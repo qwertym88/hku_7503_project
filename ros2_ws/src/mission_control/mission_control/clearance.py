@@ -55,6 +55,8 @@ class SceneClearance:
         self.bounds = scene['field']
         self.wall_margin = scene['clearance_m']
         self.markers = scene['markers']
+        if scene.get('racks_passable', False):
+            racks = {}
         self.walls = {key: rack_walls(scene, p) for key, p in racks.items() if key != carrying}
         self.cfg = cfg
         self.carrying = carrying
@@ -92,7 +94,8 @@ class SceneClearance:
 
 def docking_rack(action, cfg):
     if (action.state in ('ENTER', 'LIFT', 'LOWER_WAIT', 'EXIT')
-            or action.state in ('TO_PHOTO', 'DWELL', 'PHOTO') and cfg['racks'][action.rack].get('photo_in_docking_zone')):
+            or action.state in ('TO_PHOTO', 'DWELL', 'PHOTO')
+            and cfg['racks'].get(action.rack, {}).get('photo_in_docking_zone')):
         return action.rack
     return None
 

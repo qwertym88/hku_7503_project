@@ -233,7 +233,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.250000 0 0 3.141593</pose>
+        <pose>0 0 0.250000 0 0 0.000000</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -246,6 +251,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/A.png</albedo_map>
+              <emissive_map>../materials/textures/A.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>
@@ -280,7 +286,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.250000 0 0 3.141593</pose>
+        <pose>0 0 0.250000 0 0 0.000000</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -293,6 +304,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/B.png</albedo_map>
+              <emissive_map>../materials/textures/B.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>
@@ -327,7 +339,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.250000 0 0 3.141593</pose>
+        <pose>0 0 0.250000 0 0 0.000000</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -340,6 +357,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/C.png</albedo_map>
+              <emissive_map>../materials/textures/C.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>
@@ -374,7 +392,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.250000 0 0 3.141593</pose>
+        <pose>0 0 0.250000 0 0 0.000000</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -387,6 +410,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/D.png</albedo_map>
+              <emissive_map>../materials/textures/D.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>
@@ -399,9 +423,9 @@
       <pose>0.600000 0.600000 0 0 0 0</pose>
       <link name='pillar'>
         <pose>0 0 0.100000 0 0 0</pose>
-        <collision name='collision'><geometry><cylinder><radius>0.050000</radius><length>0.200000</length></cylinder></geometry></collision>
+        <collision name='collision'><geometry><cylinder><radius>0.030000</radius><length>0.200000</length></cylinder></geometry></collision>
         <visual name='visual'>
-          <geometry><cylinder><radius>0.050000</radius><length>0.200000</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.030000</radius><length>0.200000</length></cylinder></geometry>
           <material>
             <ambient>0.45 0.45 0.48 1</ambient>
             <diffuse>0.55 0.55 0.58 1</diffuse>
@@ -410,7 +434,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.225000 0 0 0.785398</pose>
+        <pose>0 0 0.245000 0 0 0.785398</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -423,6 +452,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/Start.png</albedo_map>
+              <emissive_map>../materials/textures/Start.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>
@@ -434,9 +464,9 @@
       <pose>0.300000 2.220000 0 0 0 0</pose>
       <link name='pillar'>
         <pose>0 0 0.100000 0 0 0</pose>
-        <collision name='collision'><geometry><cylinder><radius>0.050000</radius><length>0.200000</length></cylinder></geometry></collision>
+        <collision name='collision'><geometry><cylinder><radius>0.030000</radius><length>0.200000</length></cylinder></geometry></collision>
         <visual name='visual'>
-          <geometry><cylinder><radius>0.050000</radius><length>0.200000</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.030000</radius><length>0.200000</length></cylinder></geometry>
           <material>
             <ambient>0.45 0.45 0.48 1</ambient>
             <diffuse>0.55 0.55 0.58 1</diffuse>
@@ -445,7 +475,12 @@
         </visual>
       </link>
       <link name='qr_panel'>
-        <pose>0 0 0.225000 0 0 0.785398</pose>
+        <pose>0 0 0.245000 0 0 0.785398</pose>
+        <visual name='quiet_zone'>
+          <cast_shadows>false</cast_shadows>
+          <geometry><box><size>0.067500 0.0005 0.067500</size></box></geometry>
+          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>
+        </visual>
         <visual name='qr_image'>
           <cast_shadows>false</cast_shadows>
           <geometry><mesh>
@@ -458,6 +493,7 @@
             <specular>0 0 0 1</specular>
             <pbr><metal>
               <albedo_map>../materials/textures/End.png</albedo_map>
+              <emissive_map>../materials/textures/End.png</emissive_map>
               <metalness>0</metalness><roughness>1</roughness>
             </metal></pbr>
           </material>

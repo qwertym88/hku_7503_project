@@ -76,6 +76,8 @@ def inside(poly, bounds):
 
 def collision(cfg, robot_pose, rack_poses, carrying=None):
     g = cfg['scene']
+    if g.get('racks_passable', False):
+        rack_poses = {}
     body = g['robot']
     moving = [rectangle(robot_pose, body['length'], body['width'], g['clearance_m'])]
     if carrying:
@@ -108,6 +110,10 @@ def _finite_tree(value, path='config'):
         raise ValueError(f'{path}: null/non-finite value')
 
 
+def qr_approach_side(cfg, rack):
+    return rack.get('qr_approach_side', 'negative_y' if cfg.get('qr_faces_negative_y') else None)
+
+
 def validate_config(cfg):
     _finite_tree(cfg)
     if not isinstance(cfg['simulation_only'], bool) or cfg['frame'] != 'field':
@@ -123,6 +129,9 @@ def validate_config(cfg):
             if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
                 raise ValueError(f'{group}.{key} must be a positive number')
     c = cfg['control']
+    photo_timeout = c.get('photo_timeout_s', c['effect_timeout_s'])
+    if 'photo_first_frame_timeout_s' in c and c['photo_first_frame_timeout_s'] > photo_timeout:
+        raise ValueError('First-frame timeout cannot exceed the photo action timeout')
     if max(c['cruise_mps'], c['loaded_mps'], c['approach_mps']) > 0.5 or c['turn_rps'] > 1.5:
         raise ValueError('Configured speed exceeds ideal_base limits (0.5m/s, 1.5rad/s)')
     for name, bounds in ((k, cfg['scene'][k]) for k in ('field', 'destination')):
@@ -137,6 +146,8 @@ def validate_config(cfg):
             raise ValueError('planning.clearance_m must be positive and finite')
     if cfg['scene']['clearance_m'] < 0:
         raise ValueError('clearance_m must be nonnegative')
+    if not isinstance(cfg['scene'].get('racks_passable', False), bool):
+        raise ValueError('scene.racks_passable must be a boolean')
     if set(cfg['scene']['markers']) != {'S', 'E'}:
         raise ValueError('scene.markers must describe the existing S and E models')
     if any(m['radius'] <= 0 for m in cfg['scene']['markers'].values()):
@@ -145,6 +156,33 @@ def validate_config(cfg):
     for name, point in cfg['transit_points'].items():
         if len(point) != 2 or not all(isinstance(v, (int, float)) for v in point):
             raise ValueError(f'transit_points.{name}: expected [x, y]')
+
+    def check_leg(label, leg, field):
+        if not isinstance(leg[field], list):
+            raise ValueError(f'{label}.{field}: must be an explicit list')
+        for name in leg[field]:
+            if name not in cfg['transit_points']:
+                raise ValueError(f'{label}.{field}: unknown point {name}')
+        curve = f'{field}_curve'
+        if curve in leg:
+            spec = leg[curve]
+            if not cfg.get('planning') or not isinstance(spec, dict):
+                raise ValueError(f'{label}.{curve}: curve requires a planning clearance and a mapping')
+            pose(spec['start'])
+            pose(spec['end'])
+            if not spec['segments'] or any(
+                len(segment) != 2 or any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in segment)
+                or segment[0] <= 0 for segment in spec['segments']
+            ):
+                raise ValueError(f'{label}.{curve}: expected positive arc lengths and signed curvatures')
+
+    if 'marker_scans' in cfg:
+        markers = cfg['marker_scans']
+        xy = markers['end_xy']
+        if len(xy) != 2 or not all(type(v) in (int, float) for v in xy):
+            raise ValueError('marker_scans.end_xy: expected [x, y]')
+        check_leg('marker_scans', markers, 'to_end')
+
     models = set()
     for key, r in cfg['racks'].items():
         if r['model'] != f'rack_{key.lower()}' or r['model'] in models:
@@ -154,33 +192,22 @@ def validate_config(cfg):
             pose(r[field])
         if not isinstance(r.get('photo_in_docking_zone', False), bool):
             raise ValueError(f'{key}.photo_in_docking_zone must be a boolean')
-        if cfg.get('qr_faces_negative_y'):
+        if 'qr_approach_side' in r and r['qr_approach_side'] not in ('positive_y', 'negative_y'):
+            raise ValueError(f'{key}.qr_approach_side: expected positive_y or negative_y')
+        side = qr_approach_side(cfg, r)
+        if side is not None:
             photo = pose(r['photo_pose'])
-            if photo[1] >= r['pose']['y'] or abs(angle(photo[2] - math.pi / 2)) > 1e-6:
-                raise ValueError(f'{key}: photograph from negative Y facing positive Y')
+            side_sign = 1 if side == 'positive_y' else -1
+            if (side_sign * (photo[1] - r['pose']['y']) <= 0
+                    or abs(angle(photo[2] + side_sign * math.pi / 2)) > 1e-6):
+                raise ValueError(f'{key}: photograph from the configured {side} side facing the rack')
         for field in ('enter_distance_m', 'clear_distance_m', 'exit_distance_m'):
             if not isinstance(r[field], (int, float)) or r[field] <= 0:
                 raise ValueError(f'{key}.{field} must be positive')
         if r.get('clear_direction', 'backward') not in ('forward', 'backward'):
             raise ValueError(f'{key}.clear_direction must be forward or backward')
         for field in ('to_photo', 'to_drop'):
-            if not isinstance(r[field], list):
-                raise ValueError(f'{key}.{field} must be an explicit list')
-            for name in r[field]:
-                if name not in cfg['transit_points']:
-                    raise ValueError(f'{key}.{field}: unknown point {name}')
-            curve = f'{field}_curve'
-            if curve in r:
-                spec = r[curve]
-                if not cfg.get('planning') or not isinstance(spec, dict):
-                    raise ValueError(f'{key}.{curve}: curve requires a planning clearance and a mapping')
-                pose(spec['start'])
-                pose(spec['end'])
-                if not spec['segments'] or any(
-                    len(segment) != 2 or any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in segment)
-                    or segment[0] <= 0 for segment in spec['segments']
-                ):
-                    raise ValueError(f'{key}.{curve}: expected positive arc lengths and signed curvatures')
+            check_leg(key, r, field)
         pickup = pickup_pose(r)
         delta = relative(pose(r['pose']), pickup)
         offset = pose(r['pickup_offset'])
@@ -202,6 +229,12 @@ def load_config(path):
             return validate_config(yaml.safe_load(f))
     except (KeyError, TypeError, AttributeError) as exc:
         raise ValueError(f'Incomplete/invalid route configuration: {exc}') from exc
+
+
+def marker_scan_pose(cfg, label):
+    xy = pose(cfg['start_pose'])[:2] if label == 'START' else cfg['marker_scans']['end_xy']
+    marker = cfg['scene']['markers']['S' if label == 'START' else 'E']
+    return (*xy, math.atan2(marker['y'] - xy[1], marker['x'] - xy[0]))
 
 
 @dataclass(frozen=True)
@@ -227,7 +260,9 @@ def compile_route(cfg):
     def add(key, state, kind, target=None, value=0., speed=0., segments=()):
         nonlocal current
         timeout = c['segment_timeout_s'] if kind in ('turn', 'drive', 'curve') else c['effect_timeout_s']
-        if kind == 'wait':
+        if kind == 'photo':
+            timeout = c.get('photo_timeout_s', timeout)
+        elif kind == 'wait':
             timeout = value + c['effect_timeout_s']
         a = Action(f'{key}_{state}_{len(actions):03d}', key, state, kind,
                    current, target or current, value, speed, timeout, segments)
@@ -242,9 +277,8 @@ def compile_route(cfg):
     def drive(key, state, distance, speed):
         add(key, state, 'drive', compose(current, (distance, 0, 0)), distance, speed)
 
-    def route(key, state, field, final, speed):
-        rack = cfg['racks'][key]
-        spec = rack.get(f'{field}_curve')
+    def route(key, state, leg, field, final, speed):
+        spec = leg.get(f'{field}_curve')
         if spec:
             start, end = pose(spec['start']), pose(spec['end'])
             turn(key, state, start[2])
@@ -258,7 +292,7 @@ def compile_route(cfg):
             add(key, state, 'curve', end, sum(length for length, _ in segments), speed, segments)
             turn(key, state, final[2])
             return
-        points = rack[field]
+        points = leg[field]
         for point in [cfg['transit_points'][name] for name in points] + [final[:2]]:
             dx, dy = point[0] - current[0], point[1] - current[1]
             length = math.hypot(dx, dy)
@@ -267,9 +301,15 @@ def compile_route(cfg):
                 drive(key, state, length, speed)
         turn(key, state, final[2])
 
+    markers = cfg.get('marker_scans')
+    if markers is not None:
+        turn('START', 'TO_START', marker_scan_pose(cfg, 'START')[2])
+        add('START', 'DWELL', 'wait', value=cfg['timing']['photo_dwell_s'])
+        add('START', 'SCAN_START', 'photo')
+
     for key in cfg['order']:
         r = cfg['racks'][key]
-        route(key, 'TO_PHOTO', 'to_photo', pose(r['photo_pose']), c['cruise_mps'])
+        route(key, 'TO_PHOTO', r, 'to_photo', pose(r['photo_pose']), c['cruise_mps'])
         add(key, 'DWELL', 'wait', value=cfg['timing']['photo_dwell_s'])
         add(key, 'PHOTO', 'photo')
         drive(key, 'ENTER', r['enter_distance_m'], c['approach_mps'])
@@ -277,10 +317,14 @@ def compile_route(cfg):
         add(key, 'LIFT_WAIT', 'wait', value=cfg['timing']['lift_wait_s'])
         clear_sign = 1 if r.get('clear_direction', 'backward') == 'forward' else -1
         drive(key, 'CLEAR_RACK', clear_sign*r['clear_distance_m'], c['approach_mps'])
-        route(key, 'TO_DROP', 'to_drop', pose(r['drop_pose']), c['loaded_mps'])
+        route(key, 'TO_DROP', r, 'to_drop', pose(r['drop_pose']), c['loaded_mps'])
         add(key, 'LOWER', 'lower')
         add(key, 'LOWER_WAIT', 'wait', value=cfg['timing']['lower_wait_s'])
         drive(key, 'EXIT', -r['exit_distance_m'], c['approach_mps'])
+    if markers is not None:
+        route('END', 'TO_END', markers, 'to_end', marker_scan_pose(cfg, 'END'), c['cruise_mps'])
+        add('END', 'DWELL', 'wait', value=cfg['timing']['photo_dwell_s'])
+        add('END', 'SCAN_END', 'photo')
     return actions
 
 

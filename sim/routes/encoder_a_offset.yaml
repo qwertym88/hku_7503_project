@@ -1,0 +1,337 @@
+# Encoder route with passable racks and a -50 mm docking offset at rack A.
+version: sim-2026-11-25-start-end-qr-d-north-offline-10.0cm-curves
+simulation_only: true
+frame: field
+qr_faces_negative_y: true
+order:
+- A
+- B
+- C
+- D
+start_pose:
+  x: 1.0
+  y: 0.3
+  yaw: 1.5707963267948966
+marker_scans:
+  end_xy:
+  - 0.6
+  - 1.92
+  to_end: []
+  to_end_curve:
+    start:
+      x: 1.25
+      y: 2.05
+      yaw: 1.5707963267948966
+    end:
+      x: 0.6
+      y: 1.92
+      yaw: 2.3561944901923444
+    segments:
+    - - 0.23935300380031108
+      - 9.090909090909092
+    - - 0.40984443445422414
+      - 0.0
+    - - 0.15295920582659178
+      - -9.090909090909092
+scene:
+  field:
+    x_min: 0.0
+    x_max: 2.0
+    y_min: 0.0
+    y_max: 3.02
+  destination:
+    x_min: 0.3
+    x_max: 1.7
+    y_min: 2.22
+    y_max: 3.02
+  robot:
+    length: 0.25
+    width: 0.25
+  rack:
+    gap: 0.35
+    wall_thickness: 0.025
+    depth: 0.15
+    height: 0.23
+    qr_height: 0.25
+  markers:
+    S:
+      x: 0.6
+      y: 0.6
+      radius: 0.03
+    E:
+      x: 0.3
+      y: 2.22
+      radius: 0.03
+  clearance_m: 0.005
+  racks_passable: true
+control:
+  cruise_mps: 0.2
+  loaded_mps: 0.16
+  approach_mps: 0.09
+  turn_rps: 0.8
+  acceleration_mps2: 0.3
+  angular_acceleration_rps2: 1.5
+  position_tolerance_m: 0.012
+  yaw_tolerance_rad: 0.035
+  max_cross_track_m: 0.045
+  max_heading_error_rad: 0.3
+  settle_s: 0.45
+  stopped_linear_mps: 0.01
+  stopped_angular_rps: 0.02
+  feedback_timeout_s: 0.5
+  scan_timeout_s: 0.75
+  cargo_timeout_s: 1.6
+  image_timeout_s: 3.0
+  no_progress_s: 3.0
+  segment_timeout_s: 40.0
+  effect_timeout_s: 10.0
+  mission_timeout_s: 420.0
+  photo_first_frame_timeout_s: 10.0
+  photo_timeout_s: 15.0
+  max_overshoot_m: 0.2
+  pickup_overshoot_m: 0.025
+timing:
+  photo_dwell_s: 0.4
+  lift_wait_s: 0.6
+  lower_wait_s: 0.6
+simulation:
+  lift_height_m: 0.06
+  cargo_alignment_m: 0.025
+  cargo_alignment_rad: 0.05
+transit_points:
+  a_to_photo_01:
+  - 1.0
+  - 0.4
+  a_to_drop_01:
+  - 0.6
+  - 2.1
+racks:
+  A:
+    model: rack_a
+    pose:
+      x: 0.55
+      y: 1.895
+      yaw: 0.0
+    pickup_offset:
+      x: -0.05
+      y: 0.0
+      yaw: 1.5707963267948966
+    photo_pose:
+      x: 0.5
+      y: 1.545
+      yaw: 1.5707963267948966
+    enter_distance_m: 0.35
+    clear_direction: forward
+    clear_distance_m: 0.06
+    drop_pose:
+      x: 0.6
+      y: 2.82
+      yaw: 1.5707963267948966
+    exit_distance_m: 0.35
+    to_photo:
+    - a_to_photo_01
+    to_drop:
+    - a_to_drop_01
+    to_photo_curve:
+      start:
+        x: 1.0
+        y: 0.3
+        yaw: 1.5707963267948966
+      end:
+        x: 0.5
+        y: 1.545
+        yaw: 1.5707963267948966
+      segments:
+      - - 0.15023386731249233
+        - 2.857142857142857
+      - - 1.0488207663848004
+        - 0.0
+      - - 0.15023386731249233
+        - -2.857142857142857
+    to_drop_curve:
+      start:
+        x: 0.5
+        y: 1.955
+        yaw: 0.9670469933974604
+      end:
+        x: 0.6
+        y: 2.82
+        yaw: 1.5707963267948966
+      segments:
+      - - 0.10140519064668052
+        - 0.0
+      - - 0.14489984001538467
+        - 4.166666666666667
+      - - 0.6452660411085949
+        - 0.0
+  B:
+    model: rack_b
+    pose:
+      x: 1.36
+      y: 1.195
+      yaw: 0.0
+    pickup_offset:
+      x: 0.0
+      y: 0.0
+      yaw: 1.5707963267948966
+    photo_pose:
+      x: 1.36
+      y: 0.8450000000000001
+      yaw: 1.5707963267948966
+    enter_distance_m: 0.35
+    clear_direction: forward
+    clear_distance_m: 0.2
+    drop_pose:
+      x: 1.25
+      y: 2.82
+      yaw: 1.5707963267948966
+    exit_distance_m: 0.35
+    to_photo: []
+    to_drop: []
+    to_photo_curve:
+      start:
+        x: 0.6
+        y: 2.4699999999999998
+        yaw: 1.5707963267948966
+      end:
+        x: 1.36
+        y: 0.8450000000000001
+        yaw: 1.5707963267948966
+      segments:
+      - - 0.3244557971050426
+        - -9.090909090909092
+      - - 1.6981828523454117
+        - 0.0
+      - - 0.3244557971050426
+        - 9.090909090909092
+    to_drop_curve:
+      start:
+        x: 1.36
+        y: 1.395
+        yaw: 1.5707963267948966
+      end:
+        x: 1.25
+        y: 2.82
+        yaw: 1.5707963267948966
+      segments:
+      - - 0.008525249082712523
+        - 9.090909090909092
+      - - 1.412205721557592
+        - 0.0
+      - - 0.008525249082712523
+        - -9.090909090909092
+  C:
+    model: rack_c
+    pose:
+      x: 1.67
+      y: 1.695
+      yaw: 0.0
+    pickup_offset:
+      x: 0.0
+      y: 0.0
+      yaw: 1.5707963267948966
+    photo_pose:
+      x: 1.67
+      y: 1.3450000000000002
+      yaw: 1.5707963267948966
+    enter_distance_m: 0.35
+    clear_distance_m: 0.35
+    clear_direction: forward
+    drop_pose:
+      x: 0.65
+      y: 2.4
+      yaw: 1.5707963267948966
+    exit_distance_m: 0.35
+    to_photo: []
+    to_drop: []
+    to_photo_curve:
+      start:
+        x: 1.25
+        y: 2.4699999999999998
+        yaw: -0.5134876437867966
+      end:
+        x: 1.67
+        y: 1.3450000000000002
+        yaw: 1.5707963267948966
+      segments:
+      - - 0.10122724483504092
+        - -9.090909090909092
+      - - 1.0692728893064292
+        - 0.0
+      - - 0.3304984815990271
+        - 9.090909090909092
+    to_drop_curve:
+      start:
+        x: 1.67
+        y: 2.045
+        yaw: 1.5707963267948966
+      end:
+        x: 0.65
+        y: 2.4
+        yaw: 1.5707963267948966
+      segments:
+      - - 0.1547964187610884
+        - 9.090909090909092
+      - - 0.8471274992585235
+        - 0.0
+      - - 0.1547964187610884
+        - -9.090909090909092
+  D:
+    model: rack_d
+    pose:
+      x: 0.41
+      y: 1.095
+      yaw: 0.0
+    qr_approach_side: positive_y
+    pickup_offset:
+      x: 0.0
+      y: 0.0
+      yaw: -1.5707963267948966
+    photo_pose:
+      x: 0.41
+      y: 1.4449999999999998
+      yaw: -1.5707963267948966
+    enter_distance_m: 0.35
+    clear_distance_m: 0.35
+    clear_direction: backward
+    drop_pose:
+      x: 1.25
+      y: 2.4
+      yaw: 1.5707963267948966
+    exit_distance_m: 0.35
+    to_photo: []
+    to_drop: []
+    to_photo_curve:
+      start:
+        x: 0.65
+        y: 2.05
+        yaw: -2.6484496446014623
+      end:
+        x: 0.41
+        y: 1.4449999999999998
+        yaw: -1.5707963267948966
+      segments:
+      - - 0.08069273007884063
+        - 9.090909090909092
+      - - 0.5397435521032623
+        - 0.0
+      - - 0.0378491348798816
+        - 9.090909090909092
+    to_drop_curve:
+      start:
+        x: 0.41
+        y: 1.4449999999999998
+        yaw: -1.5707963267948966
+      end:
+        x: 1.25
+        y: 2.4
+        yaw: 1.5707963267948966
+      segments:
+      - - 0.28223466872823594
+        - 9.090909090909092
+      - - 1.1386066045829877
+        - 0.0
+      - - 0.06334052316664134
+        - 9.090909090909092
+planning:
+  clearance_m: 0.1

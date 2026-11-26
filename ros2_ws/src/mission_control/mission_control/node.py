@@ -11,6 +11,7 @@ import time
 import cv2
 import numpy as np
 import rclpy
+from qr_perception.core import QrDecoder
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped, Twist
 from nav_msgs.msg import OccupancyGrid, Odometry, Path as NavPath
@@ -32,7 +33,30 @@ def stamp_seconds(msg):
     return msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9
 
 
-def save_image(msg, filename):
+def matches_qr(text, label):
+    if label in ('START', 'END'):
+        return text == label
+    prefix = f'RACK{label}_'
+    suffix = text[len(prefix):]
+    return text.startswith(prefix) and suffix.isascii() and suffix.isalnum()
+
+
+def decode_expected_qr(decoder, pixels, label, stamp):
+    width = pixels.shape[1]
+    # The route aims the camera at the target. A central crop can isolate it
+    # when another rack is visible or the full-frame detector misses it.
+    central = pixels[:, width // 4:3 * width // 4]
+    gray = cv2.cvtColor(central, cv2.COLOR_BGR2GRAY)
+    _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    contrast = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
+    for region in (pixels, central, contrast):
+        for result in decoder.decode(region, stamp):
+            if matches_qr(result.text, label):
+                return result.text
+    return None
+
+
+def capture_image(msg, filename, decoder, label):
     channels = {'rgb8': 3, 'bgr8': 3, 'rgba8': 4, 'bgra8': 4, 'mono8': 1}
     if msg.encoding not in channels:
         raise ValueError(f'Unsupported image encoding {msg.encoding}')
@@ -47,13 +71,21 @@ def save_image(msg, filename):
         pixels = cv2.cvtColor(pixels, cv2.COLOR_RGBA2BGR)
     elif msg.encoding == 'bgra8':
         pixels = cv2.cvtColor(pixels, cv2.COLOR_BGRA2BGR)
+    text = None
+    if decoder is not None:
+        if count == 1:
+            pixels = cv2.cvtColor(pixels, cv2.COLOR_GRAY2BGR)
+        text = decode_expected_qr(decoder, pixels, label, stamp_seconds(msg))
+        if text is None:
+            return None
     if not cv2.imwrite(str(filename), pixels):
         raise OSError(f'Could not write {filename}')
-    return str(filename)
+    return str(filename), text
 
 
 class MissionNode(Node):
     simulation = True
+    encoder_only = False
 
     def __init__(self):
         super().__init__('fixed_route_mission')
@@ -69,10 +101,14 @@ class MissionNode(Node):
         if self.cfg['simulation_only'] != self.simulation:
             raise ValueError('Route configuration does not match the mission backend')
         self.mission = Mission(self.cfg)
+        self.qr_decoder = QrDecoder(deep_every_n=1) if 'marker_scans' in self.cfg else None
         self.feedback_topic = self.get_parameter('feedback_topic').value
         self.require_localization = self.get_parameter('require_localization').value
-        if not self.simulation and (not self.require_localization or self.get_parameter('autostart').value):
-            raise ValueError('Hardware requires AMCL and an explicit /mission/start request')
+        if not self.simulation and not self.encoder_only and not self.require_localization:
+            raise ValueError('Hardware requires AMCL')
+        if self.encoder_only and (self.require_localization or self.feedback_topic != '/odom'):
+            raise ValueError('Encoder mode requires raw /odom with AMCL disabled')
+        self.route_frame = 'map' if self.require_localization or self.encoder_only else 'odom'
         self.p = None
         self.odom_pose = None
         self.velocity = (0., 0.)
@@ -112,14 +148,15 @@ class MissionNode(Node):
             self.tf_listener = TransformListener(self.tf_buffer, self)
             self.initial_pose_pub = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
             self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.on_localization, retained)
-        self.create_subscription(LaserScan, '/scan', self.on_scan, qos_profile_sensor_data)
+        if not self.encoder_only:
+            self.create_subscription(LaserScan, '/scan', self.on_scan, qos_profile_sensor_data)
         self.create_subscription(Image, '/camera/image_raw', self.on_image, qos_profile_sensor_data)
         self.setup_cargo()
         self.create_service(Trigger, '/mission/start', self.start_service)
         self.create_service(Trigger, '/mission/cancel', self.cancel_service)
         self.create_service(Trigger, '/mission/reset', self.reset_service)
         self.create_timer(0.02, self.tick, clock=Clock(clock_type=ClockType.STEADY_TIME))
-        self.get_logger().info(f'Mission ready: {len(self.mission.actions)} actions; config={self.config_path}; awaiting /mission/start')
+        self.get_logger().info(f'Mission loaded: {len(self.mission.actions)} actions; config={self.config_path}')
 
     def setup_cargo(self):
         self.create_subscription(String, '/sim/cargo/status', self.on_cargo, 10)
@@ -168,7 +205,7 @@ class MissionNode(Node):
         return self.map_transform() is not None
 
     def map_transform(self):
-        if self.localization is None:
+        if self.simulation and self.localization is None:
             return None
         try:
             transform = self.tf_buffer.lookup_transform('map', 'odom', Time())
@@ -181,6 +218,9 @@ class MissionNode(Node):
     def reset_localization(self):
         self.localization = None
         self.localization_after = self.ros_seconds()
+        self.initial_pose_pub.publish(self.initial_pose_message(0.01))
+
+    def initial_pose_message(self, variance):
         msg = PoseWithCovarianceStamped()
         msg.header.frame_id = 'map'
         msg.header.stamp = self.get_clock().now().to_msg()
@@ -189,9 +229,8 @@ class MissionNode(Node):
         msg.pose.pose.position.y = float(start['y'])
         msg.pose.pose.orientation.z = math.sin(start['yaw'] / 2)
         msg.pose.pose.orientation.w = math.cos(start['yaw'] / 2)
-        msg.pose.covariance[0] = msg.pose.covariance[7] = 0.01
-        msg.pose.covariance[35] = 0.01
-        self.initial_pose_pub.publish(msg)
+        msg.pose.covariance[0] = msg.pose.covariance[7] = msg.pose.covariance[35] = variance
+        return msg
 
     def on_image(self, msg):
         if msg.width and msg.height and msg.data:
@@ -211,12 +250,16 @@ class MissionNode(Node):
         return time.monotonic()-receipt <= limit and -0.1 <= age <= limit
 
     def health(self, precheck=False):
+        return self.feedback_health(precheck) or self.cargo_health(precheck)
+
+    def feedback_health(self, precheck):
         c = self.cfg['control']
-        for name, limit in (('odom', c['feedback_timeout_s']), ('scan', c['scan_timeout_s'])):
-            if not self.fresh(name, limit):
-                return f'{name} missing/stale'
-        if not self.localization_ready():
-            return 'Waiting for AMCL pose and map-to-odom transform'
+        if not self.fresh('odom', c['feedback_timeout_s']):
+            return 'odom missing/stale'
+        if not self.encoder_only and not self.fresh('scan', c['scan_timeout_s']):
+            return 'scan missing/stale'
+        if self.require_localization and not self.localization_ready():
+            return 'Waiting for AMCL map-to-odom transform'
         if self.count_publishers('/cmd_vel') != 1:
             return '/cmd_vel must have exactly one publisher; close teleop/other controllers'
         if precheck:
@@ -224,7 +267,6 @@ class MissionNode(Node):
                 return 'Camera missing/stale'
             if any(abs(v) > lim for v, lim in zip(self.velocity, (c['stopped_linear_mps'],c['stopped_angular_rps']))):
                 return 'Robot must be stationary'
-        return self.cargo_health(precheck)
 
     def cargo_health(self, precheck):
         if not self.fresh('cargo', self.cfg['control']['cargo_timeout_s']):
@@ -347,27 +389,68 @@ class MissionNode(Node):
             if a.kind == 'photo':
                 self.photo_requested_stamp = self.ros_seconds()
                 self.photo_requested_wall = time.monotonic()
+                self.photo_stamp = self.photo_requested_stamp
+                self.mission.emit('photo_requested', id=a.id, requested_ros_s=self.photo_requested_stamp,
+                                  first_frame_timeout_s=self.photo_first_frame_timeout(), photo_timeout_s=a.timeout)
             else:
                 self.start_cargo_effect(a)
         if a.kind == 'photo':
-            if self.camera_job is None and self.image is not None:
-                # Only save an actual new image exposed after reaching PHOTO.
-                if stamp_seconds(self.image) > self.photo_requested_stamp and self.fresh('image', self.cfg['control']['image_timeout_s']):
-                    filename = self.run_dir / f'{a.rack}_photo.png'
-                    self.photo_stamp = stamp_seconds(self.image)
-                    self.camera_job = self.pool.submit(save_image, self.image, filename)
-            if self.camera_job is None and time.monotonic()-self.photo_requested_wall > self.cfg['control']['image_timeout_s']:
-                self.mission.acknowledge(a.id, False, 'no new camera frame at photo pose')
-            elif self.camera_job is not None and self.camera_job.done() and not self.mission.effect_done:
-                try:
-                    filename = self.camera_job.result()
-                    self.mission.emit('photo_saved',id=a.id,path=filename,pose=list(self.p),
-                                      requested_ros_s=self.photo_requested_stamp, image_ros_s=self.photo_stamp)
-                    self.mission.acknowledge(a.id, True, filename)
-                except Exception as exc:
-                    self.mission.acknowledge(a.id, False, f'photo save failed: {exc}')
+            self.poll_photo(a)
         elif not self.mission.effect_done:
             self.poll_cargo_effect(a)
+
+    def photo_first_frame_timeout(self):
+        control = self.cfg['control']
+        return control.get('photo_first_frame_timeout_s', control['image_timeout_s'])
+
+    def report_photo_saved(self, action_id, filename, qr_text, **details):
+        self.mission.emit('photo_saved', id=action_id, path=filename, qr=qr_text, **details)
+        if qr_text is not None:
+            banner = '=' * 64
+            self.get_logger().info(f'\n{banner}\n  QR 扫描成功  {qr_text}\n  图片已保存  {filename}\n{banner}')
+
+    def poll_photo(self, action, accept_new_frame=True):
+        if self.mission.effect_done:
+            return
+        if self.camera_job is not None:
+            if not self.camera_job.done():
+                return
+            try:
+                capture = self.camera_job.result()
+            except Exception as exc:
+                self.mission.acknowledge(action.id, False, f'camera capture failed: {exc}')
+                return
+            self.camera_job = None
+            if capture is not None:
+                filename, qr_text = capture
+                self.report_photo_saved(action.id, filename, qr_text, pose=list(self.p),
+                                        requested_ros_s=self.photo_requested_stamp, image_ros_s=self.photo_stamp,
+                                        elapsed_s=time.monotonic() - self.photo_requested_wall)
+                self.mission.acknowledge(action.id, True, filename)
+                return
+        if not accept_new_frame:
+            return
+        first_frame = self.photo_stamp == self.photo_requested_stamp
+        limit = self.cfg['control']['image_timeout_s']
+        new_frame = (self.image is not None and self.fresh('image', limit)
+                     and stamp_seconds(self.image) > self.photo_stamp)
+        if first_frame:
+            first_frame_timeout = self.photo_first_frame_timeout()
+            deadline = self.photo_requested_wall + first_frame_timeout
+            received = self.feedback['image'][0] if new_frame else None
+            if (received is not None and self.photo_requested_wall <= received
+                    and (received <= deadline or self.mission.skip_qr_timeout)):
+                self.mission.emit('photo_first_frame', id=action.id, image_ros_s=stamp_seconds(self.image),
+                                  elapsed_s=received - self.photo_requested_wall)
+            else:
+                if time.monotonic() >= deadline and not self.mission.skip_qr_timeout:
+                    self.mission.acknowledge(action.id, False,
+                                             f'no new camera frame at photo pose within {first_frame_timeout:g} s')
+                return
+        if new_frame:
+            filename = self.run_dir / f'{action.rack}_photo.png'
+            self.photo_stamp = stamp_seconds(self.image)
+            self.camera_job = self.pool.submit(capture_image, self.image, filename, self.qr_decoder, action.rack)
 
     def flush_events(self):
         events, self.mission.events = self.mission.events, []
@@ -375,14 +458,15 @@ class MissionNode(Node):
             event.update(wall_monotonic_s=time.monotonic(), ros_time_s=self.ros_seconds())
             if self.log_file:
                 self.log_file.write(json.dumps(event, ensure_ascii=False) + '\n')
-            if event['event'] in ('action_enter', 'stopped', 'done'):
+            if event['event'] in ('action_enter', 'stopped', 'done', 'localization_paused', 'localization_resumed',
+                                  'photo_requested', 'photo_first_frame', 'photo_saved', 'photo_skipped'):
                 self.get_logger().info(json.dumps(event, ensure_ascii=False))
             if event['event'] in ('done', 'stopped') and self.run_dir:
                 (self.run_dir / 'result.json').write_text(json.dumps(event, ensure_ascii=False, indent=2), encoding='utf-8')
 
     def route_path(self, actions, height):
         msg = NavPath()
-        msg.header.frame_id = 'map' if self.require_localization else 'odom'
+        msg.header.frame_id = self.route_frame
         if actions:
             positions = [actions[0].start]
             for action in actions:
@@ -405,7 +489,7 @@ class MissionNode(Node):
         if racks != self.displayed_racks:
             field = rasterize(self.cfg['scene'], racks)
             msg = OccupancyGrid()
-            msg.header.frame_id = 'map' if self.require_localization else 'odom'
+            msg.header.frame_id = self.route_frame
             msg.info.resolution = field.resolution
             msg.info.width, msg.info.height = field.width, field.height
             msg.info.origin.position.x, msg.info.origin.position.y = field.origin
@@ -426,13 +510,23 @@ class MissionNode(Node):
             self.active_path_pub.publish(self.route_path(actions, height=0.055))
             self.displayed_action = display
 
+    def idle_tick(self, now):
+        self.zero()
+
+    def start_status(self):
+        return {'start_blocker': None}
+
+    def motion_hold(self, now):
+        return False
+
     def tick(self):
         now = time.monotonic()
         try:
             if self.reset_stage:
                 self.poll_reset()
             else:
-                if self.get_parameter('autostart').value and not self.autostart_attempted and now-self.birth > 3 and not self.health(precheck=True):
+                if (self.simulation and self.get_parameter('autostart').value and not self.autostart_attempted
+                        and now-self.birth > 3 and not self.health(precheck=True)):
                     self.autostart_attempted = True
                     ok, message = self.begin()
                     if not ok:
@@ -440,8 +534,9 @@ class MissionNode(Node):
                 if self.mission.state == 'RUNNING':
                     # Check deadlines/feedback BEFORE issuing external effects.
                     fault = self.health()
-                    command = self.mission.tick(now, self.p, self.velocity, fault)
-                    if self.mission.state == 'RUNNING':
+                    paused = not fault and self.motion_hold(now)
+                    command = self.mission.tick(now, self.p, self.velocity, fault, paused=paused)
+                    if self.mission.state == 'RUNNING' and not paused:
                         self.handle_effect()
                     if self.mission.state == 'STOPPED':
                         command = (0.,0.)
@@ -449,7 +544,7 @@ class MissionNode(Node):
                     msg.linear.x, msg.angular.z = command
                     self.cmd_pub.publish(msg)
                 else:
-                    self.zero()
+                    self.idle_tick(now)
             self.flush_events()
         except Exception as exc:
             self.mission.stop(f'adapter exception: {exc}')
@@ -464,9 +559,9 @@ class MissionNode(Node):
                 rack=a.rack if a else None, carrying=self.mission.carrying,
                 placed=self.mission.placed, pose=self.p, reset_pending=bool(self.reset_stage),
                 localization_ready=self.localization_ready(),
-                start_blocker=self.health(precheck=True) if not self.simulation and self.mission.state == 'IDLE' else None,
                 elapsed_s=now-self.mission.started if self.mission.started else 0.,
-                run_dir=str(self.run_dir) if self.run_dir else None, simulation_only=self.simulation)
+                run_dir=str(self.run_dir) if self.run_dir else None, simulation_only=self.simulation,
+                **self.start_status())
             self.status_pub.publish(String(data=json.dumps(status)))
 
     def close(self):

@@ -34,6 +34,7 @@ def generate_launch_description():
     exposure_time_us = LaunchConfiguration('exposure_time_us')
     width = LaunchConfiguration('width')
     height = LaunchConfiguration('height')
+    camera_framerate = LaunchConfiguration('camera_framerate')
     confirm_frames = LaunchConfiguration('confirm_frames')
 
     return LaunchDescription([
@@ -51,6 +52,8 @@ def generate_launch_description():
             description='锁曝光时间(µs)，0=自动曝光。防运动模糊建议 ≤10000'),
         DeclareLaunchArgument('width', default_value='640'),
         DeclareLaunchArgument('height', default_value='480'),
+        DeclareLaunchArgument('camera_framerate', default_value='30',
+                              description='rpicam-vid 取流帧率'),
         DeclareLaunchArgument(
             'confirm_frames', default_value='2',
             description='多帧投票：连续 N 帧一致才上报 /qr'),
@@ -67,6 +70,7 @@ def generate_launch_description():
                 'exposure_time_us': exposure_time_us,
                 'width': width,
                 'height': height,
+                'camera_framerate': camera_framerate,
                 'confirm_frames': confirm_frames,
             }],
         ),

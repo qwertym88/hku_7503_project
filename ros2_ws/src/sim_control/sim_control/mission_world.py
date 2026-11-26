@@ -10,7 +10,7 @@ def render_world(source, target, cfg, *, include_racks=True):
     world = root.find('world')
     models = {m.get('name'): m for m in world.findall('model')}
     # Temp files live outside the package: retain absolute texture/mesh paths.
-    for tag in ('uri', 'albedo_map'):
+    for tag in ('uri', 'albedo_map', 'emissive_map'):
         for node in root.iter(tag):
             if node.text and '://' not in node.text:
                 node.text = str((source.parent / node.text).resolve())

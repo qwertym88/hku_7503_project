@@ -13,6 +13,7 @@ class Mission:
         self.cfg = cfg
         self.actions = validate_geometry(cfg)
         self.minimum_clearance = clearance_setting(cfg)
+        self.skip_qr_timeout = not cfg['simulation_only'] and 'marker_scans' in cfg
         self.events = []
         self.reset()
 
@@ -82,7 +83,26 @@ class Mission:
             self.effect_done = True
             self.emit('effect_complete', id=action_id, detail=detail)
 
-    def tick(self, now, p, velocity=(0., 0.), fault=None):
+    def footprint_fault(self, p):
+        a = self.action
+        hit = collision(self.cfg, p, self.racks, self.carrying)
+        if hit:
+            return f'{a.id}: predicted footprint intersects {hit}'
+
+        if self.minimum_clearance:
+            scene = SceneClearance(self.cfg, self.racks, self.carrying)
+            hit = scene.violation(p, self.minimum_clearance, docking=docking_rack(a, self.cfg))
+            if hit:
+                return f'{a.id}: {hit} inside {self.minimum_clearance:.3f} m clearance'
+
+    def resume_after_pause(self, now, paused_at):
+        self.entered += now - paused_at
+        self.last_tick = now
+        self.last_progress = now
+        self.best_error = math.inf
+        self.settled_since = None
+
+    def tick(self, now, p, velocity=(0., 0.), fault=None, paused=False):
         if self.state != 'RUNNING':
             return (0., 0.)
         if fault:
@@ -93,21 +113,21 @@ class Mission:
         if now - self.started >= c['mission_timeout_s']:
             self.stop('mission deadline exceeded')
             return self.command
-        if now - self.entered >= a.timeout:
-            self.stop(f'{a.id}: action timeout')
+        if paused:
+            self.command = (0., 0.)
             return self.command
-        hit = collision(self.cfg, p, self.racks, self.carrying)
-        if hit:
-            self.stop(f'{a.id}: predicted footprint intersects {hit}')
+        skip_qr = self.skip_qr_timeout and a.kind == 'photo'
+        timed_out = now - self.entered >= a.timeout
+        if timed_out and not skip_qr:
+            detail = 'action timeout'
+            if a.kind == 'photo' and 'marker_scans' in self.cfg:
+                detail = 'timed out waiting for a matching QR capture'
+            self.stop(f'{a.id}: {detail}')
             return self.command
-
-        if self.minimum_clearance:
-            scene = SceneClearance(self.cfg, self.racks, self.carrying)
-            hit = scene.violation(p, self.minimum_clearance, docking=docking_rack(a, self.cfg))
-            if hit:
-                self.stop(f'{a.id}: {hit} inside {self.minimum_clearance:.3f} m clearance')
-                return self.command
-
+        fault = self.footprint_fault(p)
+        if fault:
+            self.stop(fault)
+            return self.command
         v, w = 0., 0.
         done = False
         error = 0.
@@ -120,7 +140,7 @@ class Mission:
         elif a.kind == 'wait':
             done = now - self.entered >= a.value
         else:
-            done = self.effect_done
+            done = self.effect_done or timed_out
         if moving:
             if motion_fault:
                 self.stop(f'{a.id}: {motion_fault}')
@@ -146,6 +166,9 @@ class Mission:
                 if self.settled_since is None:
                     self.settled_since = now
                 if now - self.settled_since >= c['settle_s']:
+                    if timed_out and not self.effect_done:
+                        self.emit('photo_skipped', id=a.id, rack=a.rack, timeout_s=a.timeout, pose=list(p),
+                                  reason='No matching QR capture by the end of the scan window')
                     self._advance(now, p)
             else:
                 self.settled_since = None

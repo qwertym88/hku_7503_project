@@ -22,6 +22,14 @@ def motion_request(action, pose, control):
     done = error <= control['position_tolerance_m']
     if abs(cross) > control['max_cross_track_m'] or abs(heading) > control['max_heading_error_rad']:
         return (0., 0.), done, error, 'cross-track/heading limit'
+    overshoot_limit = control.get('max_overshoot_m')
+    if overshoot_limit is not None and along * action.value < 0.:
+        # Pickup still requires the forks to reach the rack.
+        if action.state == 'ENTER':
+            overshoot_limit = control.get('pickup_overshoot_m', overshoot_limit)
+        if error <= overshoot_limit:
+            return (0., 0.), True, error, None
+        return (0., 0.), False, error, 'overshot target'
     if along * action.value < -control['position_tolerance_m'] and not done:
         return (0., 0.), done, error, 'overshot target'
     if done:
@@ -53,15 +61,23 @@ def curve_request(action, path, progress, pose, control):
     i = min(len(distances) - 2, bisect_right(distances, progress) - 1)
     reference = advance(poses[i], progress - distances[i], curvatures[i + 1])
     heading = angle(reference[2] - yaw)
+    dx, dy = action.target[0] - x, action.target[1] - y
+    target_yaw = action.target[2]
+    along = dx * math.cos(target_yaw) + dy * math.sin(target_yaw)
+    goal_error = math.hypot(dx, dy)
+    overshoot_limit = control.get('max_overshoot_m')
+    past_end = remaining <= control['position_tolerance_m'] and along <= 0.
+    if past_end and overshoot_limit is not None:
+        cross = -dx * math.sin(target_yaw) + dy * math.cos(target_yaw)
+        if abs(cross) > control['max_cross_track_m'] or abs(angle(target_yaw - yaw)) > control['max_heading_error_rad']:
+            return (0., 0.), False, remaining, 'curve cross-track/heading limit'
+        if goal_error > overshoot_limit:
+            return (0., 0.), False, remaining, 'overshot curve target'
+        return finish_curve(target_yaw - yaw, control)
     if best > control['max_cross_track_m']**2 or abs(heading) > control['max_heading_error_rad']:
         return (0., 0.), False, remaining, 'curve cross-track/heading limit'
-    goal_error = math.dist(pose[:2], action.target[:2])
     if remaining <= control['position_tolerance_m'] and goal_error <= control['position_tolerance_m']:
-        yaw_error = angle(action.target[2] - yaw)
-        done = abs(yaw_error) <= control['yaw_tolerance_rad']
-        return (0., 0. if done else clamp(3. * yaw_error, control['turn_rps'])), done, abs(yaw_error), None
-    along = ((action.target[0] - x) * math.cos(action.target[2])
-             + (action.target[1] - y) * math.sin(action.target[2]))
+        return finish_curve(target_yaw - yaw, control)
     if remaining < 0.012 and along <= -control['position_tolerance_m']:
         return (0., 0.), False, remaining, 'overshot curve target'
     s_next = bisect_right(distances, progress + 0.09)
@@ -73,6 +89,12 @@ def curve_request(action, path, progress, pose, control):
     cross = -(reference[0] - x) * math.sin(reference[2]) + (reference[1] - y) * math.cos(reference[2])
     omega = speed * (curvatures[i_next] + 32. * cross) + 4.5 * heading
     return (speed, clamp(omega, control['turn_rps'])), False, remaining, None
+
+
+def finish_curve(heading, control):
+    yaw_error = angle(heading)
+    done = abs(yaw_error) <= control['yaw_tolerance_rad']
+    return (0., 0. if done else clamp(3. * yaw_error, control['turn_rps'])), done, abs(yaw_error), None
 
 
 def ramp_command(previous, requested, dt, control):

@@ -1,0 +1,102 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Map
+      Name: Standard field map
+      Enabled: true
+      Topic:
+        Value: /map
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Alpha: 0.85
+      Draw Behind: true
+    - Class: rviz_default_plugins/LaserScan
+      Name: MS200
+      Enabled: true
+      Topic:
+        Value: /scan
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Size (m): 0.02
+      Style: Flat Squares
+      Color Transformer: Flat Color
+      Color: 230; 145; 0
+    - Class: rviz_default_plugins/RobotModel
+      Name: Robot
+      Enabled: true
+      Description Topic:
+        Value: /robot_description
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: false
+      Frame Size: 0.15
+    - Class: rviz_default_plugins/PoseWithCovariance
+      Name: AMCL pose
+      Enabled: true
+      Shape: Arrow
+      Shaft Length: 0.15
+      Head Length: 0.07
+      Topic:
+        Value: /amcl_pose
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+    - Class: rviz_default_plugins/Path
+      Name: Planned mission route
+      Enabled: true
+      Color: 94; 91; 183
+      Line Style: Billboards
+      Line Width: 0.020
+      Topic:
+        Value: /mission/planned_path
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+    - Class: rviz_default_plugins/Path
+      Name: Current route segment
+      Enabled: true
+      Color: 0; 218; 185
+      Line Style: Billboards
+      Line Width: 0.038
+      Topic:
+        Value: /mission/active_path
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+  Global Options:
+    Fixed Frame: map
+    Background Color: 48; 48; 48
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/SetInitialPose
+      Topic:
+        Value: /initialpose
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/TopDownOrtho
+      Name: Current
+      Scale: 145
+      X: 1.0
+      Y: 1.51
+Window Geometry:
+  Height: 900
+  Width: 1200

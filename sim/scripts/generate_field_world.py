@@ -59,19 +59,20 @@ ZONES = {
 # --------------------------------------------------------------------------
 # 3. 货架（由用户确认的 SDF 布局转换，2026-11-20）
 # --------------------------------------------------------------------------
-# 新坐标：cx=旧 y，cy=3.02-旧 x。二维码网格原始正面 -Y，yaw=π 后朝新 +Y。
+# 新坐标：cx=旧 y，cy=3.02-旧 x。货架二维码使用网格原始的 −Y 正面。
 RACKS = {
-    "a": dict(cx=0.550, cy=1.895, qr_yaw=math.pi),
-    "b": dict(cx=1.360, cy=1.195, qr_yaw=math.pi),
-    "c": dict(cx=1.670, cy=1.695, qr_yaw=math.pi),
-    "d": dict(cx=0.410, cy=1.095, qr_yaw=math.pi),
+    "a": dict(cx=0.550, cy=1.895, qr_yaw=0),
+    "b": dict(cx=1.360, cy=1.195, qr_yaw=0),
+    "c": dict(cx=1.670, cy=1.695, qr_yaw=0),
+    "d": dict(cx=0.410, cy=1.095, qr_yaw=0),
 }
 
 # 起终点标志柱：新场景坐标，尺寸单位 m；高度“20”按 20 cm 处理。
-MARKER_DIAMETER = 0.10
+MARKER_DIAMETER = 0.06
 MARKER_H = 0.20
 MARKER_QR_SIZE = 0.05
-MARKER_QR_CENTER_Z = MARKER_H + MARKER_QR_SIZE / 2  # 下边缘位于柱顶
+# Keep the pattern visible from the lower camera looking across the pillar rim.
+MARKER_QR_CENTER_Z = MARKER_H + MARKER_QR_SIZE / 2 + 0.02
 # 网格正面原为 -Y，yaw=π/4 后法向为 (1,-1)/sqrt(2)。
 MARKERS = {
     "s": dict(cx=0.60, cy=0.60, texture="Start.png", qr_yaw=math.pi / 4),
@@ -229,6 +230,11 @@ def qr_panel_link(resource_base: str, texture: str, size: float,
     """共用双面二维码网格：局部 XY 原点、正面原始法向 -Y，仅视觉。"""
     return (f"      <link name='qr_panel'>\n"
             f"        <pose>0 0 {center_z:.6f} 0 0 {yaw:.6f}</pose>\n"
+            "        <visual name='quiet_zone'>\n"
+            "          <cast_shadows>false</cast_shadows>\n"
+            f"          <geometry><box><size>{size * 1.35:.6f} 0.0005 {size * 1.35:.6f}</size></box></geometry>\n"
+            "          <material><diffuse>1 1 1 1</diffuse><emissive>1 1 1 1</emissive></material>\n"
+            "        </visual>\n"
             "        <visual name='qr_image'>\n"
             "          <cast_shadows>false</cast_shadows>\n"
             "          <geometry><mesh>\n"
@@ -241,6 +247,7 @@ def qr_panel_link(resource_base: str, texture: str, size: float,
             "            <specular>0 0 0 1</specular>\n"
             "            <pbr><metal>\n"
             f"              <albedo_map>{resource_base}/materials/textures/{texture}</albedo_map>\n"
+            f"              <emissive_map>{resource_base}/materials/textures/{texture}</emissive_map>\n"
             "              <metalness>0</metalness><roughness>1</roughness>\n"
             "            </metal></pbr>\n"
             "          </material>\n"
